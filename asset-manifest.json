@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/iwi_web/static/js/main.17d7a169.js",
+    "index.html": "/iwi_web/index.html",
+    "main.17d7a169.js.map": "/iwi_web/static/js/main.17d7a169.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.17d7a169.js"
+  ]
+}
