@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,Area} from "recharts";
+import './reset.css';
 
 function App() {
   // For Login
@@ -30,6 +31,7 @@ function App() {
   const [windDirMaeam,setWindDirMaeam]=useState(null);
   const [windSpdMaeam,setWindSpdMaeam]=useState(null);
   const [visMaeam,setVisMaeam]=useState(null);
+  const arrayRowColor=["#2e86de","#0abde3"]
 
   const degreesToCompass=(degrees)=>{
     const directions = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
@@ -152,12 +154,13 @@ function App() {
   };
   function GraphWind({data}){
     return (
-      <LineChart width={400} height={100} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0}}>
+      <LineChart width={450} height={120} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="time"/>
         <YAxis domain={[0,25]} ticks={[14,25]}/>
         <Tooltip />
         <Line type="monotone" dataKey="windSpeed" stroke="#8884d8" activeDot={{ r: 8 }} label={{position:"top"}}/>
+        <Area type="monotone" dataKey="value" stroke={null} fill="white" />
       </LineChart>
     );
   };
@@ -169,7 +172,7 @@ function App() {
       ticks=[10,20];
     };
     return (
-      <LineChart width={400} height={100} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0}}>
+      <LineChart width={450} height={120} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="time"/>
         <YAxis domain={domain} ticks={ticks}/>
@@ -198,75 +201,108 @@ function App() {
       setError("로그인 오류 발생");
     }
   };
-
+  // styles
+  const titleStyle={
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center",
+    fontSize:"50px",
+    fontWeight:"bold",
+    color:"#EAF3FD",
+    margin:"20px 0"
+  };
+  const tableStyle={
+    width:"100%",
+    borderCollapse:"collapse",
+    border: "3px solid #EAF3FD",
+    padding:"10px"
+  };
+  const tagStyle={
+    textAlign: "center",       // 가로 중앙
+    verticalAlign: "middle",   // 세로 중앙
+    alignItems:"center",
+    fontSize:"30px",
+    fontWeight:"bold",
+    color:"#EAF3FD",
+    margin:"5",
+  };
+  const valueStyle={
+    textAlign: "center",       // 가로 중앙
+    verticalAlign: "middle",   // 세로 중앙
+    alignItems:"center",
+    fontSize:"40px",
+    fontWeight:"bold",
+    border:"2px solid #272727",
+    color:"#EAF3FD",
+  };
+  const graphBoxStyle={
+    justifyContent:"center",
+    alignItems:"center",
+    border:"2px solid #272727",
+    padding: '5px',
+  };
   if (!token) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-xl mb-4">비밀번호 입력</h1>
+      <div>
+        <h1>비밀번호 입력</h1>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded mb-2"
         />
-        <button
-          onClick={handleLogin}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
+        <button onClick={handleLogin}>
           로그인
         </button>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
+        {error && <p>{error}</p>}
       </div>
     );
   }
-
   return (
-    <div>
-      <h1 style={{
-      display:"flex",
-      justifyContent:"center",
-      alignItems:"center",
-      fontSize:"40px",
-      }}>울산통합기상정보시스템</h1>
+    <div style={{
+      backgroundColor:"#272727",
+      width:"100vw",
+      minHeight:"100vh",
+      }}>
+      <span style={titleStyle}>울산통합기상정보시스템</span>
       {kmaWindData && kmaVisData ?(
-        <table>
+        <table style={tableStyle}>
           <thead>
             <tr>
-              <th>지점</th>
-              <th>풍향</th>
-              <th>풍속</th>
-              <th>풍향 그래프</th>
-              <th>시정</th>
-              <th>시정 그래프</th>
+              <th style={tagStyle}>위치</th>
+              <th style={tagStyle}>풍향</th>
+              <th style={tagStyle}>풍속</th>
+              <th style={tagStyle}>풍향 그래프</th>
+              <th style={tagStyle}>시정</th>
+              <th style={tagStyle}>시정 그래프</th>
             </tr>
           </thead>
           <tbody>
             {arrayPoints.map((point, index) => {
               return(
-                <tr key={point}>
-                  <td>{point}</td>
-                  <td>{degreesToCompass(arrayKmaWindDir[index])}</td>
-                  <td>{arrayKmaWindSpd[index]} m/s</td>
-                  <td>
+                <tr key={point} style={{backgroundColor:arrayRowColor[index%2]}}>
+                  <td style={valueStyle}>{point}</td>
+                  <td style={valueStyle}>{degreesToCompass(arrayKmaWindDir[index])}</td>
+                  <td style={valueStyle}>{arrayKmaWindSpd[index]} m/s</td>
+                  <td style={graphBoxStyle}>
                     <GraphWind data={kmaWindData[index]} />
                   </td>
-                  <td>{arrayKmaVis[index]} km</td>
-                  <td>
+                  <td style={valueStyle}>{arrayKmaVis[index]} km</td>
+                  <td style={graphBoxStyle}>
                     <GraphVis data={kmaVisData[index]} varKma={true}/>
                   </td>
                 </tr>
               )
               })
             }
-            <tr key={"매암"}>
-              <td>{"매암부두"}</td>
-              <td>{windDirMaeam}</td>
-              <td>{windSpdMaeam} m/s</td>
-              <td>
+            <tr key={"매암"} style={{backgroundColor:arrayRowColor[3%2]}}>
+              <td style={valueStyle}>{"매암부두"}</td>
+              <td style={valueStyle}>{windDirMaeam}</td>
+              <td style={valueStyle}>{windSpdMaeam} m/s</td>
+              <td style={graphBoxStyle}>
                 {MaeamWindData && <GraphWind data={MaeamWindData} />}
               </td>
-              <td>{visMaeam} km</td>
-              <td>
+              <td style={valueStyle}>{visMaeam} km</td>
+              <td style={graphBoxStyle}>
                 {MaeamVisData && <GraphVis data={MaeamVisData} varKma={false}/>}
               </td>
             </tr>
