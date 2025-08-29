@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,Area} from "recharts";
+import Clock from "./Clock.js"
 import './reset.css';
 import eye from './img/eye.png';
 import wind from './img/wind.png';
@@ -35,7 +36,7 @@ function App() {
   const [visMaeam,setVisMaeam]=useState(null);
   const arrayRowColor=["#2e86de","#0abde3"]
   const graphWidth="28vw";
-  const graphHeight="16vh";
+  const graphHeight="13vh";
 
   const degreesToCompass=(degrees)=>{
     const directions = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
@@ -163,7 +164,7 @@ function App() {
           <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }} />
           <YAxis domain={[0,25]} ticks={[25]} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 500, fontWeight: 'bold', fill: '#272727' }}/>
           <Tooltip />
-          <Line type="monotone" dataKey="windSpeed" stroke="#8884d8" activeDot={{ r: 8 }} label={{position:"top",fontSize:22,fontWeight:"bold",fill:"#272727"}} strokeWidth={4}/>
+          <Line type="monotone" dataKey="windSpeed" stroke="#8884d8" activeDot={{ r: 8 }} label={{position:"top",fontSize:20,fontWeight:"bold",fill:"#272727"}} strokeWidth={3}/>
           <Area type="monotone" dataKey="value" stroke={null} fill="white" />
         </LineChart>
       </ResponsiveContainer>
@@ -182,7 +183,7 @@ function App() {
           <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }}/>
           <YAxis domain={domain} ticks={ticks} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }}/>
           <Tooltip />
-          <Line type="monotone" dataKey="vis" stroke="#3498db" activeDot={{ r: 8 }} label={{position:"top",fontSize:22,fontWeight:"bold",fill:"#272727"}} strokeWidth={4}/>
+          <Line type="monotone" dataKey="vis" stroke="#3498db" activeDot={{ r: 8 }} label={{position:"top",fontSize:18,fontWeight:"bold",fill:"#272727"}} strokeWidth={3}/>
         </LineChart>
       </ResponsiveContainer>
     );
@@ -215,7 +216,7 @@ function App() {
     fontSize:"3.3vw",
     fontWeight:"bold",
     color:"#EAF3FD",
-    margin:"20px 0"
+    margin:"10px 0"
   };
   const tableStyle={
     width:"100%",
@@ -230,7 +231,7 @@ function App() {
     fontSize:"2.3vw",
     fontWeight:"bold",
     color:"#EAF3FD",
-    padding:"5px",
+    padding:"3px",
   };
   const valueStyle={
     textAlign: "center",       // 가로 중앙
@@ -269,7 +270,10 @@ function App() {
       width:"100vw",
       minHeight:"100vh",
       }}>
-      <span style={titleStyle}>울산통합기상정보시스템</span>
+      <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
+        <span style={{...titleStyle,paddingRight:"6vw"}}>울산통합기상정보시스템</span>
+        <Clock />
+      </div>
       {kmaWindData && kmaVisData ?(
         <table style={tableStyle}>
           <thead>
@@ -297,24 +301,30 @@ function App() {
             <tr>
               <th style={tagStyle}>풍향</th>
               <th style={tagStyle}>풍속</th>
-              <th style={{...tagStyle,borderRight:"1px solid #EAF3FD"}}>풍향 그래프</th>
+              <th style={{...tagStyle,borderRight:"1px solid #EAF3FD"}}>그래프</th>
               <th style={tagStyle}>시정</th>
-              <th style={tagStyle}>시정 그래프</th>
+              <th style={tagStyle}>그래프</th>
             </tr>
           </thead>
           <tbody>
             {arrayPoints.map((point, index) => {
               return(
                 <tr key={point} style={{backgroundColor:arrayRowColor[index%2]}}>
-                  <td style={valueStyle}>{point}</td>
+                  <td style={{...valueStyle,fontWeight:"bold"}}>{point}</td>
                   <td style={valueStyle}>{degreesToCompass(arrayKmaWindDir[index])}</td>
-                  <td style={valueStyle}>{arrayKmaWindSpd[index]} m/s</td>
+                  <td style={valueStyle}>
+                    <span>{arrayKmaWindSpd[index]}</span>
+                    <span style={{fontSize:"2.4vw"}}>m/s</span>
+                  </td>
                   <td style={graphBoxStyle}>
                     <div style={{width:graphWidth,height:graphHeight}}>
                       <GraphWind data={kmaWindData[index]} />
                     </div>
                   </td>
-                  <td style={valueStyle}>{arrayKmaVis[index]} km</td>
+                  <td style={valueStyle}>
+                    <span>{arrayKmaVis[index]}</span>
+                    <span style={{fontSize:"2.4vw"}}>km</span>
+                  </td>
                   <td style={graphBoxStyle}>
                     <div style={{width:graphWidth,height:graphHeight}}>
                       <GraphVis data={kmaVisData[index]} varKma={true}/>
@@ -325,16 +335,22 @@ function App() {
               })
             }
             <tr key={"매암"} style={{backgroundColor:arrayRowColor[3%2]}}>
-              <td style={valueStyle}>{"매암부두"}</td>
+              <td style={{...valueStyle,fontWeight:"bold"}}>{"매암부두"}</td>
               <td style={valueStyle}>{windDirMaeam}</td>
-              <td style={valueStyle}>{windSpdMaeam} m/s</td>
+              <td style={valueStyle}>
+                <span>{windSpdMaeam}</span>
+                <span style={{fontSize:"2.4vw"}}>m/s</span>
+              </td>
               <td style={graphBoxStyle}>
                 {MaeamWindData && (
                   <div style={{width:graphWidth,height:graphHeight}}>
                     <GraphWind data={MaeamWindData} />
                   </div>)}
               </td>
-              <td style={valueStyle}>{visMaeam} km</td>
+              <td style={valueStyle}>
+                <span>{visMaeam}</span>
+                <span style={{fontSize:"2.4vw"}}>km</span>
+              </td>
               <td style={graphBoxStyle}>
                 {MaeamVisData && (
                   <div style={{width:graphWidth,height:graphHeight}}>
