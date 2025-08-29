@@ -250,7 +250,14 @@ function App() {
   };
   if (!token) {
     return (
-      <div>
+      <div style={{
+        width:"100vw",
+        height:"100vh",
+        backgroundColor:"#272727",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center"}}>
         <h1>비밀번호 입력</h1>
         <input
           type="password"
@@ -271,7 +278,7 @@ function App() {
       minHeight:"100vh",
       }}>
       <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
-        <span style={{...titleStyle,paddingRight:"6vw"}}>울산통합기상정보시스템</span>
+        <span style={{...titleStyle,paddingRight:"5vw"}}>울산통합기상정보시스템</span>
         <Clock />
       </div>
       {kmaWindData && kmaVisData ?(
@@ -310,9 +317,11 @@ function App() {
             {arrayPoints.map((point, index) => {
               return(
                 <tr key={point} style={{backgroundColor:arrayRowColor[index%2]}}>
-                  <td style={{...valueStyle,fontWeight:"bold"}}>{point}</td>
-                  <td style={valueStyle}>{degreesToCompass(arrayKmaWindDir[index])}</td>
-                  <td style={valueStyle}>
+                  <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
+                    {point}
+                  </td>
+                  <td style={{...valueStyle,width:"10vw"}}>{degreesToCompass(arrayKmaWindDir[index])}</td>
+                  <td style={{...valueStyle,width:"10vw"}}>
                     <span>{arrayKmaWindSpd[index]}</span>
                     <span style={{fontSize:"2.4vw"}}>m/s</span>
                   </td>
@@ -321,7 +330,7 @@ function App() {
                       <GraphWind data={kmaWindData[index]} />
                     </div>
                   </td>
-                  <td style={valueStyle}>
+                  <td style={{...valueStyle,width:"10vw"}}>
                     <span>{arrayKmaVis[index]}</span>
                     <span style={{fontSize:"2.4vw"}}>km</span>
                   </td>
