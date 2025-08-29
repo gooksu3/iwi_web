@@ -159,7 +159,7 @@ function App() {
   function GraphWind({data}){
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart width={450} height={120} data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
+        <LineChart width={450} height={100} data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
           <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }} />
           <YAxis domain={[0,25]} ticks={[25]} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 500, fontWeight: 'bold', fill: '#272727' }}/>
           <Tooltip />
@@ -178,7 +178,7 @@ function App() {
     };
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart width={450} height={120} data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
+        <LineChart width={450} height={100} data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
           <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }}/>
           <YAxis domain={domain} ticks={ticks} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }}/>
           <Tooltip />
@@ -212,7 +212,7 @@ function App() {
     display:"flex",
     justifyContent:"center",
     alignItems:"center",
-    fontSize:"3.5vw",
+    fontSize:"3.3vw",
     fontWeight:"bold",
     color:"#EAF3FD",
     margin:"20px 0"
@@ -227,7 +227,7 @@ function App() {
     textAlign: "center",       // 가로 중앙
     verticalAlign: "middle",   // 세로 중앙
     alignItems:"center",
-    fontSize:"2.5vw",
+    fontSize:"2.3vw",
     fontWeight:"bold",
     color:"#EAF3FD",
     padding:"5px",
@@ -236,7 +236,7 @@ function App() {
     textAlign: "center",       // 가로 중앙
     verticalAlign: "middle",   // 세로 중앙
     alignItems:"center",
-    fontSize:"2.9vw",
+    fontSize:"2.7vw",
     fontWeight:"bold",
     border:"2px solid #272727",
     color:"#EAF3FD",
