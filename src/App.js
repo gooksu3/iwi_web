@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useRef,useEffect } from "react";
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,Area} from "recharts";
 import Clock from "./Clock.js"
 import './reset.css';
@@ -37,6 +37,8 @@ function App() {
   const arrayRowColor=["#2e86de","#0abde3"]
   const graphWidth="28vw";
   const graphHeight="13vh";
+  const inputRef = useRef(null);
+
 
   const degreesToCompass=(degrees)=>{
     const directions = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
@@ -224,7 +226,8 @@ function App() {
       </tr>
     );
   };
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault()
     try {
       const res = await fetch("https://uiwi.gooksu3.workers.dev/login", {
         method: "POST",
@@ -284,6 +287,11 @@ function App() {
     border:"2px solid #272727",
     padding: '5px',
   };
+  useEffect(() => {
+    if (inputRef.current){
+      inputRef.current.focus();  // 렌더링 후 포커스
+    }
+    }, []);
   if (!token) {
     return (
       <div style={{
@@ -295,15 +303,19 @@ function App() {
         justifyContent: "center",
         alignItems: "center"}}>
         <h1 style={{fontSize:"4vw",fontWeight:"bold",marginBottom:"1vw",color:"#EAF3FD"}}>비밀번호 입력</h1>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{fontSize:"2vw",padding:"0.5vw",marginBottom:"1vw"}}
-        />
-        <button onClick={handleLogin} style={{fontSize:"3vw",padding:"0.5vw 1vw",cursor:"pointer",backgroundColor:"#2e86de",color:"white",border:"none",borderRadius:"5px"}}>
-          로그인
-        </button>
+        <form onSubmit={handleLogin} style={{display: "flex",flexDirection: "column",justifyContent: "center",alignItems: "center"}}>
+          <input
+            ref={inputRef}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{fontSize:"2vw",padding:"0.5vw",marginBottom:"1vw"
+            }}
+          />
+          <button style={{fontSize:"3vw",padding:"0.5vw 1vw",cursor:"pointer",backgroundColor:"#2e86de",color:"white",border:"none",borderRadius:"5px"}}>
+            로그인
+          </button>
+        </form>
         {error && <p>{error}</p>}
       </div>
     );
