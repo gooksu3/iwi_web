@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/iwi_web/static/css/main.3ed067d5.css",
-    "main.js": "/iwi_web/static/js/main.1064186f.js",
+    "main.js": "/iwi_web/static/js/main.5ed68e9e.js",
     "static/media/eye.png": "/iwi_web/static/media/eye.322225756331b9425d38.png",
     "static/media/wind.png": "/iwi_web/static/media/wind.6a9c74309f32f8fcb1c3.png",
     "index.html": "/iwi_web/index.html",
     "main.3ed067d5.css.map": "/iwi_web/static/css/main.3ed067d5.css.map",
-    "main.1064186f.js.map": "/iwi_web/static/js/main.1064186f.js.map"
+    "main.5ed68e9e.js.map": "/iwi_web/static/js/main.5ed68e9e.js.map"
   },
   "entrypoints": [
     "static/css/main.3ed067d5.css",
-    "static/js/main.1064186f.js"
+    "static/js/main.5ed68e9e.js"
   ]
 }
