@@ -161,10 +161,10 @@ function App() {
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart width={450} height={100} data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
-          <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }} />
-          <YAxis domain={[0,25]} ticks={[25]} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 500, fontWeight: 'bold', fill: '#272727' }}/>
+          <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 15, fill: '#272727' }} />
+          <YAxis domain={[0,25]} ticks={[25]} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 15, fontWeight: 500, fill: '#272727' }}/>
           <Tooltip />
-          <Line type="monotone" dataKey="windSpeed" stroke="#8884d8" activeDot={{ r: 8 }} label={{position:"top",fontSize:20,fontWeight:"bold",fill:"#272727"}} strokeWidth={3}/>
+          <Line type="monotone" dataKey="windSpeed" stroke="#8884d8" activeDot={{ r: 8 }} label={{position:"top",fontSize:20,fill:"#272727"}} strokeWidth={3}/>
           <Area type="monotone" dataKey="value" stroke={null} fill="white" />
         </LineChart>
       </ResponsiveContainer>
@@ -180,12 +180,48 @@ function App() {
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart width={450} height={100} data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0}} style={{ backgroundColor: 'white',border:"1px solid #272727"}}>
-          <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }}/>
-          <YAxis domain={domain} ticks={ticks} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 18, fontWeight: 'bold', fill: '#272727' }}/>
+          <XAxis dataKey="time" axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 15, fill: '#272727' }}/>
+          <YAxis domain={domain} ticks={ticks} axisLine={{ stroke: "#272727", strokeWidth: 2 }} tick={{ fontSize: 15, fill: '#272727' }}/>
           <Tooltip />
-          <Line type="monotone" dataKey="vis" stroke="#3498db" activeDot={{ r: 8 }} label={{position:"top",fontSize:18,fontWeight:"bold",fill:"#272727"}} strokeWidth={3}/>
+          <Line type="monotone" dataKey="vis" stroke="#3498db" activeDot={{ r: 8 }} label={{position:"top",fontSize:20,fill:"#272727"}} strokeWidth={3}/>
         </LineChart>
       </ResponsiveContainer>
+    );
+  };
+  function RowInWetherTable({point,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
+    return (
+      <tr key={point} style={{backgroundColor:backgroundColor}}>
+        <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 1vw"}}>
+            {Array.from(point).map((ch, i) => (
+              <span key={i}>{ch}</span>
+            ))}
+          </div>
+        </td>
+        <td style={{...valueStyle,width:"10vw"}}>{windDir}</td>
+        <td style={{...valueStyle,width:"10vw"}}>
+          <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw"}}>
+            <span>{windSpd}</span>
+            <span style={{fontSize:"1.8vw"}}>m/s</span>
+          </div>
+        </td>
+        <td style={graphBoxStyle}>
+          <div style={{width:graphWidth,height:graphHeight}}>
+            <GraphWind data={windData} />
+          </div>
+        </td>
+        <td style={{...valueStyle,width:"10vw"}}>
+          <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw"}}>
+            <span>{vis}</span>
+            <span style={{fontSize:"1.8vw"}}>km</span>
+          </div>
+        </td>
+        <td style={graphBoxStyle}>
+          <div style={{width:graphWidth,height:graphHeight}}>
+            <GraphVis data={visData} varKma={varKma}/>
+          </div>
+        </td>
+      </tr>
     );
   };
   const handleLogin = async () => {
@@ -258,13 +294,14 @@ function App() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"}}>
-        <h1>비밀번호 입력</h1>
+        <h1 style={{fontSize:"4vw",fontWeight:"bold",marginBottom:"1vw",color:"#EAF3FD"}}>비밀번호 입력</h1>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={{fontSize:"2vw",padding:"0.5vw",marginBottom:"1vw"}}
         />
-        <button onClick={handleLogin}>
+        <button onClick={handleLogin} style={{fontSize:"3vw",padding:"0.5vw 1vw",cursor:"pointer",backgroundColor:"#2e86de",color:"white",border:"none",borderRadius:"5px"}}>
           로그인
         </button>
         {error && <p>{error}</p>}
@@ -315,62 +352,14 @@ function App() {
           </thead>
           <tbody>
             {arrayPoints.map((point, index) => {
-              return(
-                <tr key={point} style={{backgroundColor:arrayRowColor[index%2]}}>
-                  <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
-                    {point}
-                  </td>
-                  <td style={{...valueStyle,width:"10vw"}}>{degreesToCompass(arrayKmaWindDir[index])}</td>
-                  <td style={{...valueStyle,width:"10vw"}}>
-                    <span>{arrayKmaWindSpd[index]}</span>
-                    <span style={{fontSize:"2.4vw"}}>m/s</span>
-                  </td>
-                  <td style={graphBoxStyle}>
-                    <div style={{width:graphWidth,height:graphHeight}}>
-                      <GraphWind data={kmaWindData[index]} />
-                    </div>
-                  </td>
-                  <td style={{...valueStyle,width:"10vw"}}>
-                    <span>{arrayKmaVis[index]}</span>
-                    <span style={{fontSize:"2.4vw"}}>km</span>
-                  </td>
-                  <td style={graphBoxStyle}>
-                    <div style={{width:graphWidth,height:graphHeight}}>
-                      <GraphVis data={kmaVisData[index]} varKma={true}/>
-                    </div>
-                  </td>
-                </tr>
-              )
+              return <RowInWetherTable point={point} backgroundColor={arrayRowColor[index%2]} windDir={degreesToCompass(arrayKmaWindDir[index])} windSpd={arrayKmaWindSpd[index]} windData={kmaWindData[index]} vis={arrayKmaVis[index]} visData={kmaVisData[index]} varKma={true}/>
               })
             }
-            <tr key={"매암"} style={{backgroundColor:arrayRowColor[3%2]}}>
-              <td style={{...valueStyle,fontWeight:"bold"}}>{"매암부두"}</td>
-              <td style={valueStyle}>{windDirMaeam}</td>
-              <td style={valueStyle}>
-                <span>{windSpdMaeam}</span>
-                <span style={{fontSize:"2.4vw"}}>m/s</span>
-              </td>
-              <td style={graphBoxStyle}>
-                {MaeamWindData && (
-                  <div style={{width:graphWidth,height:graphHeight}}>
-                    <GraphWind data={MaeamWindData} />
-                  </div>)}
-              </td>
-              <td style={valueStyle}>
-                <span>{visMaeam}</span>
-                <span style={{fontSize:"2.4vw"}}>km</span>
-              </td>
-              <td style={graphBoxStyle}>
-                {MaeamVisData && (
-                  <div style={{width:graphWidth,height:graphHeight}}>
-                    <GraphVis data={MaeamVisData} varKma={false}/>
-                  </div>)}
-              </td>
-            </tr>
+            <RowInWetherTable point={"매암부두"} backgroundColor={arrayRowColor[3%2]} windDir={windDirMaeam} windSpd={windSpdMaeam} windData={MaeamWindData} vis={visMaeam} visData={MaeamVisData} varKma={false}/>
           </tbody>
         </table>
       ) : kmaWindData === null || kmaVisData===null ? (
-        <p>데이터가 없습니다.</p>
+        <p></p>
       ) : (
         <p>불러오는 중...</p>
       )}
