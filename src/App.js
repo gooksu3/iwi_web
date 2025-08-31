@@ -1,5 +1,5 @@
 import { useState,useRef,useEffect } from "react";
-import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,Area} from "recharts";
+import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Area} from "recharts";
 import Clock from "./Clock.js"
 import './reset.css';
 import eye from './img/eye.png';
@@ -10,6 +10,7 @@ function App() {
   const [token, setToken] = useState(sessionStorage.getItem("token"));
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const inputPWRef = useRef(null);
   // For API
   const arrayPoints=["간절곶","울기","장생포"]
   const [kmaWindData, setKmaWindData] = useState(null);
@@ -37,7 +38,9 @@ function App() {
   const arrayRowColor=["#2e86de","#0abde3"]
   const graphWidth="28vw";
   const graphHeight="13vh";
-  const inputRef = useRef(null);
+  const [arrayDateForecast,setArrayDateForecast]=useState([])
+  const [shortForecastData,setShortForecastData]=useState([])
+
 
 
   const degreesToCompass=(degrees)=>{
@@ -77,6 +80,8 @@ function App() {
     return (Math.round((m/1000)*10)/10).toFixed(1);
   };
   const fetchData = async () => {
+    setArrayDateForecast([])
+    setShortForecastData([])
     const now = new Date();
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
     const tm2 = formatDateToYYYYMMDDHHMM(twoMinutesAgo);
@@ -139,7 +144,6 @@ function App() {
           break;
         };
       };
-      console.log(arrayInfoMaeam)
       setWindSpdMaeam(latestInfoMaeam.wind_speed);
       setWindDirMaeam(latestInfoMaeam.wind_dir);
       setVisMaeam(mToKm(latestInfoMaeam.vis));
@@ -155,6 +159,27 @@ function App() {
       });
       setMeamWindData(arrayMaeam.map(item=>({time:item.time,windSpeed:item.ws})));
       setMaeamVisData(arrayMaeam.map(item=>({time:item.time,vis:item.vis})));
+      // 단기 예보
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(objInfoFromApi.UPAForecastInside,"application/xml");
+      const forecast=xmlDoc.getElementsByTagName("KWEATHER")[0].getElementsByTagName("SHORT")[0].children
+      for (let i=0;i<forecast.length;i++){
+      // for (let i=0;i<2;i++){
+        const dateNWeek=`${forecast[i].getElementsByTagName("DATE")[0].textContent}(${forecast[i].getElementsByTagName("WEEK")[0].textContent})`
+        setArrayDateForecast(prev=>[...prev,dateNWeek])
+        const hours=forecast[i].getElementsByTagName("HOUR")[0].children
+        for (let j=0;j<hours.length;j++){
+          const time=hours[j].tagName
+          const icon=hours[j].getElementsByTagName("wcond")[0].textContent
+          const windDir=hours[j].getElementsByTagName("wdir")[0].textContent
+          const ws=hours[j].getElementsByTagName("ws")[0].textContent
+          const maxWs=hours[j].getElementsByTagName("maxws")[0].textContent
+          const maxWaveH=hours[j].getElementsByTagName("mpa")[0].textContent
+          const waveDir=hours[j].getElementsByTagName("padir")[0].textContent
+          const vis=hours[j].getElementsByTagName("ss")[0].textContent
+          setShortForecastData(prev=>[...prev,{time:time,icon:icon,wdir:windDir,ws:ws,maxWs:maxWs,maxWaveH:maxWaveH,waveDir:waveDir,vis:vis}])
+        };
+      };
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -192,7 +217,7 @@ function App() {
   };
   function RowInWetherTable({point,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
     return (
-      <tr key={point} style={{backgroundColor:backgroundColor}}>
+      <tr style={{backgroundColor:backgroundColor}}>
         <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 1vw"}}>
             {Array.from(point).map((ch, i) => (
@@ -241,6 +266,7 @@ function App() {
         fetchData();
         setInterval(fetchData, 5 * 60 * 1000); // 5분마다 갱신
       } else {
+        setPassword("")
         setError("비밀번호가 틀렸습니다.");
       }
     } catch (e) {
@@ -287,11 +313,51 @@ function App() {
     border:"2px solid #272727",
     padding: '5px',
   };
+  // 비번input태그 focus
   useEffect(() => {
-    if (inputRef.current){
-      inputRef.current.focus();  // 렌더링 후 포커스
+    if (inputPWRef.current){
+      inputPWRef.current.focus();  // 렌더링 후 포커스
     }
     }, []);
+  // 화면 확대 축소 막기
+  useEffect(() => {
+    // Ctrl + 마우스 휠 확대/축소 막기
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Ctrl + / Ctrl - 단축키 확대/축소 막기
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && (e.key === "+" || e.key === "-" || e.key === "=" || e.key === "0")) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+  // F5키 설정
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "F5" || (e.ctrlKey && e.key.toLowerCase() === "r")) {
+        e.preventDefault();
+        if (!inputPWRef.current){
+          fetchData()
+        }
+      };
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
   if (!token) {
     return (
       <div style={{
@@ -305,18 +371,23 @@ function App() {
         <h1 style={{fontSize:"4vw",fontWeight:"bold",marginBottom:"1vw",color:"#EAF3FD"}}>비밀번호 입력</h1>
         <form onSubmit={handleLogin} style={{display: "flex",flexDirection: "column",justifyContent: "center",alignItems: "center"}}>
           <input
-            ref={inputRef}
+            ref={inputPWRef}
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              if (password.length>=0){
+                setError("")
+              };
+              setPassword(e.target.value)}}
             style={{fontSize:"2vw",padding:"0.5vw",marginBottom:"1vw"
             }}
           />
+          {error && (
+            <p style={{fontSize:"2vw",color:"#ff7675",marginBottom:"1vw"}}>{error}</p>)}
           <button style={{fontSize:"3vw",padding:"0.5vw 1vw",cursor:"pointer",backgroundColor:"#2e86de",color:"white",border:"none",borderRadius:"5px"}}>
             로그인
           </button>
         </form>
-        {error && <p>{error}</p>}
       </div>
     );
   }
@@ -364,7 +435,7 @@ function App() {
           </thead>
           <tbody>
             {arrayPoints.map((point, index) => {
-              return <RowInWetherTable point={point} backgroundColor={arrayRowColor[index%2]} windDir={degreesToCompass(arrayKmaWindDir[index])} windSpd={arrayKmaWindSpd[index]} windData={kmaWindData[index]} vis={arrayKmaVis[index]} visData={kmaVisData[index]} varKma={true}/>
+              return <RowInWetherTable key={point} point={point} backgroundColor={arrayRowColor[index%2]} windDir={degreesToCompass(arrayKmaWindDir[index])} windSpd={arrayKmaWindSpd[index]} windData={kmaWindData[index]} vis={arrayKmaVis[index]} visData={kmaVisData[index]} varKma={true}/>
               })
             }
             <RowInWetherTable point={"매암부두"} backgroundColor={arrayRowColor[3%2]} windDir={windDirMaeam} windSpd={windSpdMaeam} windData={MaeamWindData} vis={visMaeam} visData={MaeamVisData} varKma={false}/>
@@ -375,6 +446,71 @@ function App() {
       ) : (
         <p>불러오는 중...</p>
       )}
+      {shortForecastData.length!==0?(
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th></th>              
+                {arrayDateForecast.map((dateNWeek)=>{
+                  return <th colSpan="8" style={{color:"#EAF3FD"}}>{dateNWeek}</th>
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>시간</td>
+                {shortForecastData.map((data,index)=>{
+                  console.log(shortForecastData)
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.time.substring(1,3)}</td>
+                })}
+              </tr>
+              <tr>
+                <td></td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.icon}</td>
+                })}
+              </tr>
+              <tr>
+                <td>풍향</td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.wdir}</td>
+                })}
+              </tr>
+              <tr>
+                <td>평균풍속</td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.ws}</td>
+                })}
+              </tr>
+              <tr>
+                <td>최대풍속</td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.maxWs}</td>
+                })}
+              </tr>
+              <tr>
+                <td>파향</td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.waveDir}</td>
+                })}
+              </tr>
+              <tr>
+                <td>최대파고</td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.maxWaveH}</td>
+                })}
+              </tr>
+              <tr>
+                <td>시정</td>
+                {shortForecastData.map((data,index)=>{
+                  return <td key={index} style={{color:"#EAF3FD"}}>{data.vis}</td>
+                })}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ):null}
     </div>
   );
 }
