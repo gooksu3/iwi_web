@@ -353,11 +353,13 @@ function App() {
     border:"2px solid #272727",
     padding: '5px',
   };
-  const forecastTableText={
-    color:"#EAF3FD",
-  };
-  const forecastTableValueBox={
+  const forecastTableValueBoxStyle={
     textAlign:"center"
+  }
+  const forecastTabletagBoxStyle={
+    color:"#EAF3FD",
+    backgroundColor:"#272727",
+    width:"2.1vw"
   }
   // 비번input태그 focus
   useEffect(() => {
@@ -512,60 +514,60 @@ function App() {
               <tr>
                 <th></th>              
                 {arrayDateForecast.map((dateNWeek,index)=>{
-                  return <th key={index} colSpan="8" style={{color:"#EAF3FD"}}>{dateNWeek}</th>
+                  return <th key={index} colSpan="8" style={{color:"#EAF3FD",fontWeight:"Bold",padding:"3px 0"}}>{dateNWeek}</th>
                 })}
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{backgroundColor:"#EAF3FD"}}>
               <tr>
-                <td>시간</td>
+                <td style={{...forecastTabletagBoxStyle}}>시간</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.time.substring(1,3)}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle,width:"3.2vw"}}>{data.time.substring(1,3)}</td>
                 })}
               </tr>
               <tr>
-                <td></td>
+                <td style={{...forecastTabletagBoxStyle}}></td>
                 {shortForecastData.map((data,index)=>{
                   return (
-                  <td key={index} style={{color:"#EAF3FD"}}>
+                  <td key={index} style={{...forecastTableValueBoxStyle}}>
                     <WeatherIcon iconNum={data.icon}/>
                   </td>)
                 })}
               </tr>
               <tr>
-                <td>풍향</td>
+                <td style={{...forecastTabletagBoxStyle}}>풍향</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{objDirections[data.wdir]}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle}}>{objDirections[data.wdir]}</td>
                 })}
               </tr>
               <tr>
-                <td>평균풍속</td>
+                <td style={{...forecastTabletagBoxStyle}}>풍속</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.ws}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle}}>{data.ws}</td>
                 })}
               </tr>
               <tr>
-                <td>최대풍속</td>
+                <td style={{...forecastTabletagBoxStyle}}>돌풍</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.maxWs}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle}}>{data.maxWs}</td>
                 })}
               </tr>
               <tr>
-                <td>파향</td>
+                <td style={{...forecastTabletagBoxStyle}}>파향</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{objDirections[data.waveDir]}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle}}>{objDirections[data.waveDir]}</td>
                 })}
               </tr>
               <tr>
-                <td>최대파고</td>
+                <td style={{...forecastTabletagBoxStyle}}>파고</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.maxWaveH}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle}}>{data.maxWaveH}</td>
                 })}
               </tr>
               <tr>
-                <td>시정</td>
+                <td style={{...forecastTabletagBoxStyle}}>시정</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.vis}</td>
+                  return <td key={index} style={{...forecastTableValueBoxStyle}}>{data.vis}</td>
                 })}
               </tr>
             </tbody>
