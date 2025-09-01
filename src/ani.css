@@ -1,0 +1,15 @@
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 7px solid #3b82f6; /* 파란색 */
+  border-top: 5px solid transparent; /* 투명 */
+  border-radius: 50%;
+  margin-left:20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
