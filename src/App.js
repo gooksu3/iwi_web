@@ -9,7 +9,7 @@ import fog from './img/fog.png';
 import heavy_rainy from './img/heavy_rainy.png';
 import mostlyCloudy from './img/mostlyCloudy.png';
 import partlyCloudy from './img/partlyCloudy.png';
-import parlyCloudyAfterRaining from './img/parlyCloudyAfterRaining.png';
+import partlyCloudyAfterRaining from './img/partlyCloudyAfterRaining.png';
 import rainy from './img/rainy.png';
 import rainyNSnowy from './img/rainyNSnowy.png';
 import snowy from './img/snowy.png';
@@ -51,8 +51,7 @@ function App() {
   const graphHeight="13vh";
   const [arrayDateForecast,setArrayDateForecast]=useState([])
   const [shortForecastData,setShortForecastData]=useState([])
-
-
+  const objDirections={0:"없음",1:"북풍",2:'북동풍',3:'동풍',4:'남동풍',5:'남풍',6:'남서풍',7:'서풍',8:'북서풍'}
 
   const degreesToCompass=(degrees)=>{
     const directions = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
@@ -107,8 +106,8 @@ function App() {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(objInfoFromApi.UPAForecastInside,"application/xml");
       const forecast=xmlDoc.getElementsByTagName("KWEATHER")[0].getElementsByTagName("SHORT")[0].children
-      for (let i=0;i<forecast.length;i++){
-      // for (let i=0;i<2;i++){
+      // for (let i=0;i<forecast.length;i++){
+      for (let i=0;i<4;i++){
         const dateNWeek=`${forecast[i].getElementsByTagName("DATE")[0].textContent}(${forecast[i].getElementsByTagName("WEEK")[0].textContent})`
         setArrayDateForecast(prev=>[...prev,dateNWeek])
         const hours=forecast[i].getElementsByTagName("HOUR")[0].children
@@ -277,10 +276,12 @@ function App() {
       </tr>
     );
   };
-  function weatherIcon(iconNum){
-    
+  function WeatherIcon({iconNum}){
+    console.log(iconNum)
+    const objNumNIcon={1:sunny,2:partlyCloudy,3:mostlyCloudy,4:cloudy,5:rainy,6:snowy,7:partlyCloudyAfterRaining,8:heavy_rainy,9:rainyNSnowy,10:rainyNSnowy,11:thunder,12:fog}
+    const icon=objNumNIcon[iconNum]
     return ( 
-    <img src={wind} alt="바람" style={{width:"4vw",height:"5vh"}}></img>)
+    <img src={icon} alt="icon" style={{width:"2vw",height:"3vh"}}></img>)
   }
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -356,7 +357,7 @@ function App() {
     color:"#EAF3FD",
   };
   const forecastTableValueBox={
-
+    textAlign:"center"
   }
   // 비번input태그 focus
   useEffect(() => {
@@ -527,14 +528,14 @@ function App() {
                 {shortForecastData.map((data,index)=>{
                   return (
                   <td key={index} style={{color:"#EAF3FD"}}>
-                    {data.icon}
+                    <WeatherIcon iconNum={data.icon}/>
                   </td>)
                 })}
               </tr>
               <tr>
                 <td>풍향</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.wdir}</td>
+                  return <td key={index} style={{color:"#EAF3FD"}}>{objDirections[data.wdir]}</td>
                 })}
               </tr>
               <tr>
@@ -552,7 +553,7 @@ function App() {
               <tr>
                 <td>파향</td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.waveDir}</td>
+                  return <td key={index} style={{color:"#EAF3FD"}}>{objDirections[data.waveDir]}</td>
                 })}
               </tr>
               <tr>
