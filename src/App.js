@@ -302,7 +302,7 @@ function App() {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
         fetchDataWData().then(fetchDataForecast);
-        // setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
+        setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
         setInterval(()=>{
           const now = new Date();
           const hours = now.getHours();
