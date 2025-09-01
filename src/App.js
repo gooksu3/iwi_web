@@ -4,6 +4,17 @@ import Clock from "./Clock.js"
 import './reset.css';
 import eye from './img/eye.png';
 import wind from './img/wind.png';
+import cloudy from './img/cloudy.png';
+import fog from './img/fog.png';
+import heavy_rainy from './img/heavy_rainy.png';
+import mostlyCloudy from './img/mostlyCloudy.png';
+import partlyCloudy from './img/partlyCloudy.png';
+import parlyCloudyAfterRaining from './img/parlyCloudyAfterRaining.png';
+import rainy from './img/rainy.png';
+import rainyNSnowy from './img/rainyNSnowy.png';
+import snowy from './img/snowy.png';
+import sunny from './img/sunny.png';
+import thunder from './img/thunder.png';
 
 function App() {
   // For Login
@@ -79,15 +90,51 @@ function App() {
   const mToKm=(m)=>{
     return (Math.round((m/1000)*10)/10).toFixed(1);
   };
-  const fetchData = async () => {
+  const fetchDataForecast=async ()=>{
     setArrayDateForecast([])
     setShortForecastData([])
+    const WORKER_URL = "https://uiwi.gooksu3.workers.dev/api/daily";
+    try {
+      const res = await fetch(WORKER_URL,{
+        method: "GET",
+        headers: {'Authorization': token},
+      });
+      if (!res.ok) {
+        throw new Error("네트워크 응답 실패");
+      };
+      const objInfoFromApi = await res.json();
+      // 단기 예보
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(objInfoFromApi.UPAForecastInside,"application/xml");
+      const forecast=xmlDoc.getElementsByTagName("KWEATHER")[0].getElementsByTagName("SHORT")[0].children
+      for (let i=0;i<forecast.length;i++){
+      // for (let i=0;i<2;i++){
+        const dateNWeek=`${forecast[i].getElementsByTagName("DATE")[0].textContent}(${forecast[i].getElementsByTagName("WEEK")[0].textContent})`
+        setArrayDateForecast(prev=>[...prev,dateNWeek])
+        const hours=forecast[i].getElementsByTagName("HOUR")[0].children
+        for (let j=0;j<hours.length;j++){
+          const time=hours[j].tagName
+          const icon=hours[j].getElementsByTagName("wcond")[0].textContent
+          const windDir=hours[j].getElementsByTagName("wdir")[0].textContent
+          const ws=hours[j].getElementsByTagName("ws")[0].textContent
+          const maxWs=hours[j].getElementsByTagName("maxws")[0].textContent
+          const maxWaveH=hours[j].getElementsByTagName("mpa")[0].textContent
+          const waveDir=hours[j].getElementsByTagName("padir")[0].textContent
+          const vis=hours[j].getElementsByTagName("ss")[0].textContent
+          setShortForecastData(prev=>[...prev,{time:time,icon:icon,wdir:windDir,ws:ws,maxWs:maxWs,maxWaveH:maxWaveH,waveDir:waveDir,vis:vis}])
+        };
+      };
+    } catch (err) {
+      console.error("데이터 불러오기 오류:", err);
+    }
+  };
+  const fetchDataWData = async () => {
     const now = new Date();
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
     const tm2 = formatDateToYYYYMMDDHHMM(twoMinutesAgo);
     const tm1 = formatDateToYYYYMMDDHHMM(new Date(twoMinutesAgo.getTime() - 60 * 60 * 1000));
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/5mins?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL,{
         method: "GET",
@@ -159,27 +206,6 @@ function App() {
       });
       setMeamWindData(arrayMaeam.map(item=>({time:item.time,windSpeed:item.ws})));
       setMaeamVisData(arrayMaeam.map(item=>({time:item.time,vis:item.vis})));
-      // 단기 예보
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(objInfoFromApi.UPAForecastInside,"application/xml");
-      const forecast=xmlDoc.getElementsByTagName("KWEATHER")[0].getElementsByTagName("SHORT")[0].children
-      for (let i=0;i<forecast.length;i++){
-      // for (let i=0;i<2;i++){
-        const dateNWeek=`${forecast[i].getElementsByTagName("DATE")[0].textContent}(${forecast[i].getElementsByTagName("WEEK")[0].textContent})`
-        setArrayDateForecast(prev=>[...prev,dateNWeek])
-        const hours=forecast[i].getElementsByTagName("HOUR")[0].children
-        for (let j=0;j<hours.length;j++){
-          const time=hours[j].tagName
-          const icon=hours[j].getElementsByTagName("wcond")[0].textContent
-          const windDir=hours[j].getElementsByTagName("wdir")[0].textContent
-          const ws=hours[j].getElementsByTagName("ws")[0].textContent
-          const maxWs=hours[j].getElementsByTagName("maxws")[0].textContent
-          const maxWaveH=hours[j].getElementsByTagName("mpa")[0].textContent
-          const waveDir=hours[j].getElementsByTagName("padir")[0].textContent
-          const vis=hours[j].getElementsByTagName("ss")[0].textContent
-          setShortForecastData(prev=>[...prev,{time:time,icon:icon,wdir:windDir,ws:ws,maxWs:maxWs,maxWaveH:maxWaveH,waveDir:waveDir,vis:vis}])
-        };
-      };
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -251,6 +277,11 @@ function App() {
       </tr>
     );
   };
+  function weatherIcon(iconNum){
+    
+    return ( 
+    <img src={wind} alt="바람" style={{width:"4vw",height:"5vh"}}></img>)
+  }
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
@@ -263,8 +294,16 @@ function App() {
       if (data.success) {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
-        fetchData();
-        setInterval(fetchData, 5 * 60 * 1000); // 5분마다 갱신
+        fetchDataWData().then(fetchDataForecast);
+        setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
+        setInterval(()=>{
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          if (hours === 0 && minutes === 30) {
+            fetchDataForecast()
+          };
+        }, 1000 * 60);
       } else {
         setPassword("")
         setError("비밀번호가 틀렸습니다.");
@@ -313,6 +352,12 @@ function App() {
     border:"2px solid #272727",
     padding: '5px',
   };
+  const forecastTableText={
+    color:"#EAF3FD",
+  };
+  const forecastTableValueBox={
+
+  }
   // 비번input태그 focus
   useEffect(() => {
     if (inputPWRef.current){
@@ -349,7 +394,7 @@ function App() {
       if (e.key === "F5" || (e.ctrlKey && e.key.toLowerCase() === "r")) {
         e.preventDefault();
         if (!inputPWRef.current){
-          fetchData()
+          fetchDataWData()
         }
       };
     };
@@ -357,6 +402,19 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
+  }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+
+      if (hours === 0 && minutes === 30) {
+        fetchDataForecast()
+      }
+    }, 1000 * 60); // 1분마다 체크
+
+    return () => clearInterval(interval);
   }, []);
   if (!token) {
     return (
@@ -448,12 +506,12 @@ function App() {
       )}
       {shortForecastData.length!==0?(
         <div>
-          <table>
+          <table style={{width:"100vw"}}>
             <thead>
               <tr>
                 <th></th>              
-                {arrayDateForecast.map((dateNWeek)=>{
-                  return <th colSpan="8" style={{color:"#EAF3FD"}}>{dateNWeek}</th>
+                {arrayDateForecast.map((dateNWeek,index)=>{
+                  return <th key={index} colSpan="8" style={{color:"#EAF3FD"}}>{dateNWeek}</th>
                 })}
               </tr>
             </thead>
@@ -461,14 +519,16 @@ function App() {
               <tr>
                 <td>시간</td>
                 {shortForecastData.map((data,index)=>{
-                  console.log(shortForecastData)
                   return <td key={index} style={{color:"#EAF3FD"}}>{data.time.substring(1,3)}</td>
                 })}
               </tr>
               <tr>
                 <td></td>
                 {shortForecastData.map((data,index)=>{
-                  return <td key={index} style={{color:"#EAF3FD"}}>{data.icon}</td>
+                  return (
+                  <td key={index} style={{color:"#EAF3FD"}}>
+                    {data.icon}
+                  </td>)
                 })}
               </tr>
               <tr>
