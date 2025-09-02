@@ -19,7 +19,7 @@ function Clock() {
     const strYear=year.toString().substring(2,4)
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${'\''}${strYear} ${month}/${day}`;
+    return `${'\''}${strYear}.${month}.${day}`;
   };
   const formatTime = (date) => {
     const hours = String(date.getHours()).padStart(2, "0");

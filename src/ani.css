@@ -7,9 +7,18 @@
   margin-left:20px;
   animation: spin 1s linear infinite;
 }
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards; /* 1초 동안 점점 나타남 */
+}
 
 @keyframes spin {
   100% {
     transform: rotate(360deg);
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

@@ -50,7 +50,7 @@ function App() {
   const [visMaeam,setVisMaeam]=useState(null);
   const arrayRowColor=["#2e86de","#0abde3"]
   const graphWidth="28vw";
-  const graphHeight="13vh";
+  const graphHeight="12vh";
   const [arrayDateForecast,setArrayDateForecast]=useState([])
   const [shortForecastData,setShortForecastData]=useState([])
   const objDirections={0:"없음",1:"북풍",2:'북동풍',3:'동풍',4:'남동풍',5:'남풍',6:'남서풍',7:'서풍',8:'북서풍'}
@@ -111,7 +111,7 @@ function App() {
       const xmlDoc = parser.parseFromString(objInfoFromApi.UPAForecastInside,"application/xml");
       const forecast=xmlDoc.getElementsByTagName("KWEATHER")[0].getElementsByTagName("SHORT")[0].children
       // for (let i=0;i<forecast.length;i++){
-      for (let i=0;i<4;i++){
+      for (let i=0;i<3;i++){
         const dateNWeek=`${forecast[i].getElementsByTagName("DATE")[0].textContent}(${forecast[i].getElementsByTagName("WEEK")[0].textContent})`
         setArrayDateForecast(prev=>[...prev,dateNWeek])
         const hours=forecast[i].getElementsByTagName("HOUR")[0].children
@@ -247,20 +247,27 @@ function App() {
       </ResponsiveContainer>
     );
   };
-  function RowInWetherTable({point,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
+  function RowInWetherTable({point,source,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
     return (
       <tr style={{backgroundColor:backgroundColor}}>
         <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 1vw"}}>
-            {Array.from(point).map((ch, i) => (
-              <span key={i}>{ch}</span>
-            ))}
+          <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 1vw",width:"88%"}}>
+              {Array.from(point).map((ch, i) => (
+                  <span key={i}>{ch}</span>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:"0.6em",padding:"3px 1.2vw",width:"70%"}}>
+              {Array.from(source).map((ch, i) => (
+                  <span key={i}>{ch}</span>
+              ))}
+            </div>
           </div>
         </td>
         <td style={{...valueStyle,width:"10vw"}}>{windDir}</td>
         <td style={{...valueStyle,width:"10vw"}}>
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw"}}>
-            <CountUp end={windSpd} duration={2.5}/>
+            <CountUp end={windSpd} duration={4}/>
             <span style={{fontSize:"1.8vw"}}>m/s</span>
           </div>
         </td>
@@ -271,7 +278,7 @@ function App() {
         </td>
         <td style={{...valueStyle,width:"10vw"}}>
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw"}}>
-            <CountUp end={vis} duration={2.5}/>
+            <CountUp end={vis} duration={4}/>
             <span style={{fontSize:"1.8vw"}}>km</span>
           </div>
         </td>
@@ -287,7 +294,7 @@ function App() {
     const objNumNIcon={1:sunny,2:partlyCloudy,3:mostlyCloudy,4:cloudy,5:rainy,6:snowy,7:partlyCloudyAfterRaining,8:heavy_rainy,9:rainyNSnowy,10:rainyNSnowy,11:thunder,12:fog}
     const icon=objNumNIcon[iconNum]
     return ( 
-    <img src={icon} alt="icon" style={{width:"2vw",height:"3vh"}}></img>)
+    <img src={icon} alt="icon" style={{width:"3vw",height:"3.5vh"}}></img>)
   }
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -302,12 +309,12 @@ function App() {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
         fetchDataWData().then(fetchDataForecast);
-        setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
+        // setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
         setInterval(()=>{
           const now = new Date();
           const hours = now.getHours();
           const minutes = now.getMinutes();
-          if (hours === 3 && minutes === 0) {
+          if ([0,4,8,12,16,20].includes(hours) && minutes === 0) {
             fetchDataForecast()
           };
         }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
@@ -421,14 +428,16 @@ function App() {
     border:"2px solid #272727",
     padding: '5px',
   };
+  const fontSizeForecastTable="1.4vw";
   const forecastTableValueBoxStyle={
     textAlign:"center",
-    width:"3.05vw"
-  }
+    fontSize:fontSizeForecastTable
+  };
   const forecastTableTagBoxStyle={
     color:"#EAF3FD",
     backgroundColor:"#272727",
-  }
+    fontSize:fontSizeForecastTable
+  };
   // 비번input태그 focus
   useEffect(() => {
     if (inputPWRef.current){
@@ -529,12 +538,12 @@ function App() {
       <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
         <div className={loadForecastTable?"spinner":""}></div>
         <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
-          <span style={{...titleStyle,paddingRight:"5vw"}}>울산통합기상정보시스템</span>
+          <span style={{...titleStyle,paddingRight:"5vw"}}>울산항통합기상정보시스템</span>
           <Clock />
         </div>
       </div>
       {kmaWindData && kmaVisData ?(
-        <table style={tableStyle}>
+        <table style={tableStyle} className="fade-in">
           <thead>
             <tr>
               <th rowSpan="2" style={{...tagStyle,borderRight:"1px solid #EAF3FD"}}>위치</th>
@@ -567,10 +576,10 @@ function App() {
           </thead>
           <tbody>
             {arrayPoints.map((point, index) => {
-              return <RowInWetherTable key={point} point={point} backgroundColor={arrayRowColor[index%2]} windDir={degreesToCompass(arrayKmaWindDir[index])} windSpd={arrayKmaWindSpd[index]} windData={kmaWindData[index]} vis={arrayKmaVis[index]} visData={kmaVisData[index]} varKma={true}/>
+              return <RowInWetherTable key={point} point={point} source={"기상청"} backgroundColor={arrayRowColor[index%2]} windDir={degreesToCompass(arrayKmaWindDir[index])} windSpd={arrayKmaWindSpd[index]} windData={kmaWindData[index]} vis={arrayKmaVis[index]} visData={kmaVisData[index]} varKma={true}/>
               })
             }
-            <RowInWetherTable point={"매암부두"} backgroundColor={arrayRowColor[3%2]} windDir={windDirMaeam} windSpd={windSpdMaeam} windData={MaeamWindData} vis={visMaeam} visData={MaeamVisData} varKma={false}/>
+            <RowInWetherTable point={"매암부두"} source={"해양조사원"} backgroundColor={arrayRowColor[3%2]} windDir={windDirMaeam} windSpd={windSpdMaeam} windData={MaeamWindData} vis={visMaeam} visData={MaeamVisData} varKma={false}/>
           </tbody>
         </table>
       ) : kmaWindData === null || kmaVisData===null ? (
@@ -580,12 +589,16 @@ function App() {
       )}
       {shortForecastData.length!==0?(
         <div>
-          <table style={{width:"100vw",border:"2px solid #EAF3FD",marginTop:"5px"}}>
+          <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"10px"}}>
+            <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
+            <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1 정박지 기준(기준좌표: 35-26-47.0N, 129-24-26.6E)</span>
+          </div>
+          <table style={{width:"100vw",border:"2px solid #EAF3FD",marginTop:"5px"}} className="fade-in">
             <thead>
               <tr>
                 <th></th>              
                 {arrayDateForecast.map((dateNWeek,index)=>{
-                  return <th key={index} colSpan="8" style={{color:"#EAF3FD",fontWeight:"Bold",padding:"3px 0", borderRight:"1px solid #EAF3FD"}}>{dateNWeek}</th>
+                  return <th key={index} colSpan="8" style={{color:"#EAF3FD",fontWeight:"Bold",padding:"3px 0", borderRight:"1px solid #EAF3FD",fontSize:fontSizeForecastTable}}>{dateNWeek}</th>
                 })}
               </tr>
             </thead>
