@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/iwi_web/static/css/main.d7f34bc7.css",
-    "main.js": "/iwi_web/static/js/main.101a0b50.js",
+    "main.css": "/iwi_web/static/css/main.7e42d51b.css",
+    "main.js": "/iwi_web/static/js/main.9cc1deb5.js",
     "static/media/sunny.png": "/iwi_web/static/media/sunny.a2dc5c1600f01279065f.png",
     "static/media/snowy.png": "/iwi_web/static/media/snowy.748f6950f61efcf3af58.png",
     "static/media/rainyNSnowy.png": "/iwi_web/static/media/rainyNSnowy.70ff87599449ab192c16.png",
@@ -15,11 +15,11 @@
     "static/media/thunder.png": "/iwi_web/static/media/thunder.e83238dccaf10b904601.png",
     "static/media/cloudy.png": "/iwi_web/static/media/cloudy.9a702b327ee9364fef1f.png",
     "index.html": "/iwi_web/index.html",
-    "main.d7f34bc7.css.map": "/iwi_web/static/css/main.d7f34bc7.css.map",
-    "main.101a0b50.js.map": "/iwi_web/static/js/main.101a0b50.js.map"
+    "main.7e42d51b.css.map": "/iwi_web/static/css/main.7e42d51b.css.map",
+    "main.9cc1deb5.js.map": "/iwi_web/static/js/main.9cc1deb5.js.map"
   },
   "entrypoints": [
-    "static/css/main.d7f34bc7.css",
-    "static/js/main.101a0b50.js"
+    "static/css/main.7e42d51b.css",
+    "static/js/main.9cc1deb5.js"
   ]
 }
