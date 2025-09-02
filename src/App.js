@@ -50,7 +50,7 @@ function App() {
   const [visMaeam,setVisMaeam]=useState(null);
   const arrayRowColor=["#2e86de","#0abde3"]
   const graphWidth="28vw";
-  const graphHeight="12vh";
+  const graphHeight="11vh";
   const [arrayDateForecast,setArrayDateForecast]=useState([])
   const [shortForecastData,setShortForecastData]=useState([])
   const objDirections={0:"없음",1:"북풍",2:'북동풍',3:'동풍',4:'남동풍',5:'남풍',6:'남서풍',7:'서풍',8:'북서풍'}
@@ -428,7 +428,7 @@ function App() {
     border:"2px solid #272727",
     padding: '5px',
   };
-  const fontSizeForecastTable="1.4vw";
+  const fontSizeForecastTable="1.3vw";
   const forecastTableValueBoxStyle={
     textAlign:"center",
     fontSize:fontSizeForecastTable
