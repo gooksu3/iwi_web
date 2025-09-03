@@ -9,7 +9,11 @@
 }
 .fade-in {
   opacity: 0;
-  animation: fadeIn 0.5s ease-in forwards; /* 1초 동안 점점 나타남 */
+  animation: fadeIn 0.5s ease-in forwards; /* 0.5초 동안 점점 나타남 */
+}
+.fade-out {
+  opacity: 1;
+  animation: fadeOut 0.5s ease-in forwards; /* 0.5초 동안 점점 나타남 */
 }
 
 @keyframes spin {
@@ -21,4 +25,8 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

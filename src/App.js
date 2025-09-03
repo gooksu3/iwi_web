@@ -588,12 +588,12 @@ function App() {
         <p>불러오는 중...</p>
       )}
       {shortForecastData.length!==0?(
-        <div>
+        <div className={loadForecastTable?"fade-out":"fade-in"}>
           <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"10px"}}>
             <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
-            <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1 정박지 기준(기준좌표: 35-26-47.0N, 129-24-26.6E)</span>
+            <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지 기준(기준좌표: 35-26-47.0N, 129-24-26.6E)</span>
           </div>
-          <table style={{width:"100vw",border:"2px solid #EAF3FD",marginTop:"5px"}} className="fade-in">
+          <table style={{width:"100vw",border:"2px solid #EAF3FD",marginTop:"5px"}}>
             <thead>
               <tr>
                 <th></th>              
