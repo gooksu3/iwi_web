@@ -53,7 +53,7 @@ function App() {
   const graphHeight="11vh";
   const [arrayDateForecast,setArrayDateForecast]=useState([])
   const [shortForecastData,setShortForecastData]=useState([])
-  const objDirections={0:"없음",1:"북풍",2:'북동풍',3:'동풍',4:'남동풍',5:'남풍',6:'남서풍',7:'서풍',8:'북서풍'}
+  const objDirections={0:"없음",1:"북",2:'북동',3:'동',4:'남동',5:'남',6:'남서',7:'서',8:'북서'}
   const [loadForecastTable,setLoadForecastTable]=useState(false)
 
   const degreesToCompass=(degrees)=>{
@@ -538,7 +538,7 @@ function App() {
       <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
         <div className={loadForecastTable?"spinner":""}></div>
         <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
-          <span style={{...titleStyle,paddingRight:"5vw"}}>울산항통합기상정보시스템</span>
+          <span style={{...titleStyle,paddingRight:"3.5vw"}}>울산항통합기상정보시스템</span>
           <Clock />
         </div>
       </div>
@@ -592,11 +592,11 @@ function App() {
         {/* <div className={loadForecastTable?"spinner":""} style={{position:"absolute",left:"40%",top:"30%"}}></div> */}
         {shortForecastData.length!==0?(
           <div className={loadForecastTable?"fade-out":"fade-in"} style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
-            <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"10px"}}>
+            <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px"}}>
               <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
-              <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지 기준(기준좌표: 35-26-47.0N, 129-24-26.6E)</span>
+              <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span>
             </div>
-            <table style={{width:"100vw",border:"2px solid #EAF3FD",marginTop:"5px"}}>
+            <table style={{width:"100vw",border:"2px solid #EAF3FD",borderCollapse: "separate",marginTop:"5px",borderRadius:"78x"}}>
               <thead>
                 <tr>
                   <th></th>              

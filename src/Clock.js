@@ -15,11 +15,14 @@ function Clock() {
 
   // 시간 포맷 함수
   const formatDate = (date) => {
+    const weekDays=["일","월","화","수","목","금","토"]
     const year = date.getFullYear();
     const strYear=year.toString().substring(2,4)
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${'\''}${strYear}.${month}.${day}`;
+    const weekDay=weekDays[date.getDay()]
+    
+    return `${'\''}${strYear}.${month}.${day}.(${weekDay})`;
   };
   const formatTime = (date) => {
     const hours = String(date.getHours()).padStart(2, "0");
