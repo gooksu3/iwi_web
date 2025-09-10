@@ -531,9 +531,10 @@ function App() {
     const stops = [
       { value: 0,   color: "rgb(255,255,255)" }, // 하양
       { value: 1,  color: "rgb(0,178,255)" },     // 초록
-      { value: 3,  color: "rgb(0,130,186)" },   // 주황
-      { value: 5,  color: "rgb(0,98,140)" },      // 빨강
-      { value: 7,  color: "rgb(0,57,82)" }      // 보라
+      { value: 2,  color: "rgb(0,130,186)" },   // 주황
+      { value: 3,  color: "rgb(0,98,140)" },      // 빨강
+      { value: 4,  color: "rgb(0,57,82)" },      // 보라
+      { value: 5,  color: "rgb(0,28,41)" },      // 보라
     ];
 
     // 범위 밖이면 최소/최대 색으로 처리
