@@ -506,7 +506,7 @@ function App() {
     const stops = [
       { value: 0,   color: "rgb(255,255,255)" }, // 하양
       { value: 7,  color: "rgb(0,255,0)" },     // 초록
-      { value: 14,  color: "rgb(255,165,0)" },   // 주황
+      { value: 12,  color: "rgb(255,165,0)" },   // 주황
       { value: 30,  color: "rgb(255,0,0)" },      // 빨강
       { value: 55,  color: "rgb(140,62,140)" }      // 보라
     ];
