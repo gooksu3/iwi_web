@@ -505,10 +505,11 @@ function App() {
   function getMultiGradientColorWindSpd(value) {
     const stops = [
       { value: 0,   color: "rgb(255,255,255)" }, // 하양
-      { value: 7,  color: "rgb(0,255,0)" },     // 초록
+      { value: 6,  color: "rgb(0,255,0)" },     // 초록
       { value: 12,  color: "rgb(255,165,0)" },   // 주황
-      { value: 30,  color: "rgb(255,0,0)" },      // 빨강
-      { value: 55,  color: "rgb(140,62,140)" }      // 보라
+      { value: 18,  color: "rgb(255,0,0)" },      // 빨강
+      { value: 24,  color: "rgb(237, 76, 103)" },      // 빨강
+      { value: 30,  color: "rgb(140,62,140)" }      // 보라
     ];
 
     // 범위 밖이면 최소/최대 색으로 처리
