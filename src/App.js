@@ -54,7 +54,9 @@ function App() {
   const [arrayDateForecast,setArrayDateForecast]=useState([])
   const [shortForecastData,setShortForecastData]=useState([])
   const objDirections={0:"없음",1:"북",2:'북동',3:'동',4:'남동',5:'남',6:'남서',7:'서',8:'북서'}
+  const [windLoaded, setWindLoaded] = useState(false);
   const [loadForecastTable,setLoadForecastTable]=useState(false)
+
 
   const degreesToCompass=(degrees)=>{
     const directions = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
@@ -133,7 +135,7 @@ function App() {
     setLoadForecastTable(false)
   };
   const fetchDataWData = async () => {
-    setLoadForecastTable(true)
+    setWindLoaded(true)
     const now = new Date();
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
     const tm2 = formatDateToYYYYMMDDHHMM(twoMinutesAgo);
@@ -218,7 +220,7 @@ function App() {
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
-    setLoadForecastTable(false)
+    setWindLoaded(false)
   };
   // component
   function GraphWind({data}){
@@ -353,10 +355,10 @@ function App() {
       </table>
     );
   };
-  function ShortForecastTable({shortForecastData, loadForecastTable}) {
+  function ShortForecastTable({shortForecastData}) {
     if (shortForecastData.length === 0) return null;
     return (
-      <div key="shortForecast" className={loadForecastTable?"short-forecast-fade-out":"short-forecast-fade-in"} style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
+      <div key="shortForecast" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
         <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px"}}>
           <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
           <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span>
@@ -706,25 +708,22 @@ function App() {
       minHeight:"100vh",
       }}>
       <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-        <div className={loadForecastTable?"spinner":""}></div>
+        <div className={windLoaded?"spinner":""}></div>
         <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
           <span style={{...titleStyle,paddingRight:"3.5vw"}}>울산항통합기상정보시스템</span>
           <Clock />
         </div>
       </div>
       {kmaWindData && kmaVisData ?(
-        <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData}/>
+        <WindAndVisTable loaded={windLoaded} kmaWindData={kmaWindData} kmaVisData={kmaVisData}/>
       ) : kmaWindData === null || kmaVisData===null ? (
         <p></p>
       ) : (
         <p>불러오는 중...</p>
       )}
-      {/* <div style={{position:"relative"}}> */}
-      <div>
-        {/* <div className={loadForecastTable?"spinner":""} style={{position:"absolute",left:"40%",top:"30%"}}></div> */}
-        {shortForecastData.length!==0?(
-          <ShortForecastTable shortForecastData={shortForecastData} loadForecastTable={loadForecastTable}/>
-        ):null}
+      <div style={{position:"relative"}}>
+        <div className={loadForecastTable?"spinner":""} style={{position:"absolute",left:"40%",top:"30%"}}></div>
+        <ShortForecastTable shortForecastData={shortForecastData}/>
       </div>
     </div>
   );
