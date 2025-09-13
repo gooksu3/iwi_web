@@ -271,17 +271,17 @@ function App() {
       console.log("====",arrayInfoUlsanCoast)
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
       const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
-      if (latest_warning_report[6]=="1"){  // 풍랑예비
+      if (latest_warning_report[6]==="1"){  // 풍랑예비
         setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
       }else{
-        if (latest_warning_report[7]=="1"){ // 발표
+        if (latest_warning_report[7]==="1"){ // 발표
           const clearTime=await fetchDataApproximateClearTime()
           setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
-        }else if (latest_warning_report[7]=="3"){
+        }else if (latest_warning_report[7]==="3"){
           const clearDateNTime=latest_warning_report[1].slice(4,6)+"월"+latest_warning_report[1].slice(6,8)+"일"+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
           const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
           setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
-        }else if (latest_warning_report[7]=="2"){
+        }else if (latest_warning_report[7]==="2"){
 
         }
       } 
@@ -608,15 +608,15 @@ function App() {
         fetchDataWData();
         fetchDataWeatherWarning();
         fetchDataForecast();
-        // setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
-        // setInterval(()=>{
-        //   const now = new Date();
-        //   const hours = now.getHours();
-        //   const minutes = now.getMinutes();
-        //   if ([0,4,8,12,16,20].includes(hours) && minutes === 30) {
-        //     fetchDataForecast()
-        //   };
-        // }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
+        setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
+        setInterval(()=>{
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          if ([0,4,8,12,16,20].includes(hours) && minutes === 30) {
+            fetchDataForecast()
+          };
+        }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
       } else {
         setPassword("")
         setError("비밀번호가 틀렸습니다.");
