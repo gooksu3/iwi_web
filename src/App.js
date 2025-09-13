@@ -58,7 +58,7 @@ function App() {
   const [loadForecastTable,setLoadForecastTable]=useState(false)
   const [warningInfo,setWarningInfo]=useState({})
   // let loadedWarningInfo=false
-  const [loadingWarningInfo,setLoadingWarningInfo]=useState(true)
+  const [showWarningInfo,setShowWarningInfo]=useState(false)
   const obj_pre_warning_report_time={"0259": "새벽(00시~03시)", "0559": "새벽(03시~06시)", "0859": "아침(06시~09시)", "1159": "오전(09시~12시)", "1459": "낮(12시~15시)", "1759": "늦은 오후(15시~18시)", "2059": "저녁(18시~21시)", "2359": "밤(21시~24시)", "1158": "오전(06시~12시)", "1758": "오후(12시~18시)", "0558": "새벽(00시~06시)", "2358": "밤(18시~24시)", "1458": "오후(12시~18시)"}
   const obj_wrn_lvl={"1":"예비", "2":"주의보", "3":"경보"}
 
@@ -252,7 +252,6 @@ function App() {
   const fetchDataWeatherWarning = async () => {
     const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/WWarning`;
     try {
-      setLoadingWarningInfo(true)
       const res = await fetch(WORKER_URL,{
         method: "GET",
         headers: {'Authorization': token},
@@ -273,21 +272,32 @@ function App() {
       const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
       if (latest_warning_report[6]==="1"){  // 풍랑예비
         setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
+        setShowWarningInfo(true)
       }else{
         if (latest_warning_report[7]==="1"){ // 발표
           const clearTime=await fetchDataApproximateClearTime()
           setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
         }else if (latest_warning_report[7]==="3"){
-          const clearDateNTime=latest_warning_report[1].slice(4,6)+"월"+latest_warning_report[1].slice(6,8)+"일"+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
-          const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
-          setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
+          const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
+          const month = parseInt(latest_warning_report[1].slice(4, 6), 10) - 1; // JS에서는 0=1월
+          const day = parseInt(latest_warning_report[1].slice(6, 8), 10);
+          const hour = parseInt(latest_warning_report[1].slice(8, 10), 10);
+          const minute = parseInt(latest_warning_report[1].slice(10, 12), 10);
+          // Date 객체 생성
+          const targetDate = new Date(year, month, day, hour, minute);
+          const now = new Date();
+          if (targetDate<now){
+            setWarningInfo({})
+          }else{
+            const clearDateNTime=latest_warning_report[1].slice(4,6)+"월"+latest_warning_report[1].slice(6,8)+"일"+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
+            const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
+            setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
+            setShowWarningInfo(true)
+          }
         }else if (latest_warning_report[7]==="2"){
 
         }
-      } 
-        
-      // loadedWarningInfo=true
-      setLoadingWarningInfo(false)
+      };        
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -446,7 +456,8 @@ function App() {
     let warningDay=""
     let warningTime=""
     let strPreOrIn="예정"
-    if (warningInfo.length!==0){
+    if (Object.keys(warningInfo).length!==0){
+      console.log("1111")
       warningMonth=Number(warningInfo.timeEff.slice(4,6))
       warningDay=Number(warningInfo.timeEff.slice(6,8))
       if (warningInfo.warnLvl==="1"){
@@ -489,7 +500,7 @@ function App() {
             {/* <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span> */}
             <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지 기준</span>
           </div>
-          {loadingWarningInfo?null:<WarningUlsanCoast/>}
+          {showWarningInfo?<WarningUlsanCoast/>:null}
         </div>
         <table style={{width:"100vw",border:"2px solid #EAF3FD",borderCollapse: "separate",marginTop:"5px",borderRadius:"78x"}}>
           <thead>
