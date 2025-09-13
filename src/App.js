@@ -56,6 +56,11 @@ function App() {
   const objDirections={0:"없음",1:"북",2:'북동',3:'동',4:'남동',5:'남',6:'남서',7:'서',8:'북서'}
   const [windLoaded, setWindLoaded] = useState(false);
   const [loadForecastTable,setLoadForecastTable]=useState(false)
+  const [warningInfo,setWarningInfo]=useState({})
+  // let loadedWarningInfo=false
+  const [loadingWarningInfo,setLoadingWarningInfo]=useState(true)
+  const obj_pre_warning_report_time={"0259": "새벽(00시~03시)", "0559": "새벽(03시~06시)", "0859": "아침(06시~09시)", "1159": "오전(09시~12시)", "1459": "낮(12시~15시)", "1759": "늦은 오후(15시~18시)", "2059": "저녁(18시~21시)", "2359": "밤(21시~24시)", "1158": "오전(06시~12시)", "1758": "오후(12시~18시)", "0558": "새벽(00시~06시)", "2358": "밤(18시~24시)", "1458": "오후(12시~18시)"}
+  const obj_wrn_lvl={"1":"예비", "2":"주의보", "3":"경보"}
 
 
   const degreesToCompass=(degrees)=>{
@@ -222,6 +227,71 @@ function App() {
     }
     setWindLoaded(false)
   };
+  const fetchDataApproximateClearTime = async ()=> {
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/clearTime`;
+    try {
+      const res = await fetch(WORKER_URL,{
+        method: "GET",
+        headers: {'Authorization': token},
+      });
+      if (!res.ok) {
+        throw new Error("네트워크 응답 실패");
+      };
+      const textInfo = await res.json();
+      let arrayInfo=textInfo.split("\n")
+      arrayInfo = arrayInfo.map(
+        (item) => item.split(",").map((part) => part.trim())
+      );
+      const clearTime=arrayInfo.filter((item)=>item.includes("울산앞바다"))[0][9]
+      // console.log("+++",clearTime)
+      return clearTime
+    } catch (err) {
+      console.error("데이터 불러오기 오류:", err);
+    }
+  }
+  const fetchDataWeatherWarning = async () => {
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/WWarning`;
+    try {
+      setLoadingWarningInfo(true)
+      const res = await fetch(WORKER_URL,{
+        method: "GET",
+        headers: {'Authorization': token},
+      });
+      if (!res.ok) {
+        throw new Error("네트워크 응답 실패");
+      }
+      const textInfo = await res.json();
+      const arrayInfo=textInfo.split("\n").slice(2,-2)
+      let arrayInfoUlsanCoast = arrayInfo.filter(item => 
+        item.includes("S1131100") && item.includes("V")
+      );
+      arrayInfoUlsanCoast=arrayInfoUlsanCoast.map((item)=>{
+        return item.split(",").map((info)=>info.trim())
+      })
+      console.log("====",arrayInfoUlsanCoast)
+      // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
+      const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
+      if (latest_warning_report[6]=="1"){  // 풍랑예비
+        setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
+      }else{
+        if (latest_warning_report[7]=="1"){ // 발표
+          const clearTime=await fetchDataApproximateClearTime()
+          setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
+        }else if (latest_warning_report[7]=="3"){
+          const clearDateNTime=latest_warning_report[1].slice(4,6)+"월"+latest_warning_report[1].slice(6,8)+"일"+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
+          const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
+          setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
+        }else if (latest_warning_report[7]=="2"){
+          
+        }
+      } 
+        
+      // loadedWarningInfo=true
+      setLoadingWarningInfo(false)
+    } catch (err) {
+      console.error("데이터 불러오기 오류:", err);
+    }
+  };
   // component
   function GraphWind({data}){
     return (
@@ -254,6 +324,22 @@ function App() {
       </ResponsiveContainer>
     );
   };
+  const colorWindValue=({windSpd}) => {
+    if (parseFloat(windSpd)>=14.0){
+      return "#f1c40f"
+    }else if (parseFloat(windSpd)>=17.0){
+      return "#ee5253"
+    }else{
+      return "#EAF3FD"
+    }
+  };
+  const colorVisValue=({vis}) => {
+    if (parseFloat(vis)<=0.5){
+      return "#ee5253"
+    }else{
+      return "#EAF3FD"
+    }
+  };
   function RowInWetherTable({point,source,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
     return (
       <tr style={{backgroundColor:backgroundColor}}>
@@ -273,9 +359,9 @@ function App() {
         </td>
         <td style={{...valueStyle,width:"10vw"}}>{windDir}</td>
         <td style={{...valueStyle,width:"10vw"}}>
-          <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw"}}>
+          <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorWindValue({windSpd})}}>
             {windSpd?
-            <CountUp start={0} end={windSpd} duration={1} decimals={1} useEasing={false}formattingFn={(windSpd)=>windSpd.toFixed(1)}/>:
+            <CountUp start={0} end={windSpd} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)}/>:
             <span></span>}
             <span style={{fontSize:"1.8vw"}}>m/s</span>
           </div>
@@ -286,7 +372,7 @@ function App() {
           </div>
         </td>
         <td style={{...valueStyle,width:"10vw"}}>
-          <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw"}}>
+          <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorVisValue({vis})}}>
             {vis?<CountUp start={0} end={vis} duration={1} decimals={1} useEasing={false}formattingFn={(vis)=>vis.toFixed(1)}/>:
             <span></span>}
             <span style={{fontSize:"1.8vw"}}>km</span>
@@ -355,13 +441,55 @@ function App() {
       </table>
     );
   };
+  function WarningUlsanCoast(){
+    let warningMonth=""
+    let warningDay=""
+    let warningTime=""
+    let strPreOrIn="예정"
+    if (warningInfo.length!==0){
+      warningMonth=Number(warningInfo.timeEff.slice(4,6))
+      warningDay=Number(warningInfo.timeEff.slice(6,8))
+      if (warningInfo.warnLvl==="1"){
+        warningTime=obj_pre_warning_report_time[warningInfo.timeEff.slice(8,warningInfo.timeEff.length)]
+      }else{
+        warningTime=warningInfo.timeEff.slice(8,warningInfo.timeEff.length)
+        warningTime=warningTime.slice(0,2)+":"+warningTime.slice(2)
+        const year = parseInt(warningInfo.timeEff.slice(0, 4), 10);
+        const month = parseInt(warningInfo.timeEff.slice(4, 6), 10) - 1; // JS에서는 0=1월
+        const day = parseInt(warningInfo.timeEff.slice(6, 8), 10);
+        const hour = parseInt(warningInfo.timeEff.slice(8, 10), 10);
+        const minute = parseInt(warningInfo.timeEff.slice(10, 12), 10);
+        // Date 객체 생성
+        const targetDate = new Date(year, month, day, hour, minute);
+        const now = new Date();
+        if (targetDate<now){
+          strPreOrIn="발효 중"
+        }
+      }
+    }
+    return(
+      <div style={{fontSize:"2.0vw",display:"flex",flexDirection:"row",alignItems:"flex-end"}}>
+        <span>울산앞바다</span>
+        <div style={{fontSize:"3vw",fontWeight:"bold",marginLeft:"1vw"}}>
+          <span >풍랑 {obj_wrn_lvl[warningInfo.warnLvl]}</span>
+          {warningInfo.warnLvl==="1"?null:<span style={{margin:"0 1vw"}}>{strPreOrIn}</span>}
+        </div>
+        <span>{warningMonth}월{warningDay}일 {warningTime} ~</span>
+        {warningInfo.timeClear!==""?<span>(해제:{warningInfo.timeClear})</span>:null}
+      </div>
+    )
+  };
   function ShortForecastTable({shortForecastData}) {
     if (shortForecastData.length === 0) return null;
     return (
       <div key="shortForecast" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
-        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px"}}>
-          <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
-          <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span>
+        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px",display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"flex-end",width:"97vw"}}>
+          <div>
+            <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
+            {/* <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span> */}
+            <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지 기준</span>
+          </div>
+          {loadingWarningInfo?null:<WarningUlsanCoast/>}
         </div>
         <table style={{width:"100vw",border:"2px solid #EAF3FD",borderCollapse: "separate",marginTop:"5px",borderRadius:"78x"}}>
           <thead>
@@ -478,16 +606,17 @@ function App() {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
         fetchDataWData();
-        fetchDataForecast()
-        setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
-        setInterval(()=>{
-          const now = new Date();
-          const hours = now.getHours();
-          const minutes = now.getMinutes();
-          if ([0,4,8,12,16,20].includes(hours) && minutes === 30) {
-            fetchDataForecast()
-          };
-        }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
+        fetchDataWeatherWarning();
+        fetchDataForecast();
+        // setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
+        // setInterval(()=>{
+        //   const now = new Date();
+        //   const hours = now.getHours();
+        //   const minutes = now.getMinutes();
+        //   if ([0,4,8,12,16,20].includes(hours) && minutes === 30) {
+        //     fetchDataForecast()
+        //   };
+        // }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
       } else {
         setPassword("")
         setError("비밀번호가 틀렸습니다.");
