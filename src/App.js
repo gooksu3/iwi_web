@@ -282,7 +282,7 @@ function App() {
           const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
           setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
         }else if (latest_warning_report[7]=="2"){
-          
+
         }
       } 
         
@@ -470,7 +470,7 @@ function App() {
     return(
       <div style={{fontSize:"2.0vw",display:"flex",flexDirection:"row",alignItems:"flex-end"}}>
         <span>울산앞바다</span>
-        <div style={{fontSize:"3vw",fontWeight:"bold",marginLeft:"1vw"}}>
+        <div style={{fontSize:"2.7vw",fontWeight:"bold",marginLeft:"1vw"}}>
           <span >풍랑 {obj_wrn_lvl[warningInfo.warnLvl]}</span>
           {warningInfo.warnLvl==="1"?null:<span style={{margin:"0 1vw"}}>{strPreOrIn}</span>}
         </div>
@@ -483,7 +483,7 @@ function App() {
     if (shortForecastData.length === 0) return null;
     return (
       <div key="shortForecast" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
-        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px",display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"flex-end",width:"97vw"}}>
+        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px",display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"flex-end",width:"100vw"}}>
           <div>
             <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
             {/* <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span> */}
