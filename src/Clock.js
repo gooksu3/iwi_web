@@ -32,7 +32,7 @@ function Clock() {
   };
 
   return (
-    <div style={{fontFamily: 'Courier',color: "#EAF3FD",paddingRight:"20px"}}>
+    <div style={{fontFamily: 'Courier',color: "#EAF3FD",paddingRight:"20px",letterSpacing:"-0.4vw"}}>
       <span style={{fontSize: "2.2vw",paddingRight:"10px"}}>{formatDate(time)}</span>
       <span style={{fontWeight: "bold", fontSize: "3.5vw"}}>{formatTime(time)}</span>
     </div>

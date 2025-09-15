@@ -267,7 +267,7 @@ function App() {
       arrayInfoUlsanCoast=arrayInfoUlsanCoast.map((item)=>{
         return item.split(",").map((info)=>info.trim())
       })
-      console.log("====",arrayInfoUlsanCoast)
+      arrayInfoUlsanCoast=[['202509151000', '202509111158', '202509100853', '159', 'S1132110', 'V', '1', '1', '00', '4', '101', '='], ['202509150700', '202509151200', '202509150613', '159', 'S1132110', 'V', '2', '1', '00', '4', '101', '='],['202509120700', '202509160700', '202509120558', '159', 'S1132110', 'V', '2', '3', '00', '4', '101', '=']]
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
       const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
       if (latest_warning_report[6]==="1"){  // 풍랑예비
@@ -276,7 +276,12 @@ function App() {
       }else{
         if (latest_warning_report[7]==="1"){ // 발표
           const clearTime=await fetchDataApproximateClearTime()
-          setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
+          if (typeof clearTime==="undefined"){
+            setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
+          }else{
+            setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
+          }
+          setShowWarningInfo(true)
         }else if (latest_warning_report[7]==="3"){
           const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
           const month = parseInt(latest_warning_report[1].slice(4, 6), 10) - 1; // JS에서는 0=1월
@@ -289,7 +294,7 @@ function App() {
           if (targetDate<now){
             setWarningInfo({})
           }else{
-            const clearDateNTime=latest_warning_report[1].slice(4,6)+"월"+latest_warning_report[1].slice(6,8)+"일"+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
+            const clearDateNTime=String(Number(latest_warning_report[1].slice(4,6)))+"월"+String(Number(latest_warning_report[1].slice(6,8)))+"일 "+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
             const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
             setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
             setShowWarningInfo(true)
@@ -336,8 +341,6 @@ function App() {
   };
   const colorWindValue=({windSpd}) => {
     if (parseFloat(windSpd)>=14.0){
-      return "#f1c40f"
-    }else if (parseFloat(windSpd)>=17.0){
       return "#ee5253"
     }else{
       return "#EAF3FD"
@@ -351,6 +354,8 @@ function App() {
     }
   };
   function RowInWetherTable({point,source,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
+    const [finishedWindCountUP, setFinishedWindCountUP] = useState(false);
+    const [finishedVisCountUp, setFinishedVisCountUp] = useState(false);
     return (
       <tr style={{backgroundColor:backgroundColor}}>
         <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
@@ -371,8 +376,15 @@ function App() {
         <td style={{...valueStyle,width:"10vw"}}>
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorWindValue({windSpd})}}>
             {windSpd?
-            <CountUp start={0} end={windSpd} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)}/>:
-            <span></span>}
+            <CountUp start={0} end={windSpd} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)} onEnd={()=>setFinishedWindCountUP(true)}>
+              {({ countUpRef }) => (
+                <span
+                  ref={countUpRef}
+                  className={finishedWindCountUP&&parseFloat(windSpd)>=14.0 ? "highlight-text" : ""}
+                />
+              )}
+            </CountUp>
+            :<span></span>}
             <span style={{fontSize:"1.8vw"}}>m/s</span>
           </div>
         </td>
@@ -383,7 +395,15 @@ function App() {
         </td>
         <td style={{...valueStyle,width:"10vw"}}>
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorVisValue({vis})}}>
-            {vis?<CountUp start={0} end={vis} duration={1} decimals={1} useEasing={false}formattingFn={(vis)=>vis.toFixed(1)}/>:
+            {vis?
+            <CountUp start={0} end={vis} duration={1} decimals={1} useEasing={false}formattingFn={(vis)=>vis.toFixed(1)} onEnd={()=>setFinishedVisCountUp(true)}>
+              {({ countUpRef }) => (
+                <span
+                  ref={countUpRef}
+                  className={finishedVisCountUp&&parseFloat(vis)<=0.5 ? "highlight-text" : ""}
+                />
+              )}
+            </CountUp>:
             <span></span>}
             <span style={{fontSize:"1.8vw"}}>km</span>
           </div>
@@ -413,14 +433,14 @@ function App() {
       <table key="windNVis" style={tableStyle} className={isFirstRender?"wind-vis-fade-in":""}>
         <thead>
           <tr>
-            <th rowSpan="2" style={{...tagStyle,borderRight:"1px solid #EAF3FD"}}>위치</th>
+            <th rowSpan="2" style={{...tagStyle,borderRight:"1px solid #EAF3FD",whiteSpace:"pre"}}>위    치</th>
             <th colSpan="3" style={{...tagStyle,borderRight:"1px solid #EAF3FD"}}>
               <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"1vw"}}>
                 <img 
                   src={wind} 
                   alt="바람"
                   style={{width:"4vw",height:"5vh"}}></img>
-                <span>풍향·풍속</span>
+                <span style={{whiteSpace:"pre"}}>풍  향·풍  속</span>
               </div>
             </th>
             <th colSpan="2" style={tagStyle}>
@@ -429,15 +449,15 @@ function App() {
                   src={eye} 
                   alt="눈"
                   style={{width:"4vw",height:"5vh"}}></img>
-                <span>시정</span>
+                <span style={{whiteSpace:"pre"}}>시  정</span>
               </div>
             </th>
           </tr>
           <tr>
-            <th style={tagStyle}>풍향</th>
-            <th style={tagStyle}>풍속</th>
+            <th style={{...tagStyle,whiteSpace:"pre"}}>풍  향</th>
+            <th style={{...tagStyle,whiteSpace:"pre"}}>풍  속</th>
             <th style={{...tagStyle,borderRight:"1px solid #EAF3FD"}}>그래프</th>
-            <th style={tagStyle}>시정</th>
+            <th style={{...tagStyle,whiteSpace:"pre"}}>시  정</th>
             <th style={tagStyle}>그래프</th>
           </tr>
         </thead>
@@ -455,9 +475,9 @@ function App() {
     let warningMonth=""
     let warningDay=""
     let warningTime=""
-    let strPreOrIn="예정"
+    let strPreOrIn="발효 예정"
+    console.log(warningInfo.timeClear,"----")
     if (Object.keys(warningInfo).length!==0){
-      console.log("1111")
       warningMonth=Number(warningInfo.timeEff.slice(4,6))
       warningDay=Number(warningInfo.timeEff.slice(6,8))
       if (warningInfo.warnLvl==="1"){
@@ -479,14 +499,15 @@ function App() {
       }
     }
     return(
-      <div style={{fontSize:"2.0vw",display:"flex",flexDirection:"row",alignItems:"flex-end"}}>
-        <span>울산앞바다</span>
-        <div style={{fontSize:"2.7vw",fontWeight:"bold",marginLeft:"1vw"}}>
-          <span >풍랑 {obj_wrn_lvl[warningInfo.warnLvl]}</span>
-          {warningInfo.warnLvl==="1"?null:<span style={{margin:"0 1vw"}}>{strPreOrIn}</span>}
+      <div style={{fontSize:"2.0vw",display:"flex",flexDirection:"row",alignItems:"center"}}>
+        <div style={{fontSize:"2.5vw",fontWeight:"bold",color:"#ee5253"}}>
+          <span >풍랑 {obj_wrn_lvl[warningInfo.warnLvl]}&nbsp;</span>
+          {warningInfo.warnLvl==="1"?null:<span>{strPreOrIn}</span>}
         </div>
-        <span>{warningMonth}월{warningDay}일 {warningTime} ~</span>
-        {warningInfo.timeClear!==""?<span>(해제:{warningInfo.timeClear})</span>:null}
+        <span>[</span>
+        <span>{warningMonth}월{warningDay}일 {warningTime} ~&nbsp;</span>
+        {warningInfo.timeClear!==""?<span>{warningInfo.timeClear}</span>:null}
+        <span>]</span>
       </div>
     )
   };
@@ -494,13 +515,9 @@ function App() {
     if (shortForecastData.length === 0) return null;
     return (
       <div key="shortForecast" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
-        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"30px",display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"flex-end",width:"100vw"}}>
-          <div>
-            <span style={{fontSize:"2.5vw",fontWeight:"bold"}}>단기예보</span>
-            {/* <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지(35-26-47.0N, 129-24-26.6E) 기준</span> */}
-            <span style={{fontSize:"1.5vw",marginLeft:"10px"}}>E1정박지 기준</span>
-          </div>
-          {showWarningInfo?<WarningUlsanCoast/>:null}
+        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"7px",width:"100vw",marginBottom:"0.5vw",display:"flex",flexDirection:"row",justifyContent:"flex-start",alignItems:"center"}}>
+          <span style={{fontSize:"2.7vw",fontWeight:"bold",backgroundColor:"#636e72",borderRadius:"10px",padding:"2px 5px",marginRight:"5px"}}>울산앞바다</span>
+          {showWarningInfo?<WarningUlsanCoast/>:<span style={{fontSize:"2.5vw"}}>기상특보 없음</span>}
         </div>
         <table style={{width:"100vw",border:"2px solid #EAF3FD",borderCollapse: "separate",marginTop:"5px",borderRadius:"78x"}}>
           <thead>
