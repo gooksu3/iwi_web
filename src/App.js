@@ -57,7 +57,6 @@ function App() {
   const [windLoaded, setWindLoaded] = useState(false);
   const [loadForecastTable,setLoadForecastTable]=useState(false)
   const [warningInfo,setWarningInfo]=useState({})
-  // let loadedWarningInfo=false
   const [showWarningInfo,setShowWarningInfo]=useState(false)
   const obj_pre_warning_report_time={"0259": "새벽(00시~03시)", "0559": "새벽(03시~06시)", "0859": "아침(06시~09시)", "1159": "오전(09시~12시)", "1459": "낮(12시~15시)", "1759": "늦은 오후(15시~18시)", "2059": "저녁(18시~21시)", "2359": "밤(21시~24시)", "1158": "오전(06시~12시)", "1758": "오후(12시~18시)", "0558": "새벽(00시~06시)", "2358": "밤(18시~24시)", "1458": "오후(12시~18시)"}
   const obj_wrn_lvl={"1":"예비", "2":"주의보", "3":"경보"}
@@ -243,13 +242,20 @@ function App() {
         (item) => item.split(",").map((part) => part.trim())
       );
       const clearTime=arrayInfo.filter((item)=>item.includes("울산앞바다"))[0][9]
-      // console.log("+++",clearTime)
       return clearTime
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
   }
   const fetchDataWeatherWarning = async () => {
+    // cmd 특보명령 (1:발표, 2:대치, 3:해제, 4:대치해제(자동), 5:연장, 6:변경, 7:변경해제)
+    // 1	발표	    새로운 특보가 처음으로 발표됨을 의미합니다.
+    // 2	대치	    기존에 발표된 특보를 같은 등급 또는 다른 등급의 특보로 교체하는 경우입니다. 예: 주의보 → 경보 등.
+    // 3	해제	    해당 지역에 대해 특보를 완전히 해제함을 의미합니다. 즉, 특보 종료.
+    // 4	대치해제    (자동)	대치로 인해 발표된 특보가 자동으로 해제된 경우입니다. 즉, 대치되기 전 특보가 자동 해제된 것.
+    // 5	연장	    기존 특보의 유효시간이 연장되었음을 의미합니다. 내용은 동일하지만 지속시간만 늘어납니다.
+    // 6	변경	    특보의 내용(예: 대상 지역, 강수량 등 세부사항)이 변경되었지만, 특보 등급은 그대로 유지됩니다.
+    // 7	변경해제	변경으로 인해 적용되었던 이전 특보 내용이 해제되었음을 알리는 자동 해제입니다. 주로 시스템적으로 이전 정보 무효화 처리 시 사용됩니다.
     const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/WWarning`;
     try {
       const res = await fetch(WORKER_URL,{
@@ -267,7 +273,6 @@ function App() {
       arrayInfoUlsanCoast=arrayInfoUlsanCoast.map((item)=>{
         return item.split(",").map((info)=>info.trim())
       })
-      arrayInfoUlsanCoast=[['202509151000', '202509111158', '202509100853', '159', 'S1132110', 'V', '1', '1', '00', '4', '101', '='], ['202509150700', '202509151200', '202509150613', '159', 'S1132110', 'V', '2', '1', '00', '4', '101', '='],['202509120700', '202509160700', '202509120558', '159', 'S1132110', 'V', '2', '3', '00', '4', '101', '=']]
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
       const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
       if (latest_warning_report[6]==="1"){  // 풍랑예비
@@ -300,7 +305,11 @@ function App() {
             setShowWarningInfo(true)
           }
         }else if (latest_warning_report[7]==="2"){
-
+          // 대치일 때. 나중에 주의보->경보 혹은 경보->주의보 대치될 때 데이터 받아보고 수정하기...
+          // 아마.... [....,[대치해제 정보],[대치정보]]로 되어 있고 마지막 정보가 대치이면 앞에 대치해제 정보와 일치하는 발표 정보 찾아서 구분하기...
+          // 대치 시간과 현재 시간 비교해서 현재 대치시간 이전이면 주의보발효중....경보대치 순으로 나오도록 수정하기
+          // 현재시간이 대치시간보다 지났으면 경보만.....
+          // 
         }
       };        
     } catch (err) {
@@ -476,7 +485,6 @@ function App() {
     let warningDay=""
     let warningTime=""
     let strPreOrIn="발효 예정"
-    console.log(warningInfo.timeClear,"----")
     if (Object.keys(warningInfo).length!==0){
       warningMonth=Number(warningInfo.timeEff.slice(4,6))
       warningDay=Number(warningInfo.timeEff.slice(6,8))
@@ -515,7 +523,7 @@ function App() {
     if (shortForecastData.length === 0) return null;
     return (
       <div key="shortForecast" style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",position:"relative"}}>
-        <div style={{color:"#EAF3FD",marginTop:"15px",marginLeft:"7px",width:"100vw",marginBottom:"0.5vw",display:"flex",flexDirection:"row",justifyContent:"flex-start",alignItems:"center"}}>
+        <div style={{color:"#EAF3FD",marginTop:"0.4vw",marginBottom:"0.3vw",marginLeft:"7px",width:"100vw",display:"flex",flexDirection:"row",justifyContent:"flex-start",alignItems:"center"}}>
           <span style={{fontSize:"2.7vw",fontWeight:"bold",backgroundColor:"#636e72",borderRadius:"10px",padding:"2px 5px",marginRight:"5px"}}>울산앞바다</span>
           {showWarningInfo?<WarningUlsanCoast/>:<span style={{fontSize:"2.5vw"}}>기상특보 없음</span>}
         </div>
