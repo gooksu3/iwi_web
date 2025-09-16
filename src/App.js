@@ -366,7 +366,7 @@ function App() {
     const [finishedWindCountUP, setFinishedWindCountUP] = useState(false);
     const [finishedVisCountUp, setFinishedVisCountUp] = useState(false);
     return (
-      <tr style={{backgroundColor:backgroundColor}}>
+      <tr style={{backgroundColor:backgroundColor,position:"relative"}}>
         <td style={{...valueStyle,fontWeight:"bold",width:"12vw"}}>
           <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 1vw",width:"88%"}}>
@@ -383,9 +383,10 @@ function App() {
         </td>
         <td style={{...valueStyle,width:"10vw"}}>{windDir}</td>
         <td style={{...valueStyle,width:"10vw"}}>
+          {typeof windData==="undefined"?<span style={{position:"absolute",display:"flex",flexDirection:"row",backgroundColor:"#272727",zIndex:1,padding:"5px 20px",left:"24vw",fontSize:"3vw",top:"1vw"}}>데이터 미수신</span>:null}
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorWindValue({windSpd})}}>
             {windSpd?
-            <CountUp start={0} end={windSpd} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)} onEnd={()=>setFinishedWindCountUP(true)}>
+            <CountUp start={0} end={{windSpd}} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)} onEnd={()=>setFinishedWindCountUP(true)}>
               {({ countUpRef }) => (
                 <span
                   ref={countUpRef}
@@ -403,6 +404,7 @@ function App() {
           </div>
         </td>
         <td style={{...valueStyle,width:"10vw"}}>
+          {typeof visData==="undefined"?<span style={{position:"absolute",display:"flex",flexDirection:"row",backgroundColor:"#272727",zIndex:1,padding:"5px 20px",right:"18vw",fontSize:"3vw",top:"1vw"}}>데이터 미수신</span>:null}
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorVisValue({vis})}}>
             {vis?
             <CountUp start={0} end={vis} duration={1} decimals={1} useEasing={false}formattingFn={(vis)=>vis.toFixed(1)} onEnd={()=>setFinishedVisCountUp(true)}>
