@@ -363,6 +363,7 @@ function App() {
     }
   };
   function RowInWetherTable({point,source,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
+    console.log(point,windSpd)
     const [finishedWindCountUP, setFinishedWindCountUP] = useState(false);
     const [finishedVisCountUp, setFinishedVisCountUp] = useState(false);
     return (
@@ -383,10 +384,10 @@ function App() {
         </td>
         <td style={{...valueStyle,width:"10vw"}}>{windDir}</td>
         <td style={{...valueStyle,width:"10vw"}}>
-          {typeof windData==="undefined"?<span style={{position:"absolute",display:"flex",flexDirection:"row",backgroundColor:"#272727",zIndex:1,padding:"5px 20px",left:"22vw",fontSize:"3vw",top:"1vw"}}>데이터 미수신</span>:null}
+          {typeof windData==="undefined"?<span style={{position:"absolute",display:"flex",flexDirection:"row",backgroundColor:"#272727",zIndex:1,padding:"5px 20px",left:"24vw",fontSize:"3vw",top:"1vw"}}>데이터 미수신</span>:null}
           <div style={{display:"flex",justifyContent:"right",alignItems:"flex-end",gap:"5px",paddingRight:"0.5vw",color:colorWindValue({windSpd})}}>
             {windSpd?
-            <CountUp start={0} end={{windSpd}} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)} onEnd={()=>setFinishedWindCountUP(true)}>
+            <CountUp start={0} end={windSpd} duration={1} decimals={1} useEasing={false} formattingFn={(windSpd)=>windSpd.toFixed(1)} onEnd={()=>setFinishedWindCountUP(true)}>
               {({ countUpRef }) => (
                 <span
                   ref={countUpRef}
