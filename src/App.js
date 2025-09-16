@@ -655,7 +655,6 @@ function App() {
           if ([0,4,8,12,16,20].includes(hours) && minutes === 30) {
             fetchDataForecast()
           }else if ([1,11,21,31,41,51].includes(minutes)){
-            console.log("------")
             fetchDataWeatherWarning()
           };
         }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
