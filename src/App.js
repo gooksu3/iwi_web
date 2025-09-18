@@ -43,8 +43,8 @@ function App() {
   const [visJangsaengpo,setVisJangsaengpo] = useState(null);
   const arrayKmaVis=[visGanjulgot,visUlgi,visJangsaengpo];
   const arraySetKmaVis=[setVisGanjulgot,setVisUlgi,setVisJangsaengpo];
-  const [MaeamWindData,setMeamWindData]=useState(null);
-  const [MaeamVisData,setMaeamVisData]=useState(null);
+  const [MaeamWindData,setMeamWindData]=useState([]);
+  const [MaeamVisData,setMaeamVisData]=useState([]);
   const [windDirMaeam,setWindDirMaeam]=useState(null);
   const [windSpdMaeam,setWindSpdMaeam]=useState(null);
   const [visMaeam,setVisMaeam]=useState(null);
@@ -198,29 +198,31 @@ function App() {
       });
       setKmaVisData(arrayKmaVis);
       // 매암
-      const arrayInfoMaeam=JSON.parse(objInfoFromApi.maeam).result.data;
-      let latestInfoMaeam = null;
-      for (let i = arrayInfoMaeam.length - 1; i >= 0; i--) {
-        if (arrayInfoMaeam[i].vis != null) {
-          latestInfoMaeam = arrayInfoMaeam[i];
-          break;
+      if (objInfoFromApi.maeam && objInfoFromApi.maeam.trim() !== "") {
+        const arrayInfoMaeam=JSON.parse(objInfoFromApi.maeam).result.data;
+        let latestInfoMaeam = null;
+        for (let i = arrayInfoMaeam.length - 1; i >= 0; i--) {
+          if (arrayInfoMaeam[i].vis != null) {
+            latestInfoMaeam = arrayInfoMaeam[i];
+            break;
+          };
         };
+        setWindSpdMaeam(latestInfoMaeam.wind_speed);
+        setWindDirMaeam(latestInfoMaeam.wind_dir);
+        setVisMaeam(mToKm(latestInfoMaeam.vis));
+        const baseDate=formatYYYYMMDDHHMMToDate(latestInfoMaeam.obs_time.replace(/[- :]/g, ""))
+        let arrayTime=[]
+        for (let diff = 0; diff <= 60; diff += 10) {
+          const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
+          arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
+        };
+        const arrayMaeam=arrayInfoMaeam.filter((info)=>arrayTime.includes(info.obs_time.replace(/[- :]/g, ""))).map((info)=>{
+          const time=formatToHHMM(info.obs_time.replace(/[- :]/g, ""));
+          return { time: time, wd:info.wind_dir,ws: info.wind_speed, vis: mToKm(info.vis)};
+        });
+        setMeamWindData(arrayMaeam.map(item=>({time:item.time,windSpeed:item.ws})));
+        setMaeamVisData(arrayMaeam.map(item=>({time:item.time,vis:item.vis})));
       };
-      setWindSpdMaeam(latestInfoMaeam.wind_speed);
-      setWindDirMaeam(latestInfoMaeam.wind_dir);
-      setVisMaeam(mToKm(latestInfoMaeam.vis));
-      const baseDate=formatYYYYMMDDHHMMToDate(latestInfoMaeam.obs_time.replace(/[- :]/g, ""))
-      let arrayTime=[]
-      for (let diff = 0; diff <= 60; diff += 10) {
-        const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
-        arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
-      };
-      const arrayMaeam=arrayInfoMaeam.filter((info)=>arrayTime.includes(info.obs_time.replace(/[- :]/g, ""))).map((info)=>{
-        const time=formatToHHMM(info.obs_time.replace(/[- :]/g, ""));
-        return { time: time, wd:info.wind_dir,ws: info.wind_speed, vis: mToKm(info.vis)};
-      });
-      setMeamWindData(arrayMaeam.map(item=>({time:item.time,windSpeed:item.ws})));
-      setMaeamVisData(arrayMaeam.map(item=>({time:item.time,vis:item.vis})));
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -274,44 +276,48 @@ function App() {
         return item.split(",").map((info)=>info.trim())
       })
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
-      const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
-      if (latest_warning_report[6]==="1"){  // 풍랑예비
-        setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
-        setShowWarningInfo(true)
-      }else{
-        if (latest_warning_report[7]==="1"){ // 발표
-          const clearTime=await fetchDataApproximateClearTime()
-          if (typeof clearTime==="undefined"){
-            setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
-          }else{
-            setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
-          }
+      if (Object.keys(arrayInfoUlsanCoast).length!==0){
+        const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
+        if (latest_warning_report[6]==="1"){  // 풍랑예비
+          setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
           setShowWarningInfo(true)
-        }else if (latest_warning_report[7]==="3"){
-          const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
-          const month = parseInt(latest_warning_report[1].slice(4, 6), 10) - 1; // JS에서는 0=1월
-          const day = parseInt(latest_warning_report[1].slice(6, 8), 10);
-          const hour = parseInt(latest_warning_report[1].slice(8, 10), 10);
-          const minute = parseInt(latest_warning_report[1].slice(10, 12), 10);
-          // Date 객체 생성
-          const targetDate = new Date(year, month, day, hour, minute);
-          const now = new Date();
-          if (targetDate<now){
-            setWarningInfo({})
-          }else{
-            const clearDateNTime=String(Number(latest_warning_report[1].slice(4,6)))+"월"+String(Number(latest_warning_report[1].slice(6,8)))+"일 "+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
-            const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
-            setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
+        }else{
+          if (latest_warning_report[7]==="1"){ // 발표
+            const clearTime=await fetchDataApproximateClearTime()
+            if (typeof clearTime==="undefined"){
+              setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
+            }else{
+              setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:clearTime})
+            }
             setShowWarningInfo(true)
+          }else if (latest_warning_report[7]==="3"){
+            const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
+            const month = parseInt(latest_warning_report[1].slice(4, 6), 10) - 1; // JS에서는 0=1월
+            const day = parseInt(latest_warning_report[1].slice(6, 8), 10);
+            const hour = parseInt(latest_warning_report[1].slice(8, 10), 10);
+            const minute = parseInt(latest_warning_report[1].slice(10, 12), 10);
+            // Date 객체 생성
+            const targetDate = new Date(year, month, day, hour, minute);
+            const now = new Date();
+            if (targetDate<now){
+              setWarningInfo({})
+            }else{
+              const clearDateNTime=String(Number(latest_warning_report[1].slice(4,6)))+"월"+String(Number(latest_warning_report[1].slice(6,8)))+"일 "+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
+              const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
+              setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
+              setShowWarningInfo(true)
+            }
+          }else if (latest_warning_report[7]==="2"){
+            // 대치일 때. 나중에 주의보->경보 혹은 경보->주의보 대치될 때 데이터 받아보고 수정하기...
+            // 아마.... [....,[대치해제 정보],[대치정보]]로 되어 있고 마지막 정보가 대치이면 앞에 대치해제 정보와 일치하는 발표 정보 찾아서 구분하기...
+            // 대치 시간과 현재 시간 비교해서 현재 대치시간 이전이면 주의보발효중....경보대치 순으로 나오도록 수정하기
+            // 현재시간이 대치시간보다 지났으면 경보만.....
+            // 
           }
-        }else if (latest_warning_report[7]==="2"){
-          // 대치일 때. 나중에 주의보->경보 혹은 경보->주의보 대치될 때 데이터 받아보고 수정하기...
-          // 아마.... [....,[대치해제 정보],[대치정보]]로 되어 있고 마지막 정보가 대치이면 앞에 대치해제 정보와 일치하는 발표 정보 찾아서 구분하기...
-          // 대치 시간과 현재 시간 비교해서 현재 대치시간 이전이면 주의보발효중....경보대치 순으로 나오도록 수정하기
-          // 현재시간이 대치시간보다 지났으면 경보만.....
-          // 
-        }
-      };        
+        };        
+      }else{
+        setShowWarningInfo(false)
+      }
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -363,7 +369,6 @@ function App() {
     }
   };
   function RowInWetherTable({point,source,backgroundColor,windDir,windSpd,vis,windData,visData,varKma=false}){
-    console.log(point,windSpd)
     const [finishedWindCountUP, setFinishedWindCountUP] = useState(false);
     const [finishedVisCountUp, setFinishedVisCountUp] = useState(false);
     return (
