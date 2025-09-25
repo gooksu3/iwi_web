@@ -60,6 +60,7 @@ function App() {
   const [showWarningInfo,setShowWarningInfo]=useState(false)
   const obj_pre_warning_report_time={"0259": "새벽(00시~03시)", "0559": "새벽(03시~06시)", "0859": "아침(06시~09시)", "1159": "오전(09시~12시)", "1459": "낮(12시~15시)", "1759": "늦은 오후(15시~18시)", "2059": "저녁(18시~21시)", "2359": "밤(21시~24시)", "1158": "오전(06시~12시)", "1758": "오후(12시~18시)", "0558": "새벽(00시~06시)", "2358": "밤(18시~24시)", "1458": "오후(12시~18시)"}
   const obj_wrn_lvl={"1":"예비", "2":"주의보", "3":"경보"}
+  const weekDays=["일","월","화","수","목","금","토"]
 
 
   const degreesToCompass=(degrees)=>{
@@ -302,7 +303,13 @@ function App() {
             if (targetDate<now){
               setWarningInfo({})
             }else{
-              const clearDateNTime=String(Number(latest_warning_report[1].slice(4,6)))+"월"+String(Number(latest_warning_report[1].slice(6,8)))+"일 "+latest_warning_report[1].slice(8,10)+":"+latest_warning_report[1].slice(10,12)
+              const weekDay=weekDays[new Date(`${latest_warning_report[1].slice(0,4)}-${latest_warning_report[1].slice(4,6)}-${latest_warning_report[1].slice(6,8)}`).getDay()]
+              const clearDateNTime=
+              String(Number(latest_warning_report[1].slice(4,6)))+"월"+
+              String(Number(latest_warning_report[1].slice(6,8)))+"일 "+
+              latest_warning_report[1].slice(8,10)+":"+
+              latest_warning_report[1].slice(10,12)+
+              `(${weekDay})`
               const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
               setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
               setShowWarningInfo(true)
@@ -885,7 +892,7 @@ function App() {
       <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
         <div className={windLoaded?"spinner":""}></div>
         <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
-          <span style={{...titleStyle,paddingRight:"3.5vw"}}>울산항통합기상정보시스템</span>
+          <span style={{...titleStyle,paddingRight:"3vw"}}>울산항 유관기관 통합기상정보시스템</span>
           <Clock />
         </div>
       </div>
