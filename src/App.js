@@ -305,11 +305,11 @@ function App() {
             }else{
               const weekDay=weekDays[new Date(`${latest_warning_report[1].slice(0,4)}-${latest_warning_report[1].slice(4,6)}-${latest_warning_report[1].slice(6,8)}`).getDay()]
               const clearDateNTime=
-              String(Number(latest_warning_report[1].slice(4,6)))+"월"+
-              String(Number(latest_warning_report[1].slice(6,8)))+"일 "+
-              latest_warning_report[1].slice(8,10)+":"+
-              latest_warning_report[1].slice(10,12)+
-              `(${weekDay})`
+                String(Number(latest_warning_report[1].slice(4,6)))+"월"+
+                String(Number(latest_warning_report[1].slice(6,8)))+"일 "+
+                latest_warning_report[1].slice(8,10)+":"+
+                latest_warning_report[1].slice(10,12)+
+                `(${weekDay})`
               const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
               setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
               setShowWarningInfo(true)
