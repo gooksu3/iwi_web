@@ -280,8 +280,12 @@ function App() {
       if (Object.keys(arrayInfoUlsanCoast).length!==0){
         const latest_warning_report=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-1]
         if (latest_warning_report[6]==="1"){  // 풍랑예비
-          setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
-          setShowWarningInfo(true)
+          if (latest_warning_report[7]==="3"){ // 해제
+            setShowWarningInfo(false)
+          }else{
+            setWarningInfo({timeEff:latest_warning_report[1],warnLvl:latest_warning_report[6],warnType:latest_warning_report[7],timeClear:""})
+            setShowWarningInfo(true)
+          }
         }else{
           if (latest_warning_report[7]==="1"){ // 발표
             const clearTime=await fetchDataApproximateClearTime()
