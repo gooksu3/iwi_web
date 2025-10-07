@@ -54,7 +54,6 @@ function App() {
   const [arrayDateForecast,setArrayDateForecast]=useState([])
   const [shortForecastData,setShortForecastData]=useState([])
   const objDirections={0:"없음",1:"북",2:'북동',3:'동',4:'남동',5:'남',6:'남서',7:'서',8:'북서'}
-  const [windLoaded, setWindLoaded] = useState(false);
   const [loadForecastTable,setLoadForecastTable]=useState(false)
   const [warningInfo,setWarningInfo]=useState({})
   const [showWarningInfo,setShowWarningInfo]=useState(false)
@@ -140,7 +139,6 @@ function App() {
     setLoadForecastTable(false)
   };
   const fetchDataWData = async () => {
-    setWindLoaded(true)
     const now = new Date();
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
     const tm2 = formatDateToYYYYMMDDHHMM(twoMinutesAgo);
@@ -227,7 +225,6 @@ function App() {
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
-    setWindLoaded(false)
   };
   const fetchDataApproximateClearTime = async ()=> {
     const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/clearTime`;
@@ -504,7 +501,15 @@ function App() {
     let warningDay=""
     let warningTime=""
     let strPreOrIn="발효 예정"
-    let weekDay=""
+    const year = parseInt(warningInfo.timeEff.slice(0, 4), 10);
+    const month = parseInt(warningInfo.timeEff.slice(4, 6), 10) - 1; // JS에서는 0=1월
+    const day = parseInt(warningInfo.timeEff.slice(6, 8), 10);
+    const hour = parseInt(warningInfo.timeEff.slice(8, 10), 10);
+    const minute = parseInt(warningInfo.timeEff.slice(10, 12), 10);
+    // Date 객체 생성
+    const targetDate = new Date(year, month, day, hour, minute);
+    const now = new Date();
+    const weekDay=weekDays[targetDate.getDay()]
     if (Object.keys(warningInfo).length!==0){
       warningMonth=Number(warningInfo.timeEff.slice(4,6))
       warningDay=Number(warningInfo.timeEff.slice(6,8))
@@ -513,15 +518,6 @@ function App() {
       }else{
         warningTime=warningInfo.timeEff.slice(8,warningInfo.timeEff.length)
         warningTime=warningTime.slice(0,2)+":"+warningTime.slice(2)
-        const year = parseInt(warningInfo.timeEff.slice(0, 4), 10);
-        const month = parseInt(warningInfo.timeEff.slice(4, 6), 10) - 1; // JS에서는 0=1월
-        const day = parseInt(warningInfo.timeEff.slice(6, 8), 10);
-        const hour = parseInt(warningInfo.timeEff.slice(8, 10), 10);
-        const minute = parseInt(warningInfo.timeEff.slice(10, 12), 10);
-        // Date 객체 생성
-        const targetDate = new Date(year, month, day, hour, minute);
-        const now = new Date();
-        weekDay=weekDays[targetDate.getDay()]
         if (targetDate<now){
           strPreOrIn="발효 중"
         }
@@ -895,15 +891,12 @@ function App() {
       width:"100vw",
       minHeight:"100vh",
       }}>
-      <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-        <div className={windLoaded?"spinner":""}></div>
-        <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
-          <span style={{...titleStyle,paddingRight:"3vw"}}>울산항 유관기관 통합기상정보시스템</span>
-          <Clock />
-        </div>
+      <div style={{display:"flex",justifyContent:"Right",alignItems:"center"}}>
+        <span style={{...titleStyle,paddingRight:"3vw"}}>울산항 유관기관 통합기상정보시스템</span>
+        <Clock />
       </div>
       {kmaWindData && kmaVisData ?(
-        <WindAndVisTable loaded={windLoaded} kmaWindData={kmaWindData} kmaVisData={kmaVisData}/>
+        <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData}/>
       ) : kmaWindData === null || kmaVisData===null ? (
         <p></p>
       ) : (
