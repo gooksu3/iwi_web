@@ -310,10 +310,10 @@ function App() {
               const weekDay=weekDays[new Date(`${latest_warning_report[1].slice(0,4)}-${latest_warning_report[1].slice(4,6)}-${latest_warning_report[1].slice(6,8)}`).getDay()]
               const clearDateNTime=
                 String(Number(latest_warning_report[1].slice(4,6)))+"월"+
-                String(Number(latest_warning_report[1].slice(6,8)))+"일 "+
+                String(Number(latest_warning_report[1].slice(6,8)))+"일"+
+                `(${weekDay}) `+
                 latest_warning_report[1].slice(8,10)+":"+
-                latest_warning_report[1].slice(10,12)+
-                `(${weekDay})`
+                latest_warning_report[1].slice(10,12)
               const warningInfoEff=arrayInfoUlsanCoast[arrayInfoUlsanCoast.length-2]
               setWarningInfo({timeEff:warningInfoEff[1],warnLvl:warningInfoEff[6],warnType:warningInfoEff[7],timeClear:clearDateNTime})
               setShowWarningInfo(true)
@@ -504,6 +504,7 @@ function App() {
     let warningDay=""
     let warningTime=""
     let strPreOrIn="발효 예정"
+    let weekDay=""
     if (Object.keys(warningInfo).length!==0){
       warningMonth=Number(warningInfo.timeEff.slice(4,6))
       warningDay=Number(warningInfo.timeEff.slice(6,8))
@@ -520,6 +521,7 @@ function App() {
         // Date 객체 생성
         const targetDate = new Date(year, month, day, hour, minute);
         const now = new Date();
+        weekDay=weekDays[targetDate.getDay()]
         if (targetDate<now){
           strPreOrIn="발효 중"
         }
@@ -532,7 +534,7 @@ function App() {
           {warningInfo.warnLvl==="1"?null:<span>{strPreOrIn}</span>}
         </div>
         <span>[</span>
-        <span>{warningMonth}월{warningDay}일 {warningTime} ~&nbsp;</span>
+        <span>{warningMonth}월{warningDay}일({weekDay}) {warningTime} ~&nbsp;</span>
         {warningInfo.timeClear!==""?<span>{warningInfo.timeClear}</span>:null}
         <span>]</span>
       </div>
