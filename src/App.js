@@ -324,6 +324,8 @@ function App() {
           }
         };        
       }else{
+        console.log("-------")
+        console.log(arrayInfoUlsanCoast)
         setShowWarningInfo(false)
       }
     } catch (err) {
