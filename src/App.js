@@ -384,6 +384,8 @@ function App() {
         return item.split(",").map((info) => info.trim());
       });
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
+      console.log(new Date());
+      console.log(arrayInfoUlsanCoast);
       if (Object.keys(arrayInfoUlsanCoast).length !== 0) {
         const latest_warning_report =
           arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 1];
@@ -474,8 +476,6 @@ function App() {
           }
         }
       } else {
-        console.log(new Date());
-        console.log(arrayInfoUlsanCoast);
         setShowWarningInfo(false);
       }
     } catch (err) {
