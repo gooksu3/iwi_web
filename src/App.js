@@ -394,6 +394,7 @@ function App() {
           if (latest_warning_report[7] === "3") {
             // 해제
             setShowWarningInfo(false);
+            setWarningInfo({});
           } else {
             setWarningInfo({
               timeEff: latest_warning_report[1],
@@ -476,7 +477,10 @@ function App() {
           }
         }
       } else {
-        setShowWarningInfo(false);
+        // 이 else는 체크를 위한 것. 문제 없으면 지우기
+        console.log("----------------------------------");
+        console.log(showWarningInfo, " / ", warningInfo);
+        console.log("----------------------------------");
       }
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
