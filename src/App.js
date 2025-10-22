@@ -394,7 +394,6 @@ function App() {
           if (latest_warning_report[7] === "3") {
             // 해제
             setShowWarningInfo(false);
-            setWarningInfo({});
           } else {
             setWarningInfo({
               timeEff: latest_warning_report[1],
@@ -474,6 +473,27 @@ function App() {
             // 대치 시간과 현재 시간 비교해서 현재 대치시간 이전이면 주의보발효중....경보대치 순으로 나오도록 수정하기
             // 현재시간이 대치시간보다 지났으면 경보만.....
             //
+          } else if (latest_warning_report[7] === "5") {
+            // 연장
+            const extended_warning_report =
+              arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 2];
+            const clearTime = await fetchDataApproximateClearTime();
+            if (typeof clearTime === "undefined") {
+              setWarningInfo({
+                timeEff: extended_warning_report[1],
+                warnLvl: extended_warning_report[6],
+                warnType: extended_warning_report[7],
+                timeClear: "",
+              });
+            } else {
+              setWarningInfo({
+                timeEff: extended_warning_report[1],
+                warnLvl: extended_warning_report[6],
+                warnType: extended_warning_report[7],
+                timeClear: clearTime,
+              });
+            }
+            setShowWarningInfo(true);
           }
         }
       } else {
