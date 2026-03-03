@@ -100,6 +100,7 @@ function App() {
   };
   const obj_wrn_lvl = { 1: "예비", 2: "주의보", 3: "경보" };
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+  const currentWarningReport = useRef("");
 
   const degreesToCompass = (degrees) => {
     const directions = [
@@ -172,7 +173,7 @@ function App() {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(
         objInfoFromApi.UPAForecastInside,
-        "application/xml"
+        "application/xml",
       );
       const forecast = xmlDoc
         .getElementsByTagName("KWEATHER")[0]
@@ -218,7 +219,7 @@ function App() {
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
     const tm2 = formatDateToYYYYMMDDHHMM(twoMinutesAgo);
     const tm1 = formatDateToYYYYMMDDHHMM(
-      new Date(twoMinutesAgo.getTime() - 60 * 60 * 1000)
+      new Date(twoMinutesAgo.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
     const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/5mins?tm1=${tm1}&tm2=${tm2}`;
@@ -234,19 +235,19 @@ function App() {
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind.map((item) =>
-        item.split("\n").slice(3, -2)
+        item.split("\n").slice(3, -2),
       );
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKmaWindInfoText[index].length > 0) {
           const lines = arrayKmaWindInfoText[index].map((line) =>
-            line.split(/\s+/)
+            line.split(/\s+/),
           );
           const arrayInfo = lines.map((line) => [line[0], ...line.slice(2, 6)]);
           arraySetKmaWindDir[index](arrayInfo[arrayInfo.length - 1][3]);
           arraySetKmaWindSpd[index](arrayInfo[arrayInfo.length - 1][4]);
           let arrayTime = [];
           const baseDate = formatYYYYMMDDHHMMToDate(
-            arrayInfo[arrayInfo.length - 1][0]
+            arrayInfo[arrayInfo.length - 1][0],
           );
           for (let diff = 0; diff <= 60; diff += 10) {
             const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
@@ -263,18 +264,18 @@ function App() {
       setKmaWindData(arrayKmaWind);
       // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis.map((item) =>
-        item.split("\n").slice(3, -2)
+        item.split("\n").slice(3, -2),
       );
       const arrayKmaVis = arrayPoints.map((point, index) => {
         if (arrayKmaVisInfoText[index].length > 0) {
           const lines = arrayKmaVisInfoText[index].map((line) =>
-            line.split(/\s+/)
+            line.split(/\s+/),
           );
           const arrayInfo = lines.map((line) => [line[0], line[5]]);
           arraySetKmaVis[index](mToKm(arrayInfo[arrayInfo.length - 1][1]));
           let arrayTime = [];
           const baseDate = formatYYYYMMDDHHMMToDate(
-            arrayInfo[arrayInfo.length - 1][0]
+            arrayInfo[arrayInfo.length - 1][0],
           );
           for (let diff = 0; diff <= 60; diff += 10) {
             const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
@@ -303,7 +304,7 @@ function App() {
         setWindDirMaeam(latestInfoMaeam.wind_dir);
         setVisMaeam(mToKm(latestInfoMaeam.vis));
         const baseDate = formatYYYYMMDDHHMMToDate(
-          latestInfoMaeam.obs_time.replace(/[- :]/g, "")
+          latestInfoMaeam.obs_time.replace(/[- :]/g, ""),
         );
         let arrayTime = [];
         for (let diff = 0; diff <= 60; diff += 10) {
@@ -312,7 +313,7 @@ function App() {
         }
         const arrayMaeam = arrayInfoMaeam
           .filter((info) =>
-            arrayTime.includes(info.obs_time.replace(/[- :]/g, ""))
+            arrayTime.includes(info.obs_time.replace(/[- :]/g, "")),
           )
           .map((info) => {
             const time = formatToHHMM(info.obs_time.replace(/[- :]/g, ""));
@@ -324,10 +325,10 @@ function App() {
             };
           });
         setMeamWindData(
-          arrayMaeam.map((item) => ({ time: item.time, windSpeed: item.ws }))
+          arrayMaeam.map((item) => ({ time: item.time, windSpeed: item.ws })),
         );
         setMaeamVisData(
-          arrayMaeam.map((item) => ({ time: item.time, vis: item.vis }))
+          arrayMaeam.map((item) => ({ time: item.time, vis: item.vis })),
         );
       }
     } catch (err) {
@@ -347,10 +348,10 @@ function App() {
       const textInfo = await res.json();
       let arrayInfo = textInfo.split("\n");
       arrayInfo = arrayInfo.map((item) =>
-        item.split(",").map((part) => part.trim())
+        item.split(",").map((part) => part.trim()),
       );
       const clearTime = arrayInfo.filter((item) =>
-        item.includes("울산앞바다")
+        item.includes("울산앞바다"),
       )[0][9];
       return clearTime;
     } catch (err) {
@@ -378,14 +379,13 @@ function App() {
       const textInfo = await res.json();
       const arrayInfo = textInfo.split("\n").slice(2, -2);
       let arrayInfoUlsanCoast = arrayInfo.filter(
-        (item) => item.includes("S1131100") && item.includes("V")
+        (item) => item.includes("S1131100") && item.includes("V"),
       );
       arrayInfoUlsanCoast = arrayInfoUlsanCoast.map((item) => {
         return item.split(",").map((info) => info.trim());
       });
-      // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
-      console.log(new Date());
       console.log(arrayInfoUlsanCoast);
+      // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
       if (Object.keys(arrayInfoUlsanCoast).length !== 0) {
         const latest_warning_report =
           arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 1];
@@ -407,23 +407,25 @@ function App() {
           if (latest_warning_report[7] === "1") {
             // 발표
             const clearTime = await fetchDataApproximateClearTime();
+            let arrayCurrentWarningReport = {
+              timeEff: latest_warning_report[1],
+              warnLvl: latest_warning_report[6],
+              warnType: latest_warning_report[7],
+              timeClear: clearTime,
+            };
             if (typeof clearTime === "undefined") {
-              setWarningInfo({
+              arrayCurrentWarningReport = {
                 timeEff: latest_warning_report[1],
                 warnLvl: latest_warning_report[6],
                 warnType: latest_warning_report[7],
                 timeClear: "",
-              });
-            } else {
-              setWarningInfo({
-                timeEff: latest_warning_report[1],
-                warnLvl: latest_warning_report[6],
-                warnType: latest_warning_report[7],
-                timeClear: clearTime,
-              });
+              };
             }
+            setWarningInfo(arrayCurrentWarningReport);
             setShowWarningInfo(true);
+            currentWarningReport.current = arrayCurrentWarningReport;
           } else if (latest_warning_report[7] === "3") {
+            // 해제
             const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
             const month =
               parseInt(latest_warning_report[1].slice(4, 6), 10) - 1; // JS에서는 0=1월
@@ -441,11 +443,11 @@ function App() {
                   new Date(
                     `${latest_warning_report[1].slice(
                       0,
-                      4
+                      4,
                     )}-${latest_warning_report[1].slice(
                       4,
-                      6
-                    )}-${latest_warning_report[1].slice(6, 8)}`
+                      6,
+                    )}-${latest_warning_report[1].slice(6, 8)}`,
                   ).getDay()
                 ];
               const clearDateNTime =
@@ -478,22 +480,122 @@ function App() {
             const extended_warning_report =
               arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 2];
             const clearTime = await fetchDataApproximateClearTime();
+            let arrayCurrentWarningReport = {
+              timeEff: extended_warning_report[1],
+              warnLvl: extended_warning_report[6],
+              warnType: extended_warning_report[7],
+              timeClear: clearTime,
+            };
             if (typeof clearTime === "undefined") {
-              setWarningInfo({
+              arrayCurrentWarningReport = {
                 timeEff: extended_warning_report[1],
                 warnLvl: extended_warning_report[6],
                 warnType: extended_warning_report[7],
                 timeClear: "",
-              });
-            } else {
-              setWarningInfo({
-                timeEff: extended_warning_report[1],
-                warnLvl: extended_warning_report[6],
-                warnType: extended_warning_report[7],
-                timeClear: clearTime,
-              });
+              };
             }
+            setWarningInfo(arrayCurrentWarningReport);
             setShowWarningInfo(true);
+            currentWarningReport.current = arrayCurrentWarningReport;
+          } else if (latest_warning_report[7] === "6") {
+            console.log("변경");
+            // 변경
+            // 대치인데 변경으로 발표하는 경우가 있음. 해당 사항 구분하여 작동하도록 수정
+            if (
+              arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 2][6] ===
+              latest_warning_report[6]
+            ) {
+              console.log("단순변경");
+              // 변경
+              const clearTime = await fetchDataApproximateClearTime();
+              let arrayCurrentWarningReport = {
+                timeEff: latest_warning_report[1],
+                warnLvl: latest_warning_report[6],
+                warnType: latest_warning_report[7],
+                timeClear: clearTime,
+              };
+              if (typeof clearTime === "undefined") {
+                arrayCurrentWarningReport = {
+                  timeEff: latest_warning_report[1],
+                  warnLvl: latest_warning_report[6],
+                  warnType: latest_warning_report[7],
+                  timeClear: "",
+                };
+              }
+              setWarningInfo(arrayCurrentWarningReport);
+              setShowWarningInfo(true);
+              currentWarningReport.current = arrayCurrentWarningReport;
+            } else {
+              console.log("대치");
+              // 대치인데 변경으로 나왔을 때
+              const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
+              const month =
+                parseInt(latest_warning_report[1].slice(4, 6), 10) - 1; // JS에서는 0=1월
+              const day = parseInt(latest_warning_report[1].slice(6, 8), 10);
+              const hour = parseInt(latest_warning_report[1].slice(8, 10), 10);
+              const minute = parseInt(
+                latest_warning_report[1].slice(10, 12),
+                10,
+              );
+              // Date 객체 생성
+              const targetDate = new Date(year, month, day, hour, minute);
+              const now = new Date();
+              if (targetDate < now) {
+                // 대치 전
+                console.log("대치전", latest_warning_report);
+                const clearTime = await fetchDataApproximateClearTime();
+                let arrayCurrentWarningReport = {
+                  timeEff: latest_warning_report[1],
+                  warnLvl: latest_warning_report[6],
+                  warnType: "1",
+                  timeClear: clearTime,
+                };
+                if (typeof clearTime === "undefined") {
+                  arrayCurrentWarningReport = {
+                    timeEff: latest_warning_report[1],
+                    warnLvl: latest_warning_report[6],
+                    warnType: "1",
+                    timeClear: "",
+                  };
+                }
+                setWarningInfo(arrayCurrentWarningReport);
+                setShowWarningInfo(true);
+                currentWarningReport.current = arrayCurrentWarningReport;
+              } else {
+                // 대치 후
+                console.log("대치후", latest_warning_report);
+                const weekDay =
+                  weekDays[
+                    new Date(
+                      `${latest_warning_report[1].slice(
+                        0,
+                        4,
+                      )}-${latest_warning_report[1].slice(
+                        4,
+                        6,
+                      )}-${latest_warning_report[1].slice(6, 8)}`,
+                    ).getDay()
+                  ];
+                const clearDateNTime =
+                  String(Number(latest_warning_report[1].slice(4, 6))) +
+                  "월" +
+                  String(Number(latest_warning_report[1].slice(6, 8))) +
+                  "일" +
+                  `(${weekDay}) ` +
+                  latest_warning_report[1].slice(8, 10) +
+                  ":" +
+                  latest_warning_report[1].slice(10, 12);
+                const warningInfoEff =
+                  arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 2];
+                setWarningInfo({
+                  timeEff: warningInfoEff[1],
+                  warnLvl: warningInfoEff[6],
+                  warnType: warningInfoEff[7],
+                  timeClear: clearDateNTime,
+                });
+                setShowWarningInfo(true);
+              }
+            }
           }
         }
       } else {
@@ -902,6 +1004,26 @@ function App() {
       </table>
     );
   }
+  function TextToShowWarningReport({
+    warningInfo,
+    warningMonth,
+    warningDay,
+    warningTime,
+    weekDay,
+  }) {
+    return (
+      <div>
+        <span>[</span>
+        <span>
+          {warningMonth}월{warningDay}일({weekDay}) {warningTime} ~&nbsp;
+        </span>
+        {warningInfo.timeClear !== "" ? (
+          <span>{warningInfo.timeClear}</span>
+        ) : null}
+        <span>]</span>
+      </div>
+    );
+  }
   function WarningUlsanCoast() {
     let warningMonth = "";
     let warningDay = "";
@@ -947,14 +1069,13 @@ function App() {
           <span>풍랑 {obj_wrn_lvl[warningInfo.warnLvl]}&nbsp;</span>
           {warningInfo.warnLvl === "1" ? null : <span>{strPreOrIn}</span>}
         </div>
-        <span>[</span>
-        <span>
-          {warningMonth}월{warningDay}일({weekDay}) {warningTime} ~&nbsp;
-        </span>
-        {warningInfo.timeClear !== "" ? (
-          <span>{warningInfo.timeClear}</span>
-        ) : null}
-        <span>]</span>
+        <TextToShowWarningReport
+          warningInfo={warningInfo}
+          weekDay={weekDay}
+          warningMonth={warningMonth}
+          warningDay={warningDay}
+          warningTime={warningTime}
+        />
       </div>
     );
   }
@@ -1147,7 +1268,7 @@ function App() {
                       style={{
                         ...forecastTableValueBoxStyle,
                         backgroundColor: getMultiGradientColorWindSpd(
-                          data.maxWs
+                          data.maxWs,
                         ),
                         borderLeft: "1px solid #272727",
                       }}
@@ -1162,7 +1283,7 @@ function App() {
                       style={{
                         ...forecastTableValueBoxStyle,
                         backgroundColor: getMultiGradientColorWindSpd(
-                          data.maxWs
+                          data.maxWs,
                         ),
                       }}
                     >
@@ -1206,7 +1327,7 @@ function App() {
                       style={{
                         ...forecastTableValueBoxStyle,
                         backgroundColor: getMultiGradientColorWaveHeight(
-                          data.maxWaveH
+                          data.maxWaveH,
                         ),
                         borderLeft: "1px solid #272727",
                       }}
@@ -1221,7 +1342,7 @@ function App() {
                       style={{
                         ...forecastTableValueBoxStyle,
                         backgroundColor: getMultiGradientColorWaveHeight(
-                          data.maxWaveH
+                          data.maxWaveH,
                         ),
                       }}
                     >
