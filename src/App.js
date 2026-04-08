@@ -355,12 +355,34 @@ function App() {
               vis: mToKm(info.dtvsbM20kLen),
             };
           });
-        setMeamWindData(
-          arrayMaeam.map((item) => ({ time: item.time, windSpeed: item.ws })),
-        );
-        setMaeamVisData(
-          arrayMaeam.map((item) => ({ time: item.time, vis: item.vis })),
-        );
+        setMeamWindData(() => {
+          const array = arrayMaeam
+            .map((item) => ({ time: item.time, windSpeed: item.ws }))
+            .sort((a, b) => {
+              const toMinutes = (t) => {
+                const [h, m] = t.split(":").map(Number);
+                return h * 60 + m;
+              };
+
+              return toMinutes(a.time) - toMinutes(b.time);
+            });
+
+          return array;
+        });
+        setMaeamVisData(() => {
+          const array = arrayMaeam
+            .map((item) => ({ time: item.time, windSpeed: item.vis }))
+            .sort((a, b) => {
+              const toMinutes = (t) => {
+                const [h, m] = t.split(":").map(Number);
+                return h * 60 + m;
+              };
+
+              return toMinutes(a.time) - toMinutes(b.time);
+            });
+
+          return array;
+        });
       }
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
