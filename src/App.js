@@ -371,7 +371,7 @@ function App() {
         });
         setMaeamVisData(() => {
           const array = arrayMaeam
-            .map((item) => ({ time: item.time, windSpeed: item.vis }))
+            .map((item) => ({ time: item.time, vis: item.vis }))
             .sort((a, b) => {
               const toMinutes = (t) => {
                 const [h, m] = t.split(":").map(Number);
