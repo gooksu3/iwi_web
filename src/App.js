@@ -1454,7 +1454,7 @@ function App() {
         fetchDataWData();
         fetchDataWeatherWarning();
         fetchDataForecast();
-        setInterval(fetchDataWData, 5 * 60 * 1000); // 5분마다 갱신
+        setInterval(fetchDataWData, 2 * 60 * 1000); // 5분마다 갱신
         setInterval(() => {
           const now = new Date();
           const hours = now.getHours();
