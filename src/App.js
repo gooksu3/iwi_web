@@ -101,6 +101,7 @@ function App() {
   const obj_wrn_lvl = { 1: "예비", 2: "주의보", 3: "경보" };
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
   const currentWarningReport = useRef("");
+  let arrayInfoUlsanCoast = [];
 
   const degreesToCompass = (degrees) => {
     const directions = [
@@ -159,7 +160,7 @@ function App() {
     setArrayDateForecast([]);
     setShortForecastData([]);
     setLoadForecastTable(true);
-    const WORKER_URL = "https://uiwi.gooksu3.workers.dev/api/daily";
+    const WORKER_URL = "https://newuiwi.gooksu3.workers.dev/api/daily";
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -222,7 +223,7 @@ function App() {
       new Date(twoMinutesAgo.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/5mins?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/5mins?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -234,17 +235,31 @@ function App() {
       const objInfoFromApi = await res.json();
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
-      const arrayKmaWindInfoText = objInfoFromApi.kmaWind.map((item) =>
-        item.split("\n").slice(3, -2),
-      );
+      const arrayKmaWindInfoText = objInfoFromApi.kmaWind.split("\n");
+      const arrayKW = arrayKmaWindInfoText
+        .slice(3, arrayKmaWindInfoText.length - 2)
+        .reduce(
+          (acc, cur) => {
+            const line = cur.split(/\s+/);
+            if (line[1] == "924") {
+              // 간절곶
+              acc["간절곶"].push(line);
+            } else if (line[1] == "901") {
+              // 울기
+              acc["울기"].push(line);
+            } else if (line[1] == "898") {
+              // 장생포
+              acc["장생포"].push(line);
+            }
+            return acc;
+          },
+          { 간절곶: [], 울기: [], 장생포: [] },
+        );
       const arrayKmaWind = arrayPoints.map((point, index) => {
-        if (arrayKmaWindInfoText[index].length > 0) {
-          const lines = arrayKmaWindInfoText[index].map((line) =>
-            line.split(/\s+/),
-          );
-          const arrayInfo = lines.map((line) => [line[0], ...line.slice(2, 6)]);
-          arraySetKmaWindDir[index](arrayInfo[arrayInfo.length - 1][3]);
-          arraySetKmaWindSpd[index](arrayInfo[arrayInfo.length - 1][4]);
+        if (arrayKW[point].length > 0) {
+          const arrayInfo = arrayKW[point];
+          arraySetKmaWindDir[index](arrayInfo[arrayInfo.length - 1][4]);
+          arraySetKmaWindSpd[index](arrayInfo[arrayInfo.length - 1][5]);
           let arrayTime = [];
           const baseDate = formatYYYYMMDDHHMMToDate(
             arrayInfo[arrayInfo.length - 1][0],
@@ -257,22 +272,36 @@ function App() {
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
               const time = formatToHHMM(info[0]);
-              return { time: time, windSpeed: info[4] };
+              return { time: time, windSpeed: info[3] };
             });
         }
       });
       setKmaWindData(arrayKmaWind);
       // 간절곶:924,울기:901,장생포:898
-      const arrayKmaVisInfoText = objInfoFromApi.kmaVis.map((item) =>
-        item.split("\n").slice(3, -2),
-      );
+      const arrayKmaVisInfoText = objInfoFromApi.kmaVis.split("\n");
+      const arrayKV = arrayKmaVisInfoText
+        .slice(3, arrayKmaVisInfoText.length - 2)
+        .reduce(
+          (acc, cur) => {
+            const line = cur.split(/\s+/);
+            if (line[1] == "924") {
+              // 간절곶
+              acc["간절곶"].push(line);
+            } else if (line[1] == "901") {
+              // 울기
+              acc["울기"].push(line);
+            } else if (line[1] == "898") {
+              // 장생포
+              acc["장생포"].push(line);
+            }
+            return acc;
+          },
+          { 간절곶: [], 울기: [], 장생포: [] },
+        );
       const arrayKmaVis = arrayPoints.map((point, index) => {
-        if (arrayKmaVisInfoText[index].length > 0) {
-          const lines = arrayKmaVisInfoText[index].map((line) =>
-            line.split(/\s+/),
-          );
-          const arrayInfo = lines.map((line) => [line[0], line[5]]);
-          arraySetKmaVis[index](mToKm(arrayInfo[arrayInfo.length - 1][1]));
+        if (arrayKV[point].length > 0) {
+          const arrayInfo = arrayKV[point];
+          arraySetKmaVis[index](mToKm(arrayInfo[arrayInfo.length - 1][5]));
           let arrayTime = [];
           const baseDate = formatYYYYMMDDHHMMToDate(
             arrayInfo[arrayInfo.length - 1][0],
@@ -285,26 +314,26 @@ function App() {
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
               const time = formatToHHMM(info[0]);
-              return { time: time, vis: mToKm(info[1]) };
+              return { time: time, vis: mToKm(info[5]) };
             });
         }
       });
       setKmaVisData(arrayKmaVis);
       // 매암
-      if (objInfoFromApi.maeam && objInfoFromApi.maeam.trim() !== "") {
-        const arrayInfoMaeam = JSON.parse(objInfoFromApi.maeam).result.data;
+      if (objInfoFromApi.maeam.body.items.item.length > 0) {
+        const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
         let latestInfoMaeam = null;
-        for (let i = arrayInfoMaeam.length - 1; i >= 0; i--) {
-          if (arrayInfoMaeam[i].vis != null) {
+        for (let i = 0; i >= 0; i++) {
+          if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
             latestInfoMaeam = arrayInfoMaeam[i];
             break;
           }
         }
-        setWindSpdMaeam(latestInfoMaeam.wind_speed);
-        setWindDirMaeam(latestInfoMaeam.wind_dir);
-        setVisMaeam(mToKm(latestInfoMaeam.vis));
+        setWindSpdMaeam(latestInfoMaeam.rmyWspd);
+        setWindDirMaeam(latestInfoMaeam.rmyWndrct);
+        setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
         const baseDate = formatYYYYMMDDHHMMToDate(
-          latestInfoMaeam.obs_time.replace(/[- :]/g, ""),
+          latestInfoMaeam.obsrvnDt.replace(/[- :]/g, ""),
         );
         let arrayTime = [];
         for (let diff = 0; diff <= 60; diff += 10) {
@@ -312,16 +341,18 @@ function App() {
           arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
         }
         const arrayMaeam = arrayInfoMaeam
-          .filter((info) =>
-            arrayTime.includes(info.obs_time.replace(/[- :]/g, "")),
-          )
+          .filter((info) => {
+            const t = info.obsrvnDt.replace(/[- :]/g, "");
+            return arrayTime.includes(t);
+          })
           .map((info) => {
-            const time = formatToHHMM(info.obs_time.replace(/[- :]/g, ""));
+            const raw = info.obsrvnDt.replace(/[- :]/g, "");
+
             return {
-              time: time,
-              wd: info.wind_dir,
-              ws: info.wind_speed,
-              vis: mToKm(info.vis),
+              time: formatToHHMM(raw),
+              wd: info.rmyWndrct,
+              ws: info.rmyWspd,
+              vis: mToKm(info.dtvsbM20kLen),
             };
           });
         setMeamWindData(
@@ -336,7 +367,7 @@ function App() {
     }
   };
   const fetchDataApproximateClearTime = async () => {
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/clearTime`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/clearTime`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -367,7 +398,7 @@ function App() {
     // 5	연장	    기존 특보의 유효시간이 연장되었음을 의미합니다. 내용은 동일하지만 지속시간만 늘어납니다.
     // 6	변경	    특보의 내용(예: 대상 지역, 강수량 등 세부사항)이 변경되었지만, 특보 등급은 그대로 유지됩니다.
     // 7	변경해제	변경으로 인해 적용되었던 이전 특보 내용이 해제되었음을 알리는 자동 해제입니다. 주로 시스템적으로 이전 정보 무효화 처리 시 사용됩니다.
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/WWarning`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/WWarning`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -378,13 +409,13 @@ function App() {
       }
       const textInfo = await res.json();
       const arrayInfo = textInfo.split("\n").slice(2, -2);
-      let arrayInfoUlsanCoast = arrayInfo.filter(
+      arrayInfoUlsanCoast = arrayInfo.filter(
         (item) => item.includes("S1131100") && item.includes("V"),
       );
       arrayInfoUlsanCoast = arrayInfoUlsanCoast.map((item) => {
         return item.split(",").map((info) => info.trim());
       });
-      console.log(arrayInfoUlsanCoast);
+
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
       if (Object.keys(arrayInfoUlsanCoast).length !== 0) {
         const latest_warning_report =
@@ -498,14 +529,12 @@ function App() {
             setShowWarningInfo(true);
             currentWarningReport.current = arrayCurrentWarningReport;
           } else if (latest_warning_report[7] === "6") {
-            console.log("변경");
             // 변경
             // 대치인데 변경으로 발표하는 경우가 있음. 해당 사항 구분하여 작동하도록 수정
             if (
               arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 2][6] ===
               latest_warning_report[6]
             ) {
-              console.log("단순변경");
               // 변경
               const clearTime = await fetchDataApproximateClearTime();
               let arrayCurrentWarningReport = {
@@ -526,7 +555,6 @@ function App() {
               setShowWarningInfo(true);
               currentWarningReport.current = arrayCurrentWarningReport;
             } else {
-              console.log("대치");
               // 대치인데 변경으로 나왔을 때
               const year = parseInt(latest_warning_report[1].slice(0, 4), 10);
               const month =
@@ -541,8 +569,7 @@ function App() {
               const targetDate = new Date(year, month, day, hour, minute);
               const now = new Date();
               if (targetDate < now) {
-                // 대치 전
-                console.log("대치전", latest_warning_report);
+                // 대치 후
                 const clearTime = await fetchDataApproximateClearTime();
                 let arrayCurrentWarningReport = {
                   timeEff: latest_warning_report[1],
@@ -562,8 +589,7 @@ function App() {
                 setShowWarningInfo(true);
                 currentWarningReport.current = arrayCurrentWarningReport;
               } else {
-                // 대치 후
-                console.log("대치후", latest_warning_report);
+                // 대치 전
                 const weekDay =
                   weekDays[
                     new Date(
@@ -585,12 +611,19 @@ function App() {
                   latest_warning_report[1].slice(8, 10) +
                   ":" +
                   latest_warning_report[1].slice(10, 12);
-                const warningInfoEff =
-                  arrayInfoUlsanCoast[arrayInfoUlsanCoast.length - 2];
+                const warningInfoEff = {
+                  timeEff: arrayInfoUlsanCoast.at(-2)[1],
+                  warnLvl: arrayInfoUlsanCoast.at(-2)[6],
+                  warnType: arrayInfoUlsanCoast.at(-2)[7],
+                  timeClear: clearDateNTime,
+                };
+                if (!currentWarningReport.current) {
+                  currentWarningReport.current = warningInfoEff;
+                }
                 setWarningInfo({
-                  timeEff: warningInfoEff[1],
-                  warnLvl: warningInfoEff[6],
-                  warnType: warningInfoEff[7],
+                  timeEff: arrayInfoUlsanCoast.at(-1)[1],
+                  warnLvl: arrayInfoUlsanCoast.at(-1)[6],
+                  warnType: arrayInfoUlsanCoast.at(-1)[7],
                   timeClear: clearDateNTime,
                 });
                 setShowWarningInfo(true);
@@ -600,15 +633,12 @@ function App() {
         }
       } else {
         // 이 else는 체크를 위한 것. 문제 없으면 지우기
-        console.log("----------------------------------");
-        console.log(showWarningInfo, " / ", warningInfo);
-        console.log("----------------------------------");
+        console.log("기상특보 내용 없음");
       }
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
   };
-  // component
   function GraphWind({ data }) {
     return (
       <ResponsiveContainer width="100%" height="100%">
@@ -698,6 +728,7 @@ function App() {
       return "#EAF3FD";
     }
   };
+  // component
   function RowInWetherTable({
     point,
     source,
@@ -1010,17 +1041,41 @@ function App() {
     warningDay,
     warningTime,
     weekDay,
+    strPreOrIn,
   }) {
+    const warnLvl = obj_wrn_lvl[warningInfo.warnLvl];
+    if (warningInfo.warnType === "2") {
+      warnLvl = obj_wrn_lvl[currentWarningReport.current.warnLvl];
+    }
     return (
-      <div>
-        <span>[</span>
-        <span>
-          {warningMonth}월{warningDay}일({weekDay}) {warningTime} ~&nbsp;
-        </span>
-        {warningInfo.timeClear !== "" ? (
-          <span>{warningInfo.timeClear}</span>
-        ) : null}
-        <span>]</span>
+      <div style={{ display: "flex" }}>
+        <div
+          style={{ fontSize: "2.5vw", fontWeight: "bold", color: "#ee5253" }}
+        >
+          <span>풍랑 {warnLvl}&nbsp;</span>
+          {warningInfo.warnLvl === "1" ? null : <span>{strPreOrIn}</span>}
+        </div>
+        {warningInfo.warnType !== "6" ? (
+          <div>
+            <span>[</span>
+            <span>
+              {warningMonth}월{warningDay}일({weekDay}) {warningTime} ~&nbsp;
+            </span>
+            {warningInfo.timeClear !== "" ? (
+              <span>{warningInfo.timeClear}</span>
+            ) : null}
+            <span>]</span>
+          </div>
+        ) : (
+          <div>
+            <span>[</span>
+            <span>
+              {warningMonth}월{warningDay}일({weekDay}) {warningTime}&nbsp;
+            </span>
+            <span>풍랑{obj_wrn_lvl[warningInfo.warnLvl]} 대치</span>
+            <span>]</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -1063,18 +1118,13 @@ function App() {
           alignItems: "center",
         }}
       >
-        <div
-          style={{ fontSize: "2.5vw", fontWeight: "bold", color: "#ee5253" }}
-        >
-          <span>풍랑 {obj_wrn_lvl[warningInfo.warnLvl]}&nbsp;</span>
-          {warningInfo.warnLvl === "1" ? null : <span>{strPreOrIn}</span>}
-        </div>
         <TextToShowWarningReport
           warningInfo={warningInfo}
           weekDay={weekDay}
           warningMonth={warningMonth}
           warningDay={warningDay}
           warningTime={warningTime}
+          strPreOrIn={strPreOrIn}
         />
       </div>
     );
@@ -1392,7 +1442,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://uiwi.gooksu3.workers.dev/login", {
+      const res = await fetch("https://newuiwi.gooksu3.workers.dev/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
