@@ -1184,8 +1184,6 @@ function App() {
       }
       return acc;
     }, []);
-    console.log(colSpans);
-    console.log(colSpansForForecast);
     const arrayKeysForForecast = [
       "time",
       "icon",
@@ -1574,10 +1572,10 @@ function App() {
       if (data.success) {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
-        // fetchDataWData();
+        fetchDataWData();
         fetchDataWeatherWarning();
         fetchDataForecast();
-        // setInterval(fetchDataWData, 2 * 60 * 1000); // 2분마다 갱신
+        setInterval(fetchDataWData, 2 * 60 * 1000); // 2분마다 갱신
         setInterval(() => {
           const now = new Date();
           const hours = now.getHours();
@@ -1753,7 +1751,7 @@ function App() {
       if (e.key === "F5" || (e.ctrlKey && e.key.toLowerCase() === "r")) {
         e.preventDefault();
         if (!inputPWRef.current) {
-          // fetchDataWData();
+          fetchDataWData();
         }
       }
     };
