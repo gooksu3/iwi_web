@@ -297,7 +297,9 @@ function App() {
             });
         }
       });
-      setKmaWindData(arrayKmaWind);
+      if (arrayKmaWind) {
+        setKmaWindData(arrayKmaWind);
+      }
       // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis.split("\n");
       const arrayKV = arrayKmaVisInfoText
@@ -339,7 +341,9 @@ function App() {
             });
         }
       });
-      setKmaVisData(arrayKmaVis);
+      if (arrayKmaVis) {
+        setKmaVisData(arrayKmaVis);
+      }
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
@@ -376,34 +380,36 @@ function App() {
               vis: mToKm(info.dtvsbM20kLen),
             };
           });
-        setMeamWindData(() => {
-          const array = arrayMaeam
-            .map((item) => ({ time: item.time, windSpeed: item.ws }))
-            .sort((a, b) => {
-              const toMinutes = (t) => {
-                const [h, m] = t.split(":").map(Number);
-                return h * 60 + m;
-              };
+        if (arrayMaeam) {
+          setMeamWindData(() => {
+            const array = arrayMaeam
+              .map((item) => ({ time: item.time, windSpeed: item.ws }))
+              .sort((a, b) => {
+                const toMinutes = (t) => {
+                  const [h, m] = t.split(":").map(Number);
+                  return h * 60 + m;
+                };
 
-              return toMinutes(a.time) - toMinutes(b.time);
-            });
+                return toMinutes(a.time) - toMinutes(b.time);
+              });
 
-          return array;
-        });
-        setMaeamVisData(() => {
-          const array = arrayMaeam
-            .map((item) => ({ time: item.time, vis: item.vis }))
-            .sort((a, b) => {
-              const toMinutes = (t) => {
-                const [h, m] = t.split(":").map(Number);
-                return h * 60 + m;
-              };
+            return array;
+          });
+          setMaeamVisData(() => {
+            const array = arrayMaeam
+              .map((item) => ({ time: item.time, vis: item.vis }))
+              .sort((a, b) => {
+                const toMinutes = (t) => {
+                  const [h, m] = t.split(":").map(Number);
+                  return h * 60 + m;
+                };
 
-              return toMinutes(a.time) - toMinutes(b.time);
-            });
+                return toMinutes(a.time) - toMinutes(b.time);
+              });
 
-          return array;
-        });
+            return array;
+          });
+        }
       }
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
@@ -458,7 +464,10 @@ function App() {
       arrayInfoUlsanCoast = arrayInfoUlsanCoast.map((item) => {
         return item.split(",").map((info) => info.trim());
       });
-
+      // 특보 정보에는 발표(1), 해제(3)만 있음
+      arrayInfoUlsanCoast = arrayInfoUlsanCoast.filter((item) =>
+        ["1", "3"].includes(item[7]),
+      );
       // warningInfo에 들어갈 정보: time_eff,warn_lvl,warn_type,time_clear
       if (Object.keys(arrayInfoUlsanCoast).length !== 0) {
         const latest_warning_report =
@@ -544,11 +553,6 @@ function App() {
               setShowWarningInfo(true);
             }
           } else if (latest_warning_report[7] === "2") {
-            // 대치일 때. 나중에 주의보->경보 혹은 경보->주의보 대치될 때 데이터 받아보고 수정하기...
-            // 아마.... [....,[대치해제 정보],[대치정보]]로 되어 있고 마지막 정보가 대치이면 앞에 대치해제 정보와 일치하는 발표 정보 찾아서 구분하기...
-            // 대치 시간과 현재 시간 비교해서 현재 대치시간 이전이면 주의보발효중....경보대치 순으로 나오도록 수정하기
-            // 현재시간이 대치시간보다 지났으면 경보만.....
-            //
           } else if (latest_warning_report[7] === "5") {
             // 연장
             const extended_warning_report =
@@ -827,7 +831,7 @@ function App() {
         </td>
         <td style={{ ...valueStyle, width: "10vw" }}>{windDir}</td>
         <td style={{ ...valueStyle, width: "10vw" }}>
-          {typeof windData === "undefined" ? (
+          {/* {typeof windData === "undefined" ? (
             <span
               style={{
                 position: "absolute",
@@ -843,7 +847,7 @@ function App() {
             >
               데이터 미수신
             </span>
-          ) : null}
+          ) : null} */}
           <div
             style={{
               display: "flex",
@@ -887,7 +891,7 @@ function App() {
           </div>
         </td>
         <td style={{ ...valueStyle, width: "10vw" }}>
-          {typeof visData === "undefined" ? (
+          {/* {typeof visData === "undefined" ? (
             <span
               style={{
                 position: "absolute",
@@ -903,7 +907,7 @@ function App() {
             >
               데이터 미수신
             </span>
-          ) : null}
+          ) : null} */}
           <div
             style={{
               display: "flex",
@@ -1326,234 +1330,6 @@ function App() {
                 })}
               </tr>
             ))}
-            {/* <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>시간</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {data.time}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td key={index} style={{ ...forecastTableValueBoxStyle }}>
-                      {data.time}
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}></td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      <WeatherIcon iconNum={data.icon} />
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td key={index} style={{ ...forecastTableValueBoxStyle }}>
-                      <WeatherIcon iconNum={data.icon} />
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>풍향</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {objDirections[data.wdir]}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td key={index} style={{ ...forecastTableValueBoxStyle }}>
-                      {objDirections[data.wdir]}
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>풍속</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getMultiGradientColorWindSpd(data.ws),
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {data.ws}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getMultiGradientColorWindSpd(data.ws),
-                      }}
-                    >
-                      {data.ws}
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>돌풍</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getMultiGradientColorWindSpd(
-                          data.maxWs,
-                        ),
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {data.maxWs}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getMultiGradientColorWindSpd(
-                          data.maxWs,
-                        ),
-                      }}
-                    >
-                      {data.maxWs}
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>파향</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {objDirections[data.waveDir]}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td key={index} style={{ ...forecastTableValueBoxStyle }}>
-                      {objDirections[data.waveDir]}
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>파고</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getMultiGradientColorWaveHeight(
-                          data.maxWaveH,
-                        ),
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {data.maxWaveH}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getMultiGradientColorWaveHeight(
-                          data.maxWaveH,
-                        ),
-                      }}
-                    >
-                      {data.maxWaveH}
-                    </td>
-                  );
-                }
-              })}
-            </tr>
-            <tr>
-              <td style={{ ...forecastTableTagBoxStyle }}>시정</td>
-              {shortForecastData.map((data, index) => {
-                if (index % 8 === 0) {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getColorVis(data.vis),
-                        borderLeft: "1px solid #272727",
-                      }}
-                    >
-                      {data.vis}
-                    </td>
-                  );
-                } else {
-                  return (
-                    <td
-                      key={index}
-                      style={{
-                        ...forecastTableValueBoxStyle,
-                        backgroundColor: getColorVis(data.vis),
-                      }}
-                    >
-                      {data.vis}
-                    </td>
-                  );
-                }
-              })}
-            </tr> */}
           </tbody>
         </table>
       </div>
