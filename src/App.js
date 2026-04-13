@@ -179,15 +179,16 @@ function App() {
       const forecast = xmlDoc
         .getElementsByTagName("KWEATHER")[0]
         .getElementsByTagName("SHORT")[0].children;
-      // for (let i=0;i<forecast.length;i++){
-      for (let i = 0; i < 3; i++) {
+      let array4DaysDate = [];
+      let array4DaysForecast = [];
+      for (let i = 0; i < 4; i++) {
         const dateNWeek = `${
           forecast[i].getElementsByTagName("DATE")[0].textContent
         }(${forecast[i].getElementsByTagName("WEEK")[0].textContent})`;
-        setArrayDateForecast((prev) => [...prev, dateNWeek]);
+        array4DaysDate.push(dateNWeek);
         const hours = forecast[i].getElementsByTagName("HOUR")[0].children;
         for (let j = 0; j < hours.length; j++) {
-          const time = hours[j].tagName;
+          const time = hours[j].tagName.substring(1, 3);
           const icon = hours[j].getElementsByTagName("wcond")[0].textContent;
           const windDir = hours[j].getElementsByTagName("wdir")[0].textContent;
           const ws = hours[j].getElementsByTagName("ws")[0].textContent;
@@ -195,21 +196,41 @@ function App() {
           const maxWaveH = hours[j].getElementsByTagName("mpa")[0].textContent;
           const waveDir = hours[j].getElementsByTagName("padir")[0].textContent;
           const vis = hours[j].getElementsByTagName("ss")[0].textContent;
-          setShortForecastData((prev) => [
-            ...prev,
-            {
-              time: time,
-              icon: icon,
-              wdir: windDir,
-              ws: ws,
-              maxWs: maxWs,
-              maxWaveH: maxWaveH,
-              waveDir: waveDir,
-              vis: vis,
-            },
-          ]);
+          array4DaysForecast.push({
+            time: time,
+            icon: icon,
+            wdir: windDir,
+            ws: ws,
+            maxWs: maxWs,
+            maxWaveH: maxWaveH,
+            waveDir: waveDir,
+            vis: vis,
+          });
         }
       }
+      const now = new Date();
+      const hourNow = now.getHours();
+      let startIndex = 0;
+      let endIndex = 24;
+      const startHour = hourNow - 6;
+      if (startHour >= -6 && startHour <= -4) {
+        startIndex = 5; // 18h
+      } else if (startHour >= -3 && startHour <= -1) {
+        startIndex = 6; // 21h
+      } else if (startHour >= 0 && startHour <= 2) {
+        startIndex = 7; // 24h
+      } else {
+        startIndex = Math.floor(startHour / 3) - 1;
+      }
+      if (startHour === 3) {
+        setArrayDateForecast(
+          array4DaysDate.slice(0, array4DaysDate.length - 1),
+        );
+      } else {
+        setArrayDateForecast(array4DaysDate);
+      }
+      endIndex += startIndex;
+      setShortForecastData(array4DaysForecast.slice(startIndex, endIndex));
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -1152,6 +1173,39 @@ function App() {
     );
   }
   function ShortForecastTable({ shortForecastData }) {
+    const arrayTimes = ["03", "06", "09", "12", "15", "18", "21", "24"];
+    const n = arrayTimes.indexOf(shortForecastData[0]["time"]);
+    const colSpans = n === 0 ? [8, 8, 8] : [8 - n, 8, 8, n];
+    const colSpansForForecast = colSpans.reduce((acc, cur, idx) => {
+      if (idx === 0) {
+        acc.push(cur);
+      } else {
+        acc.push(acc[idx - 1] + cur);
+      }
+      return acc;
+    }, []);
+    console.log(colSpans);
+    console.log(colSpansForForecast);
+    const arrayKeysForForecast = [
+      "time",
+      "icon",
+      "wdir",
+      "ws",
+      "maxWs",
+      "waveDir",
+      "maxWaveH",
+      "vis",
+    ];
+    const objKeysTags = {
+      time: "시간",
+      icon: "",
+      wdir: "풍향",
+      ws: "풍속",
+      maxWs: "돌풍",
+      waveDir: "파향",
+      maxWaveH: "파고",
+      vis: "시정",
+    };
     if (shortForecastData.length === 0) return null;
     return (
       <div
@@ -1207,27 +1261,74 @@ function App() {
           <thead>
             <tr>
               <th></th>
-              {arrayDateForecast.map((dateNWeek, index) => {
-                return (
-                  <th
-                    key={index}
-                    colSpan="8"
-                    style={{
-                      color: "#EAF3FD",
-                      fontWeight: "Bold",
-                      padding: "3px 0",
-                      borderRight: "1px solid #EAF3FD",
-                      fontSize: fontSizeForecastTable,
-                    }}
-                  >
-                    {dateNWeek}
-                  </th>
-                );
-              })}
+              {colSpans.map((span, index) => (
+                <th
+                  key={index}
+                  colSpan={span}
+                  style={{
+                    color: "#EAF3FD",
+                    fontWeight: "Bold",
+                    padding: "3px 0",
+                    borderRight: "1px solid #EAF3FD",
+                    fontSize: fontSizeForecastTable,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {span === 1
+                    ? null
+                    : span === 2
+                      ? arrayDateForecast[index].slice(
+                          3,
+                          arrayDateForecast[index].length,
+                        )
+                      : arrayDateForecast[index]}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody style={{ backgroundColor: "#EAF3FD" }}>
-            <tr>
+            {arrayKeysForForecast.map((key, idxKey) => (
+              <tr key={idxKey}>
+                <td style={{ ...forecastTableTagBoxStyle }}>
+                  {objKeysTags[key]}
+                </td>
+                {shortForecastData.map((data, idxData) => {
+                  let content = data[key];
+                  if (key === "icon") {
+                    content = <WeatherIcon iconNum={data.icon} />;
+                  } else if (key === "wdir") {
+                    content = objDirections[data.wdir];
+                  } else if (key === "waveDir") {
+                    content = objDirections[data.waveDir];
+                  }
+                  let bgColor = "transparant";
+                  if (["ws", "maxWs"].includes(key)) {
+                    bgColor = getMultiGradientColorWindSpd(content);
+                  } else if (key === "maxWaveH") {
+                    bgColor = getMultiGradientColorWaveHeight(content);
+                  } else if (key === "vis") {
+                    bgColor = getColorVis(content);
+                  }
+                  return (
+                    <td
+                      key={idxData}
+                      style={{
+                        ...forecastTableValueBoxStyle,
+                        backgroundColor: bgColor,
+                        borderLeft: colSpansForForecast.includes(idxData)
+                          ? "1px solid #272727"
+                          : null,
+                      }}
+                    >
+                      {content}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+            {/* <tr>
               <td style={{ ...forecastTableTagBoxStyle }}>시간</td>
               {shortForecastData.map((data, index) => {
                 if (index % 8 === 0) {
@@ -1239,13 +1340,13 @@ function App() {
                         borderLeft: "1px solid #272727",
                       }}
                     >
-                      {data.time.substring(1, 3)}
+                      {data.time}
                     </td>
                   );
                 } else {
                   return (
                     <td key={index} style={{ ...forecastTableValueBoxStyle }}>
-                      {data.time.substring(1, 3)}
+                      {data.time}
                     </td>
                   );
                 }
@@ -1454,7 +1555,7 @@ function App() {
                   );
                 }
               })}
-            </tr>
+            </tr> */}
           </tbody>
         </table>
       </div>
@@ -1473,10 +1574,10 @@ function App() {
       if (data.success) {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
-        fetchDataWData();
+        // fetchDataWData();
         fetchDataWeatherWarning();
         fetchDataForecast();
-        setInterval(fetchDataWData, 2 * 60 * 1000); // 5분마다 갱신
+        // setInterval(fetchDataWData, 2 * 60 * 1000); // 2분마다 갱신
         setInterval(() => {
           const now = new Date();
           const hours = now.getHours();
@@ -1652,7 +1753,7 @@ function App() {
       if (e.key === "F5" || (e.ctrlKey && e.key.toLowerCase() === "r")) {
         e.preventDefault();
         if (!inputPWRef.current) {
-          fetchDataWData();
+          // fetchDataWData();
         }
       }
     };
@@ -1774,7 +1875,9 @@ function App() {
           className={loadForecastTable ? "spinner" : ""}
           style={{ position: "absolute", left: "40%", top: "30%" }}
         ></div>
-        <ShortForecastTable shortForecastData={shortForecastData} />
+        {shortForecastData.length > 0 ? (
+          <ShortForecastTable shortForecastData={shortForecastData} />
+        ) : null}
       </div>
     </div>
   );
