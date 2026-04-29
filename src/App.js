@@ -262,13 +262,13 @@ function App() {
         .reduce(
           (acc, cur) => {
             const line = cur.split(/\s+/);
-            if (line[1] == "924") {
+            if (line[1] == "924" && !line.includes("-99.9")) {
               // 간절곶
               acc["간절곶"].push(line);
-            } else if (line[1] == "901") {
+            } else if (line[1] == "901" && !line.includes("-99.9")) {
               // 울기
               acc["울기"].push(line);
-            } else if (line[1] == "898") {
+            } else if (line[1] == "898" && !line.includes("-99.9")) {
               // 장생포
               acc["장생포"].push(line);
             }
@@ -279,8 +279,14 @@ function App() {
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
-          arraySetKmaWindDir[index](arrayInfo[arrayInfo.length - 1][4]);
-          arraySetKmaWindSpd[index](arrayInfo[arrayInfo.length - 1][5]);
+          const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
+          if (arrayKmaWindDir[index] !== latestInfoWDir) {
+            arraySetKmaWindDir[index](latestInfoWDir);
+          }
+          const latestInfoWSpd = arrayInfo[arrayInfo.length - 1][5];
+          if (arrayKmaWindSpd[index] !== latestInfoWSpd) {
+            arraySetKmaWindSpd[index](latestInfoWSpd);
+          }
           let arrayTime = [];
           const baseDate = formatYYYYMMDDHHMMToDate(
             arrayInfo[arrayInfo.length - 1][0],
@@ -289,12 +295,17 @@ function App() {
             const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
             arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
           }
-          return arrayInfo
+          const arrayWind = arrayInfo
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
               const time = formatToHHMM(info[0]);
-              return { time: time, windSpeed: info[3] };
+              return { time: time, windSpeed: info[5] };
             });
+          if (arrayWind.length === 0) {
+            return kmaWindData[index];
+          } else {
+            return arrayWind;
+          }
         }
       });
       if (arrayKmaWind) {
@@ -307,13 +318,13 @@ function App() {
         .reduce(
           (acc, cur) => {
             const line = cur.split(/\s+/);
-            if (line[1] == "924") {
+            if (line[1] == "924" && !line.includes("-99.9")) {
               // 간절곶
               acc["간절곶"].push(line);
-            } else if (line[1] == "901") {
+            } else if (line[1] == "901" && !line.includes("-99.9")) {
               // 울기
               acc["울기"].push(line);
-            } else if (line[1] == "898") {
+            } else if (line[1] == "898" && !line.includes("-99.9")) {
               // 장생포
               acc["장생포"].push(line);
             }
@@ -324,7 +335,8 @@ function App() {
       const arrayKmaVis = arrayPoints.map((point, index) => {
         if (arrayKV[point].length > 0) {
           const arrayInfo = arrayKV[point];
-          arraySetKmaVis[index](mToKm(arrayInfo[arrayInfo.length - 1][5]));
+          const latestInfoVis = mToKm(arrayInfo[arrayInfo.length - 1][5]);
+          arraySetKmaVis[index](latestInfoVis);
           let arrayTime = [];
           const baseDate = formatYYYYMMDDHHMMToDate(
             arrayInfo[arrayInfo.length - 1][0],
@@ -333,17 +345,20 @@ function App() {
             const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
             arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
           }
-          return arrayInfo
+          const arrayVis = arrayInfo
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
               const time = formatToHHMM(info[0]);
               return { time: time, vis: mToKm(info[5]) };
             });
+          if (arrayVis.length === 0) {
+            return kmaVisData[index];
+          } else {
+            return arrayVis;
+          }
         }
       });
-      if (arrayKmaVis) {
-        setKmaVisData(arrayKmaVis);
-      }
+      setKmaVisData(arrayKmaVis);
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
@@ -380,35 +395,31 @@ function App() {
               vis: mToKm(info.dtvsbM20kLen),
             };
           });
-        if (arrayMaeam) {
-          setMeamWindData(() => {
-            const array = arrayMaeam
-              .map((item) => ({ time: item.time, windSpeed: item.ws }))
-              .sort((a, b) => {
-                const toMinutes = (t) => {
-                  const [h, m] = t.split(":").map(Number);
-                  return h * 60 + m;
-                };
+        const arrayMW = arrayMaeam
+          .map((item) => ({ time: item.time, windSpeed: item.ws }))
+          .sort((a, b) => {
+            const toMinutes = (t) => {
+              const [h, m] = t.split(":").map(Number);
+              return h * 60 + m;
+            };
 
-                return toMinutes(a.time) - toMinutes(b.time);
-              });
-
-            return array;
+            return toMinutes(a.time) - toMinutes(b.time);
           });
-          setMaeamVisData(() => {
-            const array = arrayMaeam
-              .map((item) => ({ time: item.time, vis: item.vis }))
-              .sort((a, b) => {
-                const toMinutes = (t) => {
-                  const [h, m] = t.split(":").map(Number);
-                  return h * 60 + m;
-                };
+        if (arrayMW) {
+          setMeamWindData(arrayMW);
+        }
+        const arrayMV = arrayMaeam
+          .map((item) => ({ time: item.time, vis: item.vis }))
+          .sort((a, b) => {
+            const toMinutes = (t) => {
+              const [h, m] = t.split(":").map(Number);
+              return h * 60 + m;
+            };
 
-                return toMinutes(a.time) - toMinutes(b.time);
-              });
-
-            return array;
+            return toMinutes(a.time) - toMinutes(b.time);
           });
+        if (arrayMV) {
+          setMaeamVisData(arrayMV);
         }
       }
     } catch (err) {
@@ -1545,7 +1556,7 @@ function App() {
       if (hours === 0 && minutes === 30) {
         fetchDataForecast();
       }
-    }, 1000 * 60); // 1분마다 체크
+    }, 1000 * 120); // 2분마다 체크
 
     return () => clearInterval(interval);
   }, []);
