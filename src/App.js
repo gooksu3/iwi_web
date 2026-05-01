@@ -300,6 +300,7 @@ function App() {
           const uniqueArray = [
             ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
           ].map((v) => JSON.parse(v));
+          console.log(uniqueArray);
           const arrayWind = uniqueArray
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
@@ -478,7 +479,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const textInfo = await res.json();
-      const arrayInfo = textInfo.split("\n").slice(2, -2);
+      const arrayInfo = textInfo ? textInfo.split("\n").slice(2, -2) : [];
       arrayInfoUlsanCoast = arrayInfo.filter(
         (item) => item.includes("S1131100") && item.includes("V"),
       );
