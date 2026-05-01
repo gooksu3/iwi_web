@@ -1558,22 +1558,6 @@ function App() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-  useEffect(() => {
-    const interval = setInterval(
-      () => {
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-
-        if (hours === 0 && minutes === 30) {
-          fetchDataForecast();
-        }
-      },
-      1000 * 5 * 60,
-    ); // 5분마다 체크
-
-    return () => clearInterval(interval);
-  }, []);
   if (!token) {
     return (
       <div
