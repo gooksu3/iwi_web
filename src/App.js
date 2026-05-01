@@ -1374,16 +1374,35 @@ function App() {
         fetchDataForecast();
         fetchDataWeatherWarning();
         setInterval(fetchDataWData, 2 * 60 * 1000); // 2분마다 갱신
+        let lastForecastKey = "";
+        let lastWarningKey = "";
+
         setInterval(() => {
           const now = new Date();
           const hours = now.getHours();
           const minutes = now.getMinutes();
-          if ([0, 4, 8, 12, 16, 20].includes(hours) && minutes === 30) {
-            fetchDataForecast();
-          } else if ([1, 11, 21, 31, 41, 51].includes(minutes)) {
-            fetchDataWeatherWarning();
+
+          const currentKey = `${hours}:${minutes}`;
+
+          // forecast
+          if (
+            [0, 4, 8, 12, 16, 20].includes(hours) &&
+            [0, 30].includes(minutes)
+          ) {
+            if (lastForecastKey !== currentKey) {
+              lastForecastKey = currentKey;
+              fetchDataForecast();
+            }
           }
-        }, 1000 * 60); // 1분마다 체크해서 시간이 3시면 갱신
+
+          // warning
+          if ([1, 11, 21, 31, 41, 51].includes(minutes)) {
+            if (lastWarningKey !== currentKey) {
+              lastWarningKey = currentKey;
+              fetchDataWeatherWarning();
+            }
+          }
+        }, 60000);
       } else {
         setPassword("");
         setError("비밀번호가 틀렸습니다.");
