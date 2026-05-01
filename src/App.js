@@ -237,7 +237,6 @@ function App() {
     setLoadForecastTable(false);
   };
   const fetchDataWData = async () => {
-    console.log("바람데이터");
     const now = new Date();
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
     const tm2 = formatDateToYYYYMMDDHHMM(twoMinutesAgo);
@@ -257,14 +256,14 @@ function App() {
       const objInfoFromApi = await res.json();
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
-      console.log(objInfoFromApi);
-      const arrayKmaWindInfoText = objInfoFromApi.kmaWind.split("\n");
+      const arrayKmaWindInfoText = objInfoFromApi.kmaWind
+        ? objInfoFromApi.kmaWind.split("\n")
+        : [];
       const arrayKW = arrayKmaWindInfoText
         .slice(3, arrayKmaWindInfoText.length - 2)
         .reduce(
           (acc, cur) => {
             const line = cur.split(/\s+/);
-            console.log(line);
             if (line[1] == "924" && line[5] !== "-99.9") {
               // 간절곶
               acc["간절곶"].push(line);
@@ -298,7 +297,10 @@ function App() {
             const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
             arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
           }
-          const arrayWind = arrayInfo
+          const uniqueArray = [
+            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
+          ].map((v) => JSON.parse(v));
+          const arrayWind = uniqueArray
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
               const time = formatToHHMM(info[0]);
@@ -315,7 +317,9 @@ function App() {
         setKmaWindData(arrayKmaWind);
       }
       // 간절곶:924,울기:901,장생포:898
-      const arrayKmaVisInfoText = objInfoFromApi.kmaVis.split("\n");
+      const arrayKmaVisInfoText = objInfoFromApi.kmaVis
+        ? objInfoFromApi.kmaVis.split("\n")
+        : [];
       const arrayKV = arrayKmaVisInfoText
         .slice(3, arrayKmaVisInfoText.length - 2)
         .reduce(
@@ -335,7 +339,6 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      console.log(arrayKV);
       const arrayKmaVis = arrayPoints.map((point, index) => {
         if (arrayKV[point].length > 0) {
           const arrayInfo = arrayKV[point];
@@ -349,7 +352,10 @@ function App() {
             const newDate = new Date(baseDate.getTime() - diff * 60000); // diff 분 전
             arrayTime.push(formatDateToYYYYMMDDHHMM(newDate));
           }
-          const arrayVis = arrayInfo
+          const uniqueArray = [
+            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
+          ].map((v) => JSON.parse(v));
+          const arrayVis = uniqueArray
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
               const time = formatToHHMM(info[0]);
@@ -1365,6 +1371,7 @@ function App() {
         setToken(data.token);
         fetchDataWData();
         fetchDataForecast();
+        fetchDataWeatherWarning();
         setInterval(fetchDataWData, 2 * 60 * 1000); // 2분마다 갱신
         setInterval(() => {
           const now = new Date();
@@ -1551,15 +1558,18 @@ function App() {
     };
   }, []);
   useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
+    const interval = setInterval(
+      () => {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
 
-      if (hours === 0 && minutes === 30) {
-        fetchDataForecast();
-      }
-    }, 1000 * 120); // 2분마다 체크
+        if (hours === 0 && minutes === 30) {
+          fetchDataForecast();
+        }
+      },
+      1000 * 5 * 60,
+    ); // 5분마다 체크
 
     return () => clearInterval(interval);
   }, []);
