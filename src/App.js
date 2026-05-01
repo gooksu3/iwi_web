@@ -264,7 +264,6 @@ function App() {
         .reduce(
           (acc, cur) => {
             const line = cur.split(/\s+/);
-            console.log(line);
             if (line[1] == "924" && line[5] !== "-99.9") {
               // 간절곶
               acc["간절곶"].push(line);
