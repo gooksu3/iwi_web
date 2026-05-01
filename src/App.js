@@ -254,6 +254,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
+      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -278,6 +279,7 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
+      console.log(arrayKW);
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
@@ -300,7 +302,6 @@ function App() {
           const uniqueArray = [
             ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
           ].map((v) => JSON.parse(v));
-          console.log(uniqueArray);
           const arrayWind = uniqueArray
             .filter((info) => arrayTime.includes(info[0]))
             .map((info) => {
@@ -340,6 +341,7 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
+      console.log(arrayKV);
       const arrayKmaVis = arrayPoints.map((point, index) => {
         if (arrayKV[point].length > 0) {
           const arrayInfo = arrayKV[point];
@@ -479,6 +481,11 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const textInfo = await res.json();
+      console.log(
+        "--",
+        "installHook.js:1 데이터 불러오기 오류: TypeError: textInfo.split is not a function at fetchDataWeatherWarning",
+        textInfo,
+      );
       const arrayInfo = textInfo ? textInfo.split("\n").slice(2, -2) : [];
       arrayInfoUlsanCoast = arrayInfo.filter(
         (item) => item.includes("S1131100") && item.includes("V"),
