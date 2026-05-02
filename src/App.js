@@ -293,7 +293,7 @@ function App() {
           ].map((v) => JSON.parse(v));
           const arrayWind = uniqueArray.map((info) => {
             const time = formatToHHMM(info[0]);
-            return { time: time, windSpeed: parseInt(info[5], 10) + 10 };
+            return { time: time, windSpeed: info[5] };
           });
           if (arrayWind.length === 0) {
             return kmaWindData[index];
