@@ -912,7 +912,22 @@ function App() {
       setProcessedData(
         data.map((d, index) => ({
           ...d,
-          // windSpeedLine: index % 10 === 0 ? d.windSpeed : null,
+          windSpeedLine:
+            index === 0 || index === data.length - 1
+              ? d.windSpeed
+              : [0, 10, 20, 30, 40, 50].includes(
+                    parseInt(
+                      d.time.slice(d.time.length - 2, d.time.length),
+                      10,
+                    ),
+                  )
+                ? d.windSpeed
+                : null,
+        })),
+      );
+      console.log(
+        data.map((d, index) => ({
+          ...d,
           windSpeedLine:
             index === 0 || index === data.length - 1
               ? d.windSpeed
@@ -1009,6 +1024,22 @@ function App() {
 
     useEffect(() => {
       setProcessedData(
+        data.map((d, index) => ({
+          ...d,
+          visLine:
+            index === 0 || index === data.length - 1
+              ? d.vis
+              : [0, 10, 20, 30, 40, 50].includes(
+                    parseInt(
+                      d.time.slice(d.time.length - 2, d.time.length),
+                      10,
+                    ),
+                  )
+                ? d.vis
+                : null,
+        })),
+      );
+      console.log(
         data.map((d, index) => ({
           ...d,
           visLine:
