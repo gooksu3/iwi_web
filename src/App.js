@@ -593,7 +593,7 @@ function App() {
             const filtered = arrayMW.filter(
               (item) => !existingTimes.has(item.time),
             );
-            return [...prev, ...filtered];
+            return [...prev, ...filtered].slice(1);
           });
         }
         const arrayMV = arrayMaeam
@@ -613,7 +613,7 @@ function App() {
             const filtered = arrayMV.filter(
               (item) => !existingTimes.has(item.time),
             );
-            return [...prev, ...filtered];
+            return [...prev, ...filtered].slice(1);
           });
         }
       }
