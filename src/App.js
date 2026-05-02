@@ -1380,7 +1380,7 @@ function App() {
         fetchDataWData();
         fetchDataForecast();
         fetchDataWeatherWarning();
-        setInterval(fetchDataWData, 2 * 60 * 1000); // 2분마다 갱신
+        setInterval(fetchDataWData, 60 * 1000); // 1분마다 갱신
         let lastForecastKey = "";
         let lastWarningKey = "";
 
@@ -1396,6 +1396,7 @@ function App() {
             [0, 4, 8, 12, 16, 20].includes(hours) &&
             [0, 30].includes(minutes)
           ) {
+            // 매시간 00분, 30분에 업데이트
             if (lastForecastKey !== currentKey) {
               lastForecastKey = currentKey;
               fetchDataForecast();
@@ -1404,6 +1405,7 @@ function App() {
 
           // warning
           if ([1, 11, 21, 31, 41, 51].includes(minutes)) {
+            // 매시간 10분마다 업데이트
             if (lastWarningKey !== currentKey) {
               lastWarningKey = currentKey;
               fetchDataWeatherWarning();
