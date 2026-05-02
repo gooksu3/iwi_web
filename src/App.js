@@ -1045,8 +1045,8 @@ function App() {
             }}
           />
           <YAxis
-            domain={[0, 25]}
-            ticks={[25]}
+            domain={domain}
+            ticks={ticks}
             axisLine={{ stroke: "#272727", strokeWidth: 2 }}
             tick={{ fontSize: 15, fontWeight: 500, fill: "#272727" }}
           />
