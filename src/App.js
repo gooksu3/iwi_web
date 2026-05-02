@@ -160,7 +160,7 @@ function App() {
     setArrayDateForecast([]);
     setShortForecastData([]);
     setLoadForecastTable(true);
-    const WORKER_URL = "https://newuiwi.gooksu3.workers.dev/api/daily";
+    const WORKER_URL = "https://uiwi.gooksu3.workers.dev/api/daily";
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -243,7 +243,7 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -413,7 +413,7 @@ function App() {
       new Date(now.getTime() - 3 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/1min?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/1min?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -622,7 +622,7 @@ function App() {
     }
   };
   const fetchDataApproximateClearTime = async () => {
-    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/clearTime`;
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/clearTime`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -653,7 +653,7 @@ function App() {
     // 5	연장	    기존 특보의 유효시간이 연장되었음을 의미합니다. 내용은 동일하지만 지속시간만 늘어납니다.
     // 6	변경	    특보의 내용(예: 대상 지역, 강수량 등 세부사항)이 변경되었지만, 특보 등급은 그대로 유지됩니다.
     // 7	변경해제	변경으로 인해 적용되었던 이전 특보 내용이 해제되었음을 알리는 자동 해제입니다. 주로 시스템적으로 이전 정보 무효화 처리 시 사용됩니다.
-    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/WWarning`;
+    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/WWarning`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -1661,7 +1661,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://newuiwi.gooksu3.workers.dev/login", {
+      const res = await fetch("https://uiwi.gooksu3.workers.dev/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
