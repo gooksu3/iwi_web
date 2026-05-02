@@ -487,7 +487,7 @@ function App() {
             (item) => !existingTimes.has(item.time),
           );
 
-          updated[key] = [...prevArr, ...filtered].slice(1);
+          updated[key] = [...prevArr, ...filtered].slice(filtered.length);
         });
 
         return updated;
@@ -549,7 +549,7 @@ function App() {
             (item) => !existingTimes.has(item.time),
           );
 
-          updated[key] = [...prevArr, ...filtered].slice(1);
+          updated[key] = [...prevArr, ...filtered].slice(filtered.length);
         });
 
         return updated;
@@ -588,13 +588,7 @@ function App() {
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMW) {
-          setMeamWindData((prev) => {
-            const existingTimes = new Set(prev.map((item) => item.time));
-            const filtered = arrayMW.filter(
-              (item) => !existingTimes.has(item.time),
-            );
-            return [...prev, ...filtered].slice(1);
-          });
+          setMeamWindData(arrayMW);
         }
         const arrayMV = arrayMaeam
           .map((item) => ({ time: item.time, vis: item.vis }))
@@ -608,13 +602,7 @@ function App() {
           });
 
         if (arrayMV) {
-          setMaeamVisData((prev) => {
-            const existingTimes = new Set(prev.map((item) => item.time));
-            const filtered = arrayMV.filter(
-              (item) => !existingTimes.has(item.time),
-            );
-            return [...prev, ...filtered].slice(1);
-          });
+          setMaeamVisData(arrayMV);
         }
       }
     } catch (err) {
