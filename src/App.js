@@ -302,9 +302,7 @@ function App() {
           }
         }
       });
-      if (arrayKmaWind) {
-        setKmaWindData(arrayKmaWind);
-      }
+      setKmaWindData(arrayKmaWind);
       // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -385,9 +383,7 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-        if (arrayMW) {
-          setMeamWindData(arrayMW);
-        }
+        setMeamWindData(arrayMW);
         const arrayMV = arrayMaeam
           .map((item) => ({ time: item.time, vis: item.vis }))
           .sort((a, b) => {
@@ -398,9 +394,7 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-        if (arrayMV) {
-          setMaeamVisData(arrayMV);
-        }
+        setMaeamVisData(arrayMV);
       }
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
@@ -472,30 +466,30 @@ function App() {
           }
         }
       });
-      if (kmaWindData.length === 0) {
-        setKmaWindData(arrayKmaWind);
-      } else {
-        setKmaWindData((prev) => {
-          const updated = { ...prev };
+      setKmaWindData((prev) => {
+        const updated = { ...prev };
 
-          Object.keys(arrayKmaWind).forEach((key) => {
-            const prevArr = prev[key] || [];
-            const newArr = arrayKmaWind[key] || [];
+        Object.keys(arrayKmaWind).forEach((key) => {
+          const prevArr = prev[key] || [];
+          const newArr = arrayKmaWind[key] || [];
 
-            // 기존 time 목록
-            const existingTimes = new Set(prevArr.map((item) => item.time));
+          // 기존 time 목록
+          const existingTimes = new Set(prevArr.map((item) => item.time));
 
-            // 중복 아닌 것만 필터
-            const filtered = newArr.filter(
-              (item) => !existingTimes.has(item.time),
-            );
-
+          // 중복 아닌 것만 필터
+          const filtered = newArr.filter(
+            (item) => !existingTimes.has(item.time),
+          );
+          if (prevArr.length === 0) {
+            updated[key] = [...filtered];
+          } else {
             updated[key] = [...prevArr, ...filtered].slice(filtered.length);
-          });
-
-          return updated;
+          }
         });
-      }
+
+        return updated;
+      });
+
       // // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -538,30 +532,31 @@ function App() {
           }
         }
       });
-      if (kmaVisData.length === 0) {
-        setKmaVisData(arrayKmaVis);
-      } else {
-        setKmaVisData((prev) => {
-          const updated = { ...prev };
 
-          Object.keys(arrayKmaVis).forEach((key) => {
-            const prevArr = prev[key] || [];
-            const newArr = arrayKmaVis[key] || [];
+      setKmaVisData((prev) => {
+        const updated = { ...prev };
 
-            // 기존 time 목록
-            const existingTimes = new Set(prevArr.map((item) => item.time));
+        Object.keys(arrayKmaVis).forEach((key) => {
+          const prevArr = prev[key] || [];
+          const newArr = arrayKmaVis[key] || [];
 
-            // 중복 아닌 것만 필터
-            const filtered = newArr.filter(
-              (item) => !existingTimes.has(item.time),
-            );
+          // 기존 time 목록
+          const existingTimes = new Set(prevArr.map((item) => item.time));
 
+          // 중복 아닌 것만 필터
+          const filtered = newArr.filter(
+            (item) => !existingTimes.has(item.time),
+          );
+          if (prevArr.length === 0) {
+            updated[key] = [...filtered];
+          } else {
             updated[key] = [...prevArr, ...filtered].slice(filtered.length);
-          });
-
-          return updated;
+          }
         });
-      }
+
+        return updated;
+      });
+
       // // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
