@@ -461,7 +461,7 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      console.log(arraykw);
+      console.log(arrayKW);
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
