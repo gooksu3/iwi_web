@@ -591,7 +591,7 @@ function App() {
           setMaeamVisData(arrayMV);
         }
       }
-      // console.log(objInfoFromApi.eastBreak);
+      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }

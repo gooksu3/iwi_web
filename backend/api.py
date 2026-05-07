@@ -1,6 +1,7 @@
 from flask import Flask,jsonify,request
 from flask_cors import CORS
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -18,24 +19,31 @@ def initial_api_calling():
     results={}
     url_kma_wind = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?'
     url_kma_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
-    url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     params_kma = {
     "authKey": "1oWYR_o-SnGFmEf6PlpxQQ",
     "tm1":tm1,
     "tm2":tm2,
     }
+    url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
                   "type":"json",
                   "obsCode":"SF_0010",
                   "reqDate":"20260407",
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
                   "min":"1"}
+    key_east_break="FA799FE5-BF35-4BB6-B58F-ED803D58056B"
+    today=datetime.now().strftime("%Y%m%d")
+    mmaf=104
+    east_break_water=1041519
+    url_east_break=f"http://marineweather.nmpnt.go.kr:8001/openWeatherDate.do?serviceKey={key_east_break}&resultType=xml&date={today}&mmaf={mmaf}&mmsi={east_break_water}&dataType=2"
     response_wind = requests.get(url_kma_wind,params=params_kma)
     response_vis=requests.get(url_kma_vis,params=params_kma)
     response_maeam=requests.get(url_maeam,params=params_maeam)
+    response_east_break=requests.get(url_east_break)
     results["kmaWind"]=response_wind.text
     results["kmaVis"]=response_vis.text
     results["maeam"]=response_maeam.json()
+    results["east_break"]=response_east_break.json()
     return jsonify(results)
 
 
