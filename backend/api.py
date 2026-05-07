@@ -31,19 +31,19 @@ def initial_api_calling():
                   "reqDate":"20260407",
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
                   "min":"1"}
-    # key_east_break="FA799FE5-BF35-4BB6-B58F-ED803D58056B"
-    # today=datetime.now().strftime("%Y%m%d")
-    # mmaf=104
-    # east_break_water=1041519
-    # url_east_break=f"http://marineweather.nmpnt.go.kr:8001/openWeatherDate.do?serviceKey={key_east_break}&resultType=json&date={today}&mmaf={mmaf}&mmsi={east_break_water}&dataType=2"
+    key_east_break="FA799FE5-BF35-4BB6-B58F-ED803D58056B"
+    today=datetime.now().strftime("%Y%m%d")
+    mmaf=104
+    east_break_water=1041519
+    url_east_break=f"http://marineweather.nmpnt.go.kr:8001/openWeatherDate.do?serviceKey={key_east_break}&resultType=json&date={today}&mmaf={mmaf}&mmsi={east_break_water}&dataType=2"
     response_wind = requests.get(url_kma_wind,params=params_kma)
     response_vis=requests.get(url_kma_vis,params=params_kma)
     response_maeam=requests.get(url_maeam,params=params_maeam)
-    # response_east_break=requests.get(url_east_break)
+    response_east_break=requests.get(url_east_break)
     results["kmaWind"]=response_wind.text
     results["kmaVis"]=response_vis.text
     results["maeam"]=response_maeam.json()
-    # results["east_break"]=response_east_break.json()
+    results["east_break"]=response_east_break.json()['result']['recordset']
     return jsonify(results)
 
 if __name__ == "__main__":
