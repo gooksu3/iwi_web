@@ -437,7 +437,6 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -487,6 +486,7 @@ function App() {
           }
         }
       });
+      console.log(arrayKmaWind);
       if (arrayKmaWind) {
         setKmaWindData(arrayKmaWind);
       }
@@ -532,7 +532,10 @@ function App() {
           }
         }
       });
-      setKmaVisData(arrayKmaVis);
+      console.log(arrayKmaVis);
+      if (arrayKmaVis) {
+        setKmaVisData(arrayKmaVis);
+      }
       // 매암
       // if (objInfoFromApi.maeam.body.items.item.length > 0) {
       //   const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
