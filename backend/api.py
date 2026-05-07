@@ -1,12 +1,12 @@
-from flask import Flask
+from flask import Flask,jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
+@app.route("/api/1min")
 def home():
-    return "Flask server running"
+    return jsonify("Flask server running")
 
 @app.route("/test")
 def test():

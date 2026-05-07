@@ -427,7 +427,8 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    // const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://xxxxx.onrender.com/api/1min?tm1=${tm1}&tm2=${tm2}/api/initial?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -437,7 +438,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      console.log(objInfoFromApi);
+      console.log("----", objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
