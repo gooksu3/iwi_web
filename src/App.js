@@ -1950,42 +1950,43 @@ function App() {
     );
   }
   return (
-    <div
-      style={{
-        backgroundColor: "#272727",
-        width: "100vw",
-        minHeight: "100vh",
-      }}
-    >
-      {/* <div
-        style={{
-          display: "flex",
-          justifyContent: "Right",
-          alignItems: "center",
-        }}
-      >
-        <span style={{ ...titleStyle, paddingRight: "3vw" }}>
-          울산항 유관기관 통합기상정보시스템
-        </span>
-        <Clock />
-      </div> */}
-      {kmaWindData && kmaVisData ? (
-        <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData} />
-      ) : kmaWindData === null || kmaVisData === null ? (
-        <p></p>
-      ) : (
-        <p>불러오는 중...</p>
-      )}
-      <div style={{ position: "relative" }}>
-        <div
-          className={loadForecastTable ? "spinner" : ""}
-          style={{ position: "absolute", left: "40%", top: "30%" }}
-        ></div>
-        {shortForecastData.length > 0 ? (
-          <ShortForecastTable shortForecastData={shortForecastData} />
-        ) : null}
-      </div>
-    </div>
+    // <div
+    //   style={{
+    //     backgroundColor: "#272727",
+    //     width: "100vw",
+    //     minHeight: "100vh",
+    //   }}
+    // >
+    //   {/* <div
+    //     style={{
+    //       display: "flex",
+    //       justifyContent: "Right",
+    //       alignItems: "center",
+    //     }}
+    //   >
+    //     <span style={{ ...titleStyle, paddingRight: "3vw" }}>
+    //       울산항 유관기관 통합기상정보시스템
+    //     </span>
+    //     <Clock />
+    //   </div> */}
+    //   {kmaWindData && kmaVisData ? (
+    //     <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData} />
+    //   ) : kmaWindData === null || kmaVisData === null ? (
+    //     <p></p>
+    //   ) : (
+    //     <p>불러오는 중...</p>
+    //   )}
+    //   <div style={{ position: "relative" }}>
+    //     <div
+    //       className={loadForecastTable ? "spinner" : ""}
+    //       style={{ position: "absolute", left: "40%", top: "30%" }}
+    //     ></div>
+    //     {shortForecastData.length > 0 ? (
+    //       <ShortForecastTable shortForecastData={shortForecastData} />
+    //     ) : null}
+    //   </div>
+    // </div>
+    <div>화이팅!!</div>
   );
 }
 
