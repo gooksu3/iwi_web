@@ -35,7 +35,7 @@ def initial_api_calling():
     today=datetime.now().strftime("%Y%m%d")
     mmaf=104
     east_break_water=1041519
-    url_east_break=f"http://marineweather.nmpnt.go.kr:8001/openWeatherDate.do?serviceKey={key_east_break}&resultType=xml&date={today}&mmaf={mmaf}&mmsi={east_break_water}&dataType=2"
+    url_east_break=f"http://marineweather.nmpnt.go.kr:8001/openWeatherDate.do?serviceKey={key_east_break}&resultType=json&date={today}&mmaf={mmaf}&mmsi={east_break_water}&dataType=2"
     response_wind = requests.get(url_kma_wind,params=params_kma)
     response_vis=requests.get(url_kma_vis,params=params_kma)
     response_maeam=requests.get(url_maeam,params=params_maeam)
