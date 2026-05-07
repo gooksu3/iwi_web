@@ -12,8 +12,8 @@ def test():
 
 @app.route("/api/initial", methods=["GET", "OPTIONS"])
 def initial_api_calling():
-    tm1 = request.args.json['tm1']
-    tm2 = request.args.json['tm2']
+    tm1=request.args.get("tm1")
+    tm2=request.args.get("tm2")
     url_wind = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?'
     # url_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
     params = {
