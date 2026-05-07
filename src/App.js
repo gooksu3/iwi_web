@@ -421,14 +421,14 @@ function App() {
     setLoadForecastTable(false);
   };
   const fetchInitialWindData = async () => {
+    console.log("처음 호출");
     const now = new Date();
     const tm2 = formatDateToYYYYMMDDHHMM(now);
     const tm1 = formatDateToYYYYMMDDHHMM(
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    // const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
-    const WORKER_URL = `https://xxxxx.onrender.com/api/1min?tm1=${tm1}&tm2=${tm2}/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://iwi-web.onrender.com/api/initial?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -438,7 +438,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      console.log("----", objInfoFromApi);
+      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -1674,40 +1674,40 @@ function App() {
         sessionStorage.setItem("token", data.token); // 브라우저 닫으면 초기화
         setToken(data.token);
         fetchInitialWindData();
-        fetchDataForecast();
-        fetchDataWeatherWarning();
-        setInterval(fetchWindData1min, 10 * 60 * 1000); // 1분마다 갱신
-        let lastForecastKey = "";
-        let lastWarningKey = "";
+        // fetchDataForecast();
+        // fetchDataWeatherWarning();
+        // setInterval(fetchWindData1min, 10 * 60 * 1000); // 1분마다 갱신
+        // let lastForecastKey = "";
+        // let lastWarningKey = "";
 
-        setInterval(() => {
-          const now = new Date();
-          const hours = now.getHours();
-          const minutes = now.getMinutes();
+        // setInterval(() => {
+        //   const now = new Date();
+        //   const hours = now.getHours();
+        //   const minutes = now.getMinutes();
 
-          const currentKey = `${hours}:${minutes}`;
+        //   const currentKey = `${hours}:${minutes}`;
 
-          // forecast
-          if (
-            [0, 4, 8, 12, 16, 20].includes(hours) &&
-            [0, 30].includes(minutes)
-          ) {
-            // 매시간 00분, 30분에 업데이트
-            if (lastForecastKey !== currentKey) {
-              lastForecastKey = currentKey;
-              fetchDataForecast();
-            }
-          }
+        //   // forecast
+        //   if (
+        //     [0, 4, 8, 12, 16, 20].includes(hours) &&
+        //     [0, 30].includes(minutes)
+        //   ) {
+        //     // 매시간 00분, 30분에 업데이트
+        //     if (lastForecastKey !== currentKey) {
+        //       lastForecastKey = currentKey;
+        //       fetchDataForecast();
+        //     }
+        //   }
 
-          // warning
-          if ([1, 11, 21, 31, 41, 51].includes(minutes)) {
-            // 매시간 10분마다 업데이트
-            if (lastWarningKey !== currentKey) {
-              lastWarningKey = currentKey;
-              fetchDataWeatherWarning();
-            }
-          }
-        }, 60000);
+        //   // warning
+        //   if ([1, 11, 21, 31, 41, 51].includes(minutes)) {
+        //     // 매시간 10분마다 업데이트
+        //     if (lastWarningKey !== currentKey) {
+        //       lastWarningKey = currentKey;
+        //       fetchDataWeatherWarning();
+        //     }
+        //   }
+        // }, 60000);
       } else {
         setPassword("");
         setError("비밀번호가 틀렸습니다.");
