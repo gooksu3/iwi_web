@@ -421,7 +421,6 @@ function App() {
     setLoadForecastTable(false);
   };
   const fetchInitialWindData = async () => {
-    console.log("처음 호출");
     const now = new Date();
     const tm2 = formatDateToYYYYMMDDHHMM(now);
     const tm1 = formatDateToYYYYMMDDHHMM(
@@ -432,11 +431,13 @@ function App() {
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
+        headers: { Authorization: token },
       });
       if (!res.ok) {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
+      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -531,10 +532,7 @@ function App() {
           }
         }
       });
-      console.log(arrayKmaVis);
-      if (arrayKmaVis) {
-        setKmaVisData(arrayKmaVis);
-      }
+      setKmaVisData(arrayKmaVis);
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
@@ -572,7 +570,6 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-        console.log("매암", arrayMW);
         if (arrayMW) {
           setMeamWindData(arrayMW);
         }
@@ -586,12 +583,10 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-        console.log("매암", arrayMV);
         if (arrayMV) {
           setMaeamVisData(arrayMV);
         }
       }
-      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -1954,43 +1949,42 @@ function App() {
     );
   }
   return (
-    // <div
-    //   style={{
-    //     backgroundColor: "#272727",
-    //     width: "100vw",
-    //     minHeight: "100vh",
-    //   }}
-    // >
-    //   {/* <div
-    //     style={{
-    //       display: "flex",
-    //       justifyContent: "Right",
-    //       alignItems: "center",
-    //     }}
-    //   >
-    //     <span style={{ ...titleStyle, paddingRight: "3vw" }}>
-    //       울산항 유관기관 통합기상정보시스템
-    //     </span>
-    //     <Clock />
-    //   </div> */}
-    //   {kmaWindData && kmaVisData ? (
-    //     <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData} />
-    //   ) : kmaWindData === null || kmaVisData === null ? (
-    //     <p></p>
-    //   ) : (
-    //     <p>불러오는 중...</p>
-    //   )}
-    //   <div style={{ position: "relative" }}>
-    //     <div
-    //       className={loadForecastTable ? "spinner" : ""}
-    //       style={{ position: "absolute", left: "40%", top: "30%" }}
-    //     ></div>
-    //     {shortForecastData.length > 0 ? (
-    //       <ShortForecastTable shortForecastData={shortForecastData} />
-    //     ) : null}
-    //   </div>
-    // </div>
-    <div>화이팅!!</div>
+    <div
+      style={{
+        backgroundColor: "#272727",
+        width: "100vw",
+        minHeight: "100vh",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "Right",
+          alignItems: "center",
+        }}
+      >
+        <span style={{ ...titleStyle, paddingRight: "3vw" }}>
+          울산항 유관기관 통합기상정보시스템
+        </span>
+        <Clock />
+      </div>
+      {kmaWindData && kmaVisData ? (
+        <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData} />
+      ) : kmaWindData === null || kmaVisData === null ? (
+        <p></p>
+      ) : (
+        <p>불러오는 중...</p>
+      )}
+      <div style={{ position: "relative" }}>
+        <div
+          className={loadForecastTable ? "spinner" : ""}
+          style={{ position: "absolute", left: "40%", top: "30%" }}
+        ></div>
+        {/* {shortForecastData.length > 0 ? (
+          <ShortForecastTable shortForecastData={shortForecastData} />
+        ) : null} */}
+      </div>
+    </div>
   );
 }
 
