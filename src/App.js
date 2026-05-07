@@ -26,6 +26,190 @@ import snowy from "./img/snowy.png";
 import sunny from "./img/sunny.png";
 import thunder from "./img/thunder.png";
 
+function GraphWind({ data }) {
+  const [processedData, setProcessedData] = useState([]);
+
+  const tickIndexes = processedData
+    .map((d, index) =>
+      d.windSpeedLine !== null && d.windSpeedLine !== undefined
+        ? index
+        : [0, processedData.length - 1].includes(index)
+          ? index
+          : null,
+    )
+    .filter((v) => v !== null);
+
+  const tickValues = tickIndexes.map((i) => processedData[i].time);
+
+  useEffect(() => {
+    setProcessedData(
+      data.map((d, index) => ({
+        ...d,
+        windSpeedLine:
+          index === 0 || index === data.length - 1
+            ? d.windSpeed
+            : [0, 10, 20, 30, 40, 50].includes(
+                  parseInt(d.time.slice(d.time.length - 2, d.time.length), 10),
+                )
+              ? d.windSpeed
+              : null,
+      })),
+    );
+  }, [data]);
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        width={450}
+        height={100}
+        data={processedData}
+        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+        style={{ backgroundColor: "white", border: "1px solid #272727" }}
+      >
+        <XAxis
+          dataKey="time"
+          axisLine={{ stroke: "#272727", strokeWidth: 2 }}
+          tick={{ fontSize: 15, fill: "#272727" }}
+          ticks={tickValues}
+          tickFormatter={(time, index) => {
+            return time;
+          }}
+        />
+        <YAxis
+          domain={[0, 25]}
+          ticks={[25]}
+          axisLine={{ stroke: "#272727", strokeWidth: 2 }}
+          tick={{ fontSize: 15, fontWeight: 500, fill: "#272727" }}
+        />
+
+        <Tooltip />
+
+        {/* 60개 전체 영역 */}
+        <Area
+          type="monotone"
+          dataKey="windSpeed"
+          stroke={null}
+          fill="#e0e0e0"
+        />
+
+        {/* 전체 선 (60개 데이터) */}
+        <Line
+          type="monotone"
+          dataKey="windSpeed"
+          stroke="#8884d8"
+          strokeWidth={3}
+          dot={false} // 🔥 점 제거
+        />
+
+        {/* 10분 간격 점만 표시 */}
+        <Line
+          type="monotone"
+          dataKey="windSpeedLine"
+          stroke="transparent" // 🔥 선 안 보이게
+          dot={{ r: 5, stroke: "#8884d8", strokeWidth: 2, fill: "white" }} // 🔥 점만 보이게
+          activeDot={{ r: 8 }}
+          connectNulls={false}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+function GraphVis({ data, varKma }) {
+  const [processedData, setProcessedData] = useState([]);
+
+  const tickIndexes = processedData
+    .map((d, index) =>
+      d.visLine !== null && d.visLine !== undefined
+        ? index
+        : [0, processedData.length - 1].includes(index)
+          ? index
+          : null,
+    )
+    .filter((v) => v !== null);
+
+  const tickValues = tickIndexes.map((i) => processedData[i].time);
+
+  let domain = [0, 50];
+  let ticks = [25, 50];
+  if (varKma === false) {
+    domain = [0, 20];
+    ticks = [10, 20];
+  }
+
+  useEffect(() => {
+    setProcessedData(
+      data.map((d, index) => ({
+        ...d,
+        visLine:
+          index === 0 || index === data.length - 1
+            ? d.vis
+            : [0, 10, 20, 30, 40, 50].includes(
+                  parseInt(d.time.slice(d.time.length - 2, d.time.length), 10),
+                )
+              ? d.vis
+              : null,
+      })),
+    );
+  }, [data]);
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        width={450}
+        height={100}
+        data={processedData}
+        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+        style={{ backgroundColor: "white", border: "1px solid #272727" }}
+      >
+        <XAxis
+          dataKey="time"
+          axisLine={{ stroke: "#272727", strokeWidth: 2 }}
+          tick={{ fontSize: 15, fill: "#272727" }}
+          ticks={tickValues}
+          tickFormatter={(time, index) => {
+            return time;
+          }}
+        />
+        <YAxis
+          domain={domain}
+          ticks={ticks}
+          axisLine={{ stroke: "#272727", strokeWidth: 2 }}
+          tick={{ fontSize: 15, fontWeight: 500, fill: "#272727" }}
+        />
+
+        <Tooltip />
+
+        {/* 60개 전체 영역 */}
+        <Area
+          type="monotone"
+          dataKey="windSpeed"
+          stroke={null}
+          fill="#e0e0e0"
+        />
+
+        {/* 전체 선 (60개 데이터) */}
+        <Line
+          type="monotone"
+          dataKey="vis"
+          stroke="#8884d8"
+          strokeWidth={3}
+          dot={false} // 🔥 점 제거
+        />
+
+        {/* 10분 간격 점만 표시 */}
+        <Line
+          type="monotone"
+          dataKey="visLine"
+          stroke="transparent" // 🔥 선 안 보이게
+          dot={{ r: 5, stroke: "#8884d8", strokeWidth: 2, fill: "white" }} // 🔥 점만 보이게
+          activeDot={{ r: 8 }}
+          connectNulls={false}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
 function App() {
   // For Login
   const [token, setToken] = useState(sessionStorage.getItem("token"));
@@ -66,7 +250,7 @@ function App() {
   const [visMaeam, setVisMaeam] = useState(null);
   const arrayRowColor = ["#2e86de", "#0abde3"];
   const graphWidth = "28vw";
-  const graphHeight = "11vh";
+  const graphHeight = "10vh";
   const [arrayDateForecast, setArrayDateForecast] = useState([]);
   const [shortForecastData, setShortForecastData] = useState([]);
   const objDirections = {
@@ -160,7 +344,7 @@ function App() {
     setArrayDateForecast([]);
     setShortForecastData([]);
     setLoadForecastTable(true);
-    const WORKER_URL = "https://uiwi.gooksu3.workers.dev/api/daily";
+    const WORKER_URL = "https://newuiwi.gooksu3.workers.dev/api/daily";
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -243,7 +427,7 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/initial?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -253,6 +437,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
+      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -263,13 +448,13 @@ function App() {
         .reduce(
           (acc, cur) => {
             const line = cur.split(/\s+/);
-            if (line[1] == "924" && line[5] !== "-99.9") {
+            if (line[1] === "924" && line[5] !== "-99.9") {
               // 간절곶
               acc["간절곶"].push(line);
-            } else if (line[1] == "901" && line[5] !== "-99.9") {
+            } else if (line[1] === "901" && line[5] !== "-99.9") {
               // 울기
               acc["울기"].push(line);
-            } else if (line[1] == "898" && line[5] !== "-99.9") {
+            } else if (line[1] === "898" && line[5] !== "-99.9") {
               // 장생포
               acc["장생포"].push(line);
             }
@@ -302,7 +487,9 @@ function App() {
           }
         }
       });
-      setKmaWindData(arrayKmaWind);
+      if (arrayKmaWind) {
+        setKmaWindData(arrayKmaWind);
+      }
       // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -383,7 +570,9 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-        setMeamWindData(arrayMW);
+        if (arrayMW) {
+          setMeamWindData(arrayMW);
+        }
         const arrayMV = arrayMaeam
           .map((item) => ({ time: item.time, vis: item.vis }))
           .sort((a, b) => {
@@ -394,8 +583,11 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-        setMaeamVisData(arrayMV);
+        if (arrayMV) {
+          setMaeamVisData(arrayMV);
+        }
       }
+      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -407,7 +599,7 @@ function App() {
       new Date(now.getTime() - 3 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/1min?tm1=${tm1}&tm2=${tm2}`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/1min?tm1=${tm1}&tm2=${tm2}`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -417,6 +609,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
+      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -466,6 +659,7 @@ function App() {
           }
         }
       });
+      // console.log(arrayKmaWind);
       setKmaWindData((prev) => {
         const updated = { ...prev };
 
@@ -480,16 +674,12 @@ function App() {
           const filtered = newArr.filter(
             (item) => !existingTimes.has(item.time),
           );
-          if (prevArr.length === 0) {
-            updated[key] = [...filtered];
-          } else {
-            updated[key] = [...prevArr, ...filtered].slice(filtered.length);
-          }
+
+          updated[key] = [...prevArr, ...filtered].slice(filtered.length);
         });
 
         return updated;
       });
-
       // // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -532,7 +722,7 @@ function App() {
           }
         }
       });
-
+      // console.log(arrayKmaVis);
       setKmaVisData((prev) => {
         const updated = { ...prev };
 
@@ -547,11 +737,8 @@ function App() {
           const filtered = newArr.filter(
             (item) => !existingTimes.has(item.time),
           );
-          if (prevArr.length === 0) {
-            updated[key] = [...filtered];
-          } else {
-            updated[key] = [...prevArr, ...filtered].slice(filtered.length);
-          }
+
+          updated[key] = [...prevArr, ...filtered].slice(filtered.length);
         });
 
         return updated;
@@ -591,7 +778,13 @@ function App() {
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMW) {
-          setMeamWindData(arrayMW);
+          setMeamWindData((prev) => {
+            const existingTimes = new Set(prev.map((item) => item.time));
+            const filtered = arrayMW.filter(
+              (item) => !existingTimes.has(item.time),
+            );
+            return [...prev, ...filtered].slice(filtered.length);
+          });
         }
         const arrayMV = arrayMaeam
           .map((item) => ({ time: item.time, vis: item.vis }))
@@ -605,15 +798,22 @@ function App() {
           });
 
         if (arrayMV) {
-          setMaeamVisData(arrayMV);
+          setMaeamVisData((prev) => {
+            const existingTimes = new Set(prev.map((item) => item.time));
+            const filtered = arrayMV.filter(
+              (item) => !existingTimes.has(item.time),
+            );
+            return [...prev, ...filtered].slice(filtered.length);
+          });
         }
       }
+      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
   };
   const fetchDataApproximateClearTime = async () => {
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/clearTime`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/clearTime`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -644,7 +844,7 @@ function App() {
     // 5	연장	    기존 특보의 유효시간이 연장되었음을 의미합니다. 내용은 동일하지만 지속시간만 늘어납니다.
     // 6	변경	    특보의 내용(예: 대상 지역, 강수량 등 세부사항)이 변경되었지만, 특보 등급은 그대로 유지됩니다.
     // 7	변경해제	변경으로 인해 적용되었던 이전 특보 내용이 해제되었음을 알리는 자동 해제입니다. 주로 시스템적으로 이전 정보 무효화 처리 시 사용됩니다.
-    const WORKER_URL = `https://uiwi.gooksu3.workers.dev/api/WWarning`;
+    const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/WWarning`;
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
@@ -884,227 +1084,7 @@ function App() {
       console.error("데이터 불러오기 오류:", err);
     }
   };
-  function GraphWind({ data }) {
-    const [processedData, setProcessedData] = useState([]);
 
-    const tickIndexes = processedData
-      .map((d, index) =>
-        d.windSpeedLine !== null && d.windSpeedLine !== undefined
-          ? index
-          : [0, processedData.length - 1].includes(index)
-            ? index
-            : null,
-      )
-      .filter((v) => v !== null);
-
-    const tickValues = tickIndexes.map((i) => processedData[i].time);
-
-    useEffect(() => {
-      setProcessedData(
-        data.map((d, index) => ({
-          ...d,
-          windSpeedLine:
-            index === 0 || index === data.length - 1
-              ? d.windSpeed
-              : [0, 10, 20, 30, 40, 50].includes(
-                    parseInt(
-                      d.time.slice(d.time.length - 2, d.time.length),
-                      10,
-                    ),
-                  )
-                ? d.windSpeed
-                : null,
-        })),
-      );
-      console.log(
-        data.map((d, index) => ({
-          ...d,
-          windSpeedLine:
-            index === 0 || index === data.length - 1
-              ? d.windSpeed
-              : [0, 10, 20, 30, 40, 50].includes(
-                    parseInt(
-                      d.time.slice(d.time.length - 2, d.time.length),
-                      10,
-                    ),
-                  )
-                ? d.windSpeed
-                : null,
-        })),
-      );
-    }, [data]);
-
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          width={450}
-          height={100}
-          data={processedData}
-          margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-          style={{ backgroundColor: "white", border: "1px solid #272727" }}
-        >
-          <XAxis
-            dataKey="time"
-            axisLine={{ stroke: "#272727", strokeWidth: 2 }}
-            tick={{ fontSize: 15, fill: "#272727" }}
-            ticks={tickValues}
-            tickFormatter={(time, index) => {
-              return time;
-            }}
-          />
-          <YAxis
-            domain={[0, 25]}
-            ticks={[25]}
-            axisLine={{ stroke: "#272727", strokeWidth: 2 }}
-            tick={{ fontSize: 15, fontWeight: 500, fill: "#272727" }}
-          />
-
-          <Tooltip />
-
-          {/* 60개 전체 영역 */}
-          <Area
-            type="monotone"
-            dataKey="windSpeed"
-            stroke={null}
-            fill="#e0e0e0"
-          />
-
-          {/* 전체 선 (60개 데이터) */}
-          <Line
-            type="monotone"
-            dataKey="windSpeed"
-            stroke="#8884d8"
-            strokeWidth={3}
-            dot={false} // 🔥 점 제거
-          />
-
-          {/* 10분 간격 점만 표시 */}
-          <Line
-            type="monotone"
-            dataKey="windSpeedLine"
-            stroke="transparent" // 🔥 선 안 보이게
-            dot={{ r: 5, stroke: "#8884d8", strokeWidth: 2, fill: "white" }} // 🔥 점만 보이게
-            activeDot={{ r: 8 }}
-            connectNulls={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  }
-  function GraphVis({ data, varKma }) {
-    const [processedData, setProcessedData] = useState([]);
-
-    const tickIndexes = processedData
-      .map((d, index) =>
-        d.visLine !== null && d.visLine !== undefined
-          ? index
-          : [0, processedData.length - 1].includes(index)
-            ? index
-            : null,
-      )
-      .filter((v) => v !== null);
-
-    const tickValues = tickIndexes.map((i) => processedData[i].time);
-
-    let domain = [0, 50];
-    let ticks = [25, 50];
-    if (varKma === false) {
-      domain = [0, 20];
-      ticks = [10, 20];
-    }
-
-    useEffect(() => {
-      setProcessedData(
-        data.map((d, index) => ({
-          ...d,
-          visLine:
-            index === 0 || index === data.length - 1
-              ? d.vis
-              : [0, 10, 20, 30, 40, 50].includes(
-                    parseInt(
-                      d.time.slice(d.time.length - 2, d.time.length),
-                      10,
-                    ),
-                  )
-                ? d.vis
-                : null,
-        })),
-      );
-      console.log(
-        data.map((d, index) => ({
-          ...d,
-          visLine:
-            index === 0 || index === data.length - 1
-              ? d.vis
-              : [0, 10, 20, 30, 40, 50].includes(
-                    parseInt(
-                      d.time.slice(d.time.length - 2, d.time.length),
-                      10,
-                    ),
-                  )
-                ? d.vis
-                : null,
-        })),
-      );
-    }, [data]);
-
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          width={450}
-          height={100}
-          data={processedData}
-          margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-          style={{ backgroundColor: "white", border: "1px solid #272727" }}
-        >
-          <XAxis
-            dataKey="time"
-            axisLine={{ stroke: "#272727", strokeWidth: 2 }}
-            tick={{ fontSize: 15, fill: "#272727" }}
-            ticks={tickValues}
-            tickFormatter={(time, index) => {
-              return time;
-            }}
-          />
-          <YAxis
-            domain={domain}
-            ticks={ticks}
-            axisLine={{ stroke: "#272727", strokeWidth: 2 }}
-            tick={{ fontSize: 15, fontWeight: 500, fill: "#272727" }}
-          />
-
-          <Tooltip />
-
-          {/* 60개 전체 영역 */}
-          <Area
-            type="monotone"
-            dataKey="windSpeed"
-            stroke={null}
-            fill="#e0e0e0"
-          />
-
-          {/* 전체 선 (60개 데이터) */}
-          <Line
-            type="monotone"
-            dataKey="vis"
-            stroke="#8884d8"
-            strokeWidth={3}
-            dot={false} // 🔥 점 제거
-          />
-
-          {/* 10분 간격 점만 표시 */}
-          <Line
-            type="monotone"
-            dataKey="visLine"
-            stroke="transparent" // 🔥 선 안 보이게
-            dot={{ r: 5, stroke: "#8884d8", strokeWidth: 2, fill: "white" }} // 🔥 점만 보이게
-            activeDot={{ r: 8 }}
-            connectNulls={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  }
   const colorWindValue = ({ windSpd }) => {
     if (parseFloat(windSpd) >= 14.0) {
       return "#ee5253";
@@ -1683,7 +1663,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://uiwi.gooksu3.workers.dev/login", {
+      const res = await fetch("https://newuiwi.gooksu3.workers.dev/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
@@ -1695,7 +1675,7 @@ function App() {
         fetchInitialWindData();
         fetchDataForecast();
         fetchDataWeatherWarning();
-        setInterval(fetchWindData1min, 60 * 1000); // 1분마다 갱신
+        setInterval(fetchWindData1min, 10 * 60 * 1000); // 1분마다 갱신
         let lastForecastKey = "";
         let lastWarningKey = "";
 
@@ -1823,7 +1803,7 @@ function App() {
     textAlign: "center", // 가로 중앙
     verticalAlign: "middle", // 세로 중앙
     alignItems: "center",
-    fontSize: "2.3vw",
+    fontSize: "2vw",
     fontWeight: "bold",
     color: "#EAF3FD",
     padding: "3px",
@@ -1977,7 +1957,7 @@ function App() {
         minHeight: "100vh",
       }}
     >
-      <div
+      {/* <div
         style={{
           display: "flex",
           justifyContent: "Right",
@@ -1988,7 +1968,7 @@ function App() {
           울산항 유관기관 통합기상정보시스템
         </span>
         <Clock />
-      </div>
+      </div> */}
       {kmaWindData && kmaVisData ? (
         <WindAndVisTable kmaWindData={kmaWindData} kmaVisData={kmaVisData} />
       ) : kmaWindData === null || kmaVisData === null ? (
