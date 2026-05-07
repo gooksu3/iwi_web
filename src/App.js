@@ -465,7 +465,6 @@ function App() {
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
-          console.log(arrayInfo);
           const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
           if (arrayKmaWindDir[index] !== latestInfoWDir) {
             arraySetKmaWindDir[index](latestInfoWDir);
@@ -537,6 +536,7 @@ function App() {
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
+        console.log(arrayInfoMaeam);
         let latestInfoMaeam = null;
         for (let i = 0; i >= 0; i++) {
           if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
