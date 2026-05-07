@@ -572,6 +572,7 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
+        console.log("매암", arrayMW);
         if (arrayMW) {
           setMeamWindData(arrayMW);
         }
@@ -585,6 +586,7 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
+        console.log("매암", arrayMV);
         if (arrayMV) {
           setMaeamVisData(arrayMV);
         }
