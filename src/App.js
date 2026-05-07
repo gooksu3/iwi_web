@@ -465,6 +465,7 @@ function App() {
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
+          console.log(arrayInfo);
           const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
           if (arrayKmaWindDir[index] !== latestInfoWDir) {
             arraySetKmaWindDir[index](latestInfoWDir);
