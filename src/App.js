@@ -461,7 +461,6 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      console.log(arrayKW);
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
@@ -487,7 +486,6 @@ function App() {
           }
         }
       });
-      console.log(arrayKmaWind);
       if (arrayKmaWind) {
         setKmaWindData(arrayKmaWind);
       }
@@ -533,64 +531,64 @@ function App() {
           }
         }
       });
-      // console.log(arrayKmaVis);
+      console.log(arrayKmaVis);
       if (arrayKmaVis) {
         setKmaVisData(arrayKmaVis);
       }
       // 매암
-      // if (objInfoFromApi.maeam.body.items.item.length > 0) {
-      //   const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
-      //   let latestInfoMaeam = null;
-      //   for (let i = 0; i >= 0; i++) {
-      //     if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
-      //       latestInfoMaeam = arrayInfoMaeam[i];
-      //       break;
-      //     }
-      //   }
-      //   setWindSpdMaeam(latestInfoMaeam.rmyWspd);
-      //   setWindDirMaeam(latestInfoMaeam.rmyWndrct);
-      //   setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
-      //   const baseDate = formatYYYYMMDDHHMMToDate(
-      //     latestInfoMaeam.obsrvnDt.replace(/[- :]/g, ""),
-      //   );
+      if (objInfoFromApi.maeam.body.items.item.length > 0) {
+        const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
+        let latestInfoMaeam = null;
+        for (let i = 0; i >= 0; i++) {
+          if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
+            latestInfoMaeam = arrayInfoMaeam[i];
+            break;
+          }
+        }
+        setWindSpdMaeam(latestInfoMaeam.rmyWspd);
+        setWindDirMaeam(latestInfoMaeam.rmyWndrct);
+        setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
+        const baseDate = formatYYYYMMDDHHMMToDate(
+          latestInfoMaeam.obsrvnDt.replace(/[- :]/g, ""),
+        );
 
-      //   const arrayMaeam = arrayInfoMaeam.map((info) => {
-      //     const raw = info.obsrvnDt.replace(/[- :]/g, "");
+        const arrayMaeam = arrayInfoMaeam.map((info) => {
+          const raw = info.obsrvnDt.replace(/[- :]/g, "");
 
-      //     return {
-      //       time: formatToHHMM(raw),
-      //       wd: info.rmyWndrct,
-      //       ws: info.rmyWspd,
-      //       vis: mToKm(info.dtvsbM20kLen),
-      //     };
-      //   });
-      //   const arrayMW = arrayMaeam
-      //     .map((item) => ({ time: item.time, windSpeed: item.ws }))
-      //     .sort((a, b) => {
-      //       const toMinutes = (t) => {
-      //         const [h, m] = t.split(":").map(Number);
-      //         return h * 60 + m;
-      //       };
+          return {
+            time: formatToHHMM(raw),
+            wd: info.rmyWndrct,
+            ws: info.rmyWspd,
+            vis: mToKm(info.dtvsbM20kLen),
+          };
+        });
+        const arrayMW = arrayMaeam
+          .map((item) => ({ time: item.time, windSpeed: item.ws }))
+          .sort((a, b) => {
+            const toMinutes = (t) => {
+              const [h, m] = t.split(":").map(Number);
+              return h * 60 + m;
+            };
 
-      //       return toMinutes(a.time) - toMinutes(b.time);
-      //     });
-      //   if (arrayMW) {
-      //     setMeamWindData(arrayMW);
-      //   }
-      //   const arrayMV = arrayMaeam
-      //     .map((item) => ({ time: item.time, vis: item.vis }))
-      //     .sort((a, b) => {
-      //       const toMinutes = (t) => {
-      //         const [h, m] = t.split(":").map(Number);
-      //         return h * 60 + m;
-      //       };
+            return toMinutes(a.time) - toMinutes(b.time);
+          });
+        if (arrayMW) {
+          setMeamWindData(arrayMW);
+        }
+        const arrayMV = arrayMaeam
+          .map((item) => ({ time: item.time, vis: item.vis }))
+          .sort((a, b) => {
+            const toMinutes = (t) => {
+              const [h, m] = t.split(":").map(Number);
+              return h * 60 + m;
+            };
 
-      //       return toMinutes(a.time) - toMinutes(b.time);
-      //     });
-      //   if (arrayMV) {
-      //     setMaeamVisData(arrayMV);
-      //   }
-      // }
+            return toMinutes(a.time) - toMinutes(b.time);
+          });
+        if (arrayMV) {
+          setMaeamVisData(arrayMV);
+        }
+      }
       // console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
