@@ -432,7 +432,6 @@ function App() {
     try {
       const res = await fetch(WORKER_URL, {
         method: "GET",
-        headers: { Authorization: token },
       });
       if (!res.ok) {
         throw new Error("네트워크 응답 실패");
