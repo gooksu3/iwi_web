@@ -39,13 +39,12 @@ def initial_api_calling():
     response_wind = requests.get(url_kma_wind,params=params_kma)
     response_vis=requests.get(url_kma_vis,params=params_kma)
     response_maeam=requests.get(url_maeam,params=params_maeam)
-    response_east_break=requests.get(url_east_break)
+    # response_east_break=requests.get(url_east_break)
     results["kmaWind"]=response_wind.text
     results["kmaVis"]=response_vis.text
     results["maeam"]=response_maeam.json()
-    results["east_break"]=response_east_break.json()
+    # results["east_break"]=response_east_break.json()
     return jsonify(results)
-
 
 if __name__ == "__main__":
     app.run()
