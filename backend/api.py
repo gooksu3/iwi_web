@@ -42,7 +42,7 @@ def initial_api_calling():
     mmaf=104
     east_break_water=1041519
     url_east_break=f"http://marineweather.nmpnt.go.kr:8001/openWeatherDate.do?serviceKey={key_east_break}&resultType=json&date={today}&mmaf={mmaf}&mmsi={east_break_water}&dataType=2"
-    response_east_break=requests.get(url_east_break)
+    response_east_break=requests.get(url_east_break,timeout=30)
     results["east_break"]=response_east_break.status_code
     return jsonify(results)
 
