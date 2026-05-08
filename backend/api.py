@@ -56,16 +56,24 @@ def initial_api_calling():
         try:
             response_wind = session.get(url_kma_wind,params=params_kma,timeout=10)
             if response_wind.status_code == 200:
-                list_wind_info=response_wind.text.split("\n")[3:-2]
-                results["kmaWind"].extend([i for i in list_wind_info if i[1] in ["898","901","924"]])
+                list_info_text=response_wind.text.split("\n")[3:-2]
+                list_wind_info_1=[]
+                for t in list_info_text:
+                    list_wind_info_1.append(t.split())
+                list_wind_info_2=[i for i in list_wind_info_2 if i[1] in ["898","901","924"]]
+                results["kmaWind"].extend([{"time":i[0],"windSpeed":i[5]} for i in list_wind_info_2])
         except Exception as e:
             results["kmaWind"].append(str(e))
         # 기상청 시정
         try:
             response_vis = session.get(url_kma_vis,params=params_kma,timeout=10)
             if response_vis.status_code == 200:
-                list_vis_info=response_vis.text.split("\n")[3:-2]
-                results["kmaVis"].extend([i for i in list_vis_info if i[1] in ["898","901","924"]])
+                list_info_text=response_vis.text.split("\n")[3:-2]
+                list_vis_info_1=[]
+                for t in list_info_text:
+                    list_vis_info_1.append(t.split())
+                list_vis_info_2=[i for i in list_wind_info_2 if i[1] in ["898","901","924"]]
+                results["kmaVis"].extend([{"time":i[0],"vis":i[5]} for i in list_vis_info_2 if i[1] in ["898","901","924"]])
         except Exception as e:
             results["kmaVis"].append(str(e))
         current = next_time
