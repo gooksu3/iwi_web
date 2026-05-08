@@ -459,16 +459,22 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     const ranges = splitTimeRange(tm1, tm2, 10);
-    const WORKER_URL = `https://iwi-web.onrender.com/api/initial?tm1=${tm1}&tm2=${tm2}`;
-    const windPromises = ranges.map((r) => {
-      const res = await fetch(WORKER_URL, {
-        method: "GET",
-        headers: { Authorization: token },
-      });
-      return res
-    });
-    const windResponses = await Promise.all(windPromises);
-    console.log(windResponses)
+    const WORKER_URL = `https://iwi-web.onrender.com/api/10min?tm1=${tm1}&tm2=${tm2}`;
+    const windResponses = await Promise.all(
+      ranges.map(async (r) => {
+        const WORKER_URL = `https://iwi-web.onrender.com/api/initial?tm1=${r.tm1}&tm2=${r.tm2}`;
+
+        const res = await fetch(WORKER_URL, {
+          method: "GET",
+          headers: {
+            Authorization: token,
+          },
+        });
+
+        return await res.json();
+      }),
+    );
+    console.log(windResponses);
     // try {
     //   const res = await fetch(WORKER_URL, {
     //     method: "GET",

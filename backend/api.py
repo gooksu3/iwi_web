@@ -99,14 +99,14 @@ def initial_api_calling():
         #         results["kmaVis"].extend(dict_vis_info)
         # except Exception as e:
         #     results["kmaVis"].append(str(e))
-        current = next_time
+        # current = next_time
     # 매암
-    try:
-        response_maeam = requests.get(url_maeam,params=params_maeam,timeout=10)
-        results["maeam"] = response_maeam.json()
-    except Exception as e:
-        results["maeam"] = str(e)
-    session.close()
+    # try:
+    #     response_maeam = requests.get(url_maeam,params=params_maeam,timeout=10)
+    #     results["maeam"] = response_maeam.json()
+    # except Exception as e:
+    #     results["maeam"] = str(e)
+    # session.close()
     response = make_response(jsonify(results))
 
     response.headers["Access-Control-Allow-Origin"] = "*"
