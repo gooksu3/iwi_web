@@ -119,13 +119,14 @@ def maeam_wind_n_vis_today():
     tm1_datetime=datetime.strptime(tm1,"%Y%m%d%H%M")
     tm2=request.args.get("tm2")
     tm2_datetime=datetime.strptime(tm2,"%Y%m%d%H%M")
+    pageNo=request.args.get("pageNo")
     params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
                   "type":"json",
                   "obsCode":"SF_0010",
                   "reqDate":today,
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
                   "min":"1",
-                  "numOfRows":"65"}
+                  "pageNo":pageNo}
     url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     response_maeam=requests.get(url_maeam,params=params_maeam)
     if response_maeam.status_code==200:
@@ -134,9 +135,7 @@ def maeam_wind_n_vis_today():
             time_datetime=datetime.strptime(i["obsrvnDt"],"%Y-%m-%d %H:%M")
             if tm1_datetime<=time_datetime<=tm2_datetime:
                 results.append({"time":time_datetime.strftime("%Y%m%d%H%M"),"windDir":i["rmyWndrct"],"windSpeed":i["rmyWspd"],"vis":i["dtvsbM20kLen"]})
-
-
-
+                
     response = make_response(jsonify(results))
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "*"
