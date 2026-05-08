@@ -463,13 +463,10 @@ function App() {
     const windResponses = [];
     for (const r of ranges) {
       const url = `https://iwi-web.onrender.com/api/initial?tm1=${r.tm1}&tm2=${r.tm2}`;
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: token,
-        },
-      });
-
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
       windResponses.push(await res.json());
     }
     console.log(windResponses);
