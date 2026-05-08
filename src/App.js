@@ -337,6 +337,71 @@ function App() {
     const mm = parseInt(dateString.slice(10, 12));
     return new Date(yyyy, MM, dd, HH, mm);
   };
+  function splitTimeRange(tm1, tm2, minutes = 10) {
+    const out = [];
+
+    const toDate = (s) =>
+      new Date(
+        s.slice(0, 4),
+        s.slice(4, 6) - 1,
+        s.slice(6, 8),
+        s.slice(8, 10),
+        s.slice(10, 12),
+      );
+
+    const fmt = (d) =>
+      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(
+        d.getDate(),
+      ).padStart(2, "0")}${String(d.getHours()).padStart(2, "0")}${String(
+        d.getMinutes(),
+      ).padStart(2, "0")}`;
+
+    let cur = toDate(tm1);
+    const end = toDate(tm2);
+
+    while (cur < end) {
+      const next = new Date(cur.getTime() + minutes * 60000);
+      out.push({
+        tm1: fmt(cur),
+        tm2: fmt(next > end ? end : next),
+      });
+      cur = next;
+    }
+    return out;
+  }
+  async function fetchSafe(url, options = {}, timeout = 12000, retries = 1) {
+    for (let i = 0; i <= retries; i++) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        console.log("fetch start");
+
+        const res = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+
+        clearTimeout(id);
+
+        console.log("status", res.status);
+
+        if (!res.ok) {
+          throw new Error(`bad response ${res.status}`);
+        }
+
+        return res;
+      } catch (e) {
+        clearTimeout(id);
+
+        console.log("fetch error", e);
+
+        if (i === retries) return null;
+
+        await new Promise((r) => setTimeout(r, 800));
+      }
+    }
+  }
   const mToKm = (m) => {
     return (Math.round((m / 1000) * 10) / 10).toFixed(1);
   };
@@ -427,12 +492,36 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
-    const WORKER_URL = `https://iwi-web.onrender.com/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    const ranges = splitTimeRange(tm1, tm2, 10);
+
+    const windPromises = ranges.map((r) =>
+      fetchSafe(
+        `https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm1=${r.tm1}&tm2=${r.tm2}&authKey=${kmaKey}`,
+        {},
+        12000,
+        1,
+      ),
+    );
+    // const visPromises = ranges.map((r) =>
+    //   fetchSafe(
+    //     `https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?tm1=${r.tm1}&tm2=${r.tm2}&authKey=${kmaKey}`,
+    //     {},
+    //     12000,
+    //     1,
+    //   ),
+    // );
+    const [windResponses, visResponses] = await Promise.all([
+      Promise.all(windPromises),
+      // Promise.all(visPromises),
+    ]);
+
     try {
-      const res = await fetch(WORKER_URL, {
-        method: "GET",
-        headers: { Authorization: token },
-      });
+      const res = fetchSafe(
+        `https://iwi-web.onrender.com/api/initial?tm1=${tm1}&tm2=${tm2}`,
+        {},
+        12000,
+        1,
+      ),
       if (!res.ok) {
         throw new Error("네트워크 응답 실패");
       }
