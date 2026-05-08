@@ -67,9 +67,9 @@ def initial_api_calling():
                     elif parts[1] == "924":
                         dict_wind_info["간절곶"].append(info)
                     else:
-                        dict_wind_info["간절곶"].append(parts)
-                        dict_wind_info["울기"].append(parts)
-                        dict_wind_info["장생포"].append(parts)
+                        dict_wind_info["간절곶"].append(parts[0],"-",len(parts[0]),parts[5])
+                        dict_wind_info["울기"].append(parts[0],"-",len(parts[0]),parts[5])
+                        dict_wind_info["장생포"].append(parts[0],"-",len(parts[0]),parts[5])
     except Exception as e:
         results["kmaWind"]=str(e)
         
