@@ -50,14 +50,14 @@ def initial_api_calling():
             }
         # 기상청 바람
         try:
-            response_wind = session.get(url_kma_wind,params=params_kma,timeout=3)
+            response_wind = session.get(url_kma_wind,params=params_kma,timeout=10)
             if response_wind.status_code == 200:
                 results["kmaWind"].extend(response_wind.text.split("\n")[3:-2])
         except Exception as e:
             results["kmaWind"].append(str(e))
         # 기상청 시정
         try:
-            response_vis = session.get(url_kma_vis,params=params_kma,timeout=3)
+            response_vis = session.get(url_kma_vis,params=params_kma,timeout=10)
             if response_vis.status_code == 200:
                 results["kmaVis"].extend(response_vis.text.split("\n")[3:-2])
         except Exception as e:
