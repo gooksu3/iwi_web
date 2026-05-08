@@ -4,7 +4,11 @@ import requests
 from datetime import datetime,timedelta
 
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}}
+)
+
 @app.route("/login")
 def test():
     return {
@@ -52,14 +56,16 @@ def initial_api_calling():
         try:
             response_wind = session.get(url_kma_wind,params=params_kma,timeout=10)
             if response_wind.status_code == 200:
-                results["kmaWind"].extend(response_wind.text.split("\n")[3:-2])
+                list_wind_info=response_wind.text.split("\n")[3:-2]
+                results["kmaWind"].extend([i for i in list_wind_info if i[1] in ["898","901","924"]])
         except Exception as e:
             results["kmaWind"].append(str(e))
         # 기상청 시정
         try:
             response_vis = session.get(url_kma_vis,params=params_kma,timeout=10)
             if response_vis.status_code == 200:
-                results["kmaVis"].extend(response_vis.text.split("\n")[3:-2])
+                list_vis_info=response_vis.text.split("\n")[3:-2]
+                results["kmaVis"].extend([i for i in list_vis_info if i[1] in ["898","901","924"]])
         except Exception as e:
             results["kmaVis"].append(str(e))
         current = next_time
@@ -70,7 +76,13 @@ def initial_api_calling():
     except Exception as e:
         results["maeam"] = str(e)
     session.close()
-    return jsonify(results)
+    response = make_response(jsonify(results))
+
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+
+    return response
 
 if __name__ == "__main__":
     app.run()
