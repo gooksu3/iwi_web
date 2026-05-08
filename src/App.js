@@ -515,8 +515,6 @@ function App() {
           windSpeed: obj2.windSpeed,
         };
         if (index === obj1.kmaWind["장생포"].length - 1) {
-          console.log(obj2.windSpeed);
-          console.log(obj2.windDir);
           setWindSpdJangsaengpo(obj2.windSpeed);
           setWindDirJangsaengpo(obj2.windDir);
         }
@@ -530,6 +528,7 @@ function App() {
       removeDuplicatesArray(mergedWind[place]);
     });
     setKmaWindData(mergedWind);
+    console.log(mergedWind);
     // 기상청 시정
     const responsesVis = [];
     for (const r of ranges) {
@@ -575,13 +574,16 @@ function App() {
       removeDuplicatesArray(mergedVis[place]);
     });
     setKmaVisData(mergedVis);
+    console.log(mergedVis);
     // 매암
-    const url_maeam = "https://iwi-web.onrender.com/api/maeamToday?";
+    const url_maeam = `https://iwi-web.onrender.com/api/maeamToday?tm1=${tm1}&tm2=${tm2}`;
     const res = await fetch(url_maeam);
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
+    console.log("-----");
     console.log(await res.json());
+    setOpenTableWindNVis(true);
   };
   const fetchWindData1min = async () => {
     const now = new Date();
