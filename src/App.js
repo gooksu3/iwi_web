@@ -471,6 +471,7 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     const ranges = splitTimeRange(tm1, tm2, 10);
+    // 기상청 바람
     const responsesWind = [];
     for (const r of ranges) {
       const url = `https://iwi-web.onrender.com/api/kmaWind?tm1=${r.tm1}&tm2=${r.tm2}`;
@@ -485,37 +486,39 @@ function App() {
       울기: [],
       장생포: [],
     };
-    responsesWind.forEach((obj) => {
-      const ganjulgot = obj.kmaWind["간절곶"].map((obj, index) => {
+    responsesWind.forEach((obj1) => {
+      const ganjulgot = obj1.kmaWind["간절곶"].map((obj2, index) => {
         const objInfo = {
-          time: formatToHHMM(obj.time),
-          windSpeed: obj.windSpeed,
+          time: formatToHHMM(obj2.time),
+          windSpeed: obj2.windSpeed,
         };
-        if (index === obj.kmaWind.length - 1) {
-          setWindSpdGanjulgot(obj.windSpeed);
-          setWindDirGanjulgot(obj.windDir);
+        if (index === obj1.kmaWind["간절곶"].length - 1) {
+          setWindSpdGanjulgot(obj2.windSpeed);
+          setWindDirGanjulgot(obj2.windDir);
         }
         return objInfo;
       });
-      const ulgi = obj.kmaWind["울기"].map((obj) => {
+      const ulgi = obj1.kmaWind["울기"].map((obj2, index) => {
         const objInfo = {
-          time: formatToHHMM(obj.time),
-          windSpeed: obj.windSpeed,
+          time: formatToHHMM(obj2.time),
+          windSpeed: obj2.windSpeed,
         };
-        if (index === obj.kmaWind.length - 1) {
-          setWindSpdUlgi(obj.windSpeed);
-          setWindDirUlgi(obj.windDir);
+        if (index === obj1.kmaWind["울기"].length - 1) {
+          setWindSpdUlgi(obj2.windSpeed);
+          setWindDirUlgi(obj2.windDir);
         }
         return objInfo;
       });
-      const jangsaengpo = obj.kmaWind["장생포"].map((obj) => {
+      const jangsaengpo = obj1.kmaWind["장생포"].map((obj2, index) => {
         const objInfo = {
-          time: formatToHHMM(obj.time),
-          windSpeed: obj.windSpeed,
+          time: formatToHHMM(obj2.time),
+          windSpeed: obj2.windSpeed,
         };
-        if (index === obj.kmaWind.length - 1) {
-          setWindSpdJangsaengpo(obj.windSpeed);
-          setWindDirJangsaengpo(obj.windDir);
+        if (index === obj1.kmaWind["장생포"].length - 1) {
+          console.log(obj2.windSpeed);
+          console.log(obj2.windDir);
+          setWindSpdJangsaengpo(obj2.windSpeed);
+          setWindDirJangsaengpo(obj2.windDir);
         }
         return objInfo;
       });
@@ -527,7 +530,7 @@ function App() {
       removeDuplicatesArray(mergedWind[place]);
     });
     setKmaWindData(mergedWind);
-    console.log(mergedWind);
+    // 기상청 시정
     const responsesVis = [];
     for (const r of ranges) {
       const url = `https://iwi-web.onrender.com/api/kmaVis?tm1=${r.tm1}&tm2=${r.tm2}`;
@@ -542,17 +545,26 @@ function App() {
       울기: [],
       장생포: [],
     };
-    responsesVis.forEach((obj) => {
-      const ganjulgot = obj.kmaVis["간절곶"].map((obj) => {
-        const objInfo = { time: formatToHHMM(obj.time), vis: mToKm(obj.vis) };
+    responsesVis.forEach((obj1) => {
+      const ganjulgot = obj1.kmaVis["간절곶"].map((obj2, index) => {
+        const objInfo = { time: formatToHHMM(obj2.time), vis: mToKm(obj2.vis) };
+        if (index === obj1.kmaVis["간절곶"].length - 1) {
+          setVisGanjulgot(mToKm(obj2.vis));
+        }
         return objInfo;
       });
-      const ulgi = obj.kmaVis["울기"].map((obj) => {
-        const objInfo = { time: formatToHHMM(obj.time), vis: mToKm(obj.vis) };
+      const ulgi = obj1.kmaVis["울기"].map((obj2, index) => {
+        const objInfo = { time: formatToHHMM(obj2.time), vis: mToKm(obj2.vis) };
+        if (index === obj1.kmaVis["울기"].length - 1) {
+          setVisUlgi(mToKm(obj2.vis));
+        }
         return objInfo;
       });
-      const jangsaengpo = obj.kmaVis["장생포"].map((obj) => {
-        const objInfo = { time: formatToHHMM(obj.time), vis: mToKm(obj.vis) };
+      const jangsaengpo = obj1.kmaVis["장생포"].map((obj2, index) => {
+        const objInfo = { time: formatToHHMM(obj2.time), vis: mToKm(obj2.vis) };
+        if (index === obj1.kmaVis["장생포"].length - 1) {
+          setVisJangsaengpo(mToKm(obj2.vis));
+        }
         return objInfo;
       });
       mergedVis["간절곶"].push(...ganjulgot);
@@ -563,66 +575,13 @@ function App() {
       removeDuplicatesArray(mergedVis[place]);
     });
     setKmaVisData(mergedVis);
-    console.log(mergedVis);
-    setOpenTableWindNVis(true);
-    //   // 매암
-    //   if (objInfoFromApi.maeam.body.items.item.length > 0) {
-    //     const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
-    //     console.log(arrayInfoMaeam);
-    //     let latestInfoMaeam = null;
-    //     for (let i = 0; i >= 0; i++) {
-    //       if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
-    //         latestInfoMaeam = arrayInfoMaeam[i];
-    //         break;
-    //       }
-    //     }
-    //     setWindSpdMaeam(latestInfoMaeam.rmyWspd);
-    //     setWindDirMaeam(latestInfoMaeam.rmyWndrct);
-    //     setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
-    //     const baseDate = formatYYYYMMDDHHMMToDate(
-    //       latestInfoMaeam.obsrvnDt.replace(/[- :]/g, ""),
-    //     );
-
-    //     const arrayMaeam = arrayInfoMaeam.map((info) => {
-    //       const raw = info.obsrvnDt.replace(/[- :]/g, "");
-
-    //       return {
-    //         time: formatToHHMM(raw),
-    //         wd: info.rmyWndrct,
-    //         ws: info.rmyWspd,
-    //         vis: mToKm(info.dtvsbM20kLen),
-    //       };
-    //     });
-    //     const arrayMW = arrayMaeam
-    //       .map((item) => ({ time: item.time, windSpeed: item.ws }))
-    //       .sort((a, b) => {
-    //         const toMinutes = (t) => {
-    //           const [h, m] = t.split(":").map(Number);
-    //           return h * 60 + m;
-    //         };
-
-    //         return toMinutes(a.time) - toMinutes(b.time);
-    //       });
-    //     if (arrayMW) {
-    //       setMeamWindData(arrayMW);
-    //     }
-    //     const arrayMV = arrayMaeam
-    //       .map((item) => ({ time: item.time, vis: item.vis }))
-    //       .sort((a, b) => {
-    //         const toMinutes = (t) => {
-    //           const [h, m] = t.split(":").map(Number);
-    //           return h * 60 + m;
-    //         };
-
-    //         return toMinutes(a.time) - toMinutes(b.time);
-    //       });
-    //     if (arrayMV) {
-    //       setMaeamVisData(arrayMV);
-    //     }
-    //   }
-    // } catch (err) {
-    //   console.error("데이터 불러오기 오류:", err);
-    // }
+    // 매암
+    const url_maeam = "https://iwi-web.onrender.com/api/maeamToday?";
+    const res = await fetch(url_maeam);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    console.log(await res.json());
   };
   const fetchWindData1min = async () => {
     const now = new Date();
@@ -641,7 +600,6 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -691,7 +649,6 @@ function App() {
           }
         }
       });
-      // console.log(arrayKmaWind);
       setKmaWindData((prev) => {
         const updated = { ...prev };
 
@@ -754,7 +711,6 @@ function App() {
           }
         }
       });
-      // console.log(arrayKmaVis);
       setKmaVisData((prev) => {
         const updated = { ...prev };
 
@@ -839,7 +795,6 @@ function App() {
           });
         }
       }
-      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -1143,9 +1098,6 @@ function App() {
     visData,
     varKma = false,
   }) {
-    console.log("-----------", point, "-----------");
-    console.log(windData);
-    console.log(visData);
     const [finishedWindCountUP, setFinishedWindCountUP] = useState(false);
     const [finishedVisCountUp, setFinishedVisCountUp] = useState(false);
     return (
@@ -1337,8 +1289,6 @@ function App() {
     );
   }
   function WindAndVisTable({ kmaWindData, kmaVisData }) {
-    console.log(kmaWindData);
-    console.log(kmaVisData);
     const [isFirstRender, setIsFirstRender] = useState(true);
     useEffect(() => {
       // 마운트 직후 한 번만 실행됨

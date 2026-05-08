@@ -63,6 +63,7 @@ def kma_wind_api_calling_10min():
     response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
 
     return response
+
 @app.route("/api/kmaVis", methods=["GET", "OPTIONS"])
 def kma_vis_api_calling_10min():
     if request.method == "OPTIONS":
@@ -74,22 +75,13 @@ def kma_vis_api_calling_10min():
 
     tm1=request.args.get("tm1")
     tm2=request.args.get("tm2")
-    today=datetime.now().strftime("%Y%m%d")
     results={}
     url_kma_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
-    # url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     params_kma = {
                 "authKey": "1oWYR_o-SnGFmEf6PlpxQQ",
                 "tm1":tm1,
                 "tm2":tm2,
                 }
-    # params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
-    #               "type":"json",
-    #               "obsCode":"SF_0010",
-    #               "reqDate":today,
-    #               "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
-    #               "min":"1",
-    #               "numOfRows":"65"}
     # 기상청 바람
     dict_vis_info={"간절곶":[],"울기":[],"장생포":[]}
     try:
@@ -119,6 +111,32 @@ def kma_vis_api_calling_10min():
     response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
 
     return response
+
+@app.route("/api/maeamToday", methods=["GET", "OPTIONS"])
+def maeam_wind_n_vis_today():
+    today=datetime.now().strftime("%Y%m%d")
+    today=datetime.now().strftime("%Y%m%d")
+    params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
+                  "type":"json",
+                  "obsCode":"SF_0010",
+                  "reqDate":today,
+                  "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
+                  "min":"1",
+                  "numOfRows":"65"}
+    url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
+    response=requests.get(url_maeam,params=params_maeam)
+
+
+    # if response.status_code==200:
+
+
+    # response = make_response(jsonify(response.json()))
+    # response.headers["Access-Control-Allow-Origin"] = "*"
+    # response.headers["Access-Control-Allow-Headers"] = "*"
+    # response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+
+    return jsonify(response.status_code)
+    
 
 if __name__ == "__main__":
     app.run()
