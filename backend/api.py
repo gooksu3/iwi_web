@@ -44,7 +44,8 @@ def kma_wind_api_calling_10min():
                 if len(parts) > 5 and parts[1] in ["898", "901", "924"]:
                     info = {
                         "time": parts[0],
-                        "windSpeed": parts[5]
+                        "windSpeed": parts[5],
+                        "windDir":parts[4]
                     }
                     if "898" in parts[1] and parts[5]!="-99.9":
                         dict_wind_info["장생포"].append(info)
