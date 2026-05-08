@@ -37,7 +37,8 @@ def initial_api_calling():
                   "obsCode":"SF_0010",
                   "reqDate":today,
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
-                  "min":"1"}
+                  "min":"1"
+                  "numOfRow":"65"}
     response_wind = requests.get(url_kma_wind,params=params_kma,timeout=20)
     response_vis=requests.get(url_kma_vis,params=params_kma,timeout=20)
     response_maeam=requests.get(url_maeam,params=params_maeam,timeout=20)
