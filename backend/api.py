@@ -115,10 +115,6 @@ def kma_vis_api_calling_10min():
 @app.route("/api/maeamToday", methods=["GET", "OPTIONS"])
 def maeam_wind_n_vis_today():
     today=datetime.now().strftime("%Y%m%d")
-    tm1=request.args.get("tm1")
-    tm1_datetime=datetime.strptime(tm1,"%Y%m%d%H%M")
-    tm2=request.args.get("tm2")
-    tm2_datetime=datetime.strptime(tm2,"%Y%m%d%H%M")
     pageNo=request.args.get("pageNo")
     params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
                   "type":"json",
@@ -134,7 +130,7 @@ def maeam_wind_n_vis_today():
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-        return jsonify(response)
+        return response
     
 if __name__ == "__main__":
     app.run()

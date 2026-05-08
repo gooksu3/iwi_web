@@ -578,7 +578,7 @@ function App() {
     // 매암
     const responseMaeam = [];
     for (let page = 1; page < 7; page++) {
-      const url_maeam = `https://iwi-web.onrender.com/api/maeamToday?tm1=${tm1}&tm2=${tm2}&pageNo=${page}`;
+      const url_maeam = `https://iwi-web.onrender.com/api/maeamToday?pageNo=${page}`;
       const res = await fetch(url_maeam);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
