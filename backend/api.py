@@ -40,7 +40,7 @@ def initial_api_calling():
     current=tm1_datetime
     session = requests.Session()
     while current < tm2_datetime:
-        next_time = current + timedelta(minutes=10)
+        next_time = current + timedelta(minutes=20)
         if next_time > tm2_datetime:
             next_time = tm2_datetime
         params_kma = {
@@ -50,18 +50,18 @@ def initial_api_calling():
             }
         # 기상청 바람
         try:
-            response_wind = session.get(url_kma_wind,params=params_kma,timeout=10)
+            response_wind = session.get(url_kma_wind,params=params_kma,timeout=3)
             if response_wind.status_code == 200:
                 results["kmaWind"].extend(response_wind.text.split("\n")[3:-2])
         except Exception as e:
-            results["kmaWind"].extend(str(e))
+            results["kmaWind"].append(str(e))
         # 기상청 시정
         try:
-            response_vis = session.get(url_kma_vis,params=params_kma,timeout=10)
+            response_vis = session.get(url_kma_vis,params=params_kma,timeout=3)
             if response_vis.status_code == 200:
                 results["kmaVis"].extend(response_vis.text.split("\n")[3:-2])
         except Exception as e:
-            results["kmaVis"].extend(str(e))
+            results["kmaVis"].append(str(e))
         current = next_time
     # 매암
     try:
@@ -69,6 +69,7 @@ def initial_api_calling():
         results["maeam"] = response_maeam.json()
     except Exception as e:
         results["maeam"] = str(e)
+    session.close()
     return jsonify(results)
 
 if __name__ == "__main__":
