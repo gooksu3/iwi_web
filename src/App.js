@@ -492,7 +492,7 @@ function App() {
     Object.keys(mergedWind).forEach((place) => {
       removeDuplicatesArray(mergedWind[place]);
     });
-    console.log(mergedWind);
+    setKmaWindData(mergedWind);
     // console.log(arrayKmaWind);
     // try {
     //   const res = await fetch(WORKER_URL, {
