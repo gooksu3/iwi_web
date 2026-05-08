@@ -1,4 +1,4 @@
-from flask import Flask,jsonify,request
+from flask import Flask,jsonify,request, make_response
 from flask_cors import CORS
 import requests
 from datetime import datetime
@@ -13,6 +13,12 @@ def test():
 
 @app.route("/api/initial", methods=["GET", "OPTIONS"])
 def initial_api_calling():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        return response
 
     tm1=request.args.get("tm1")
     tm2=request.args.get("tm2")
@@ -32,9 +38,9 @@ def initial_api_calling():
                   "reqDate":today,
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
                   "min":"1"}
-    response_wind = requests.get(url_kma_wind,params=params_kma)
-    response_vis=requests.get(url_kma_vis,params=params_kma)
-    response_maeam=requests.get(url_maeam,params=params_maeam)
+    response_wind = requests.get(url_kma_wind,params=params_kma,timeout=20)
+    response_vis=requests.get(url_kma_vis,params=params_kma,timeout=20)
+    response_maeam=requests.get(url_maeam,params=params_maeam,timeout=20)
     results["kmaWind"]=response_wind.text
     results["kmaVis"]=response_vis.text
     results["maeam"]=response_maeam.json()
