@@ -460,20 +460,18 @@ function App() {
     );
     const ranges = splitTimeRange(tm1, tm2, 10);
     const WORKER_URL = `https://iwi-web.onrender.com/api/10min?tm1=${tm1}&tm2=${tm2}`;
-    const windResponses = await Promise.all(
-      ranges.map(async (r) => {
-        const WORKER_URL = `https://iwi-web.onrender.com/api/initial?tm1=${r.tm1}&tm2=${r.tm2}`;
+    const windResponses = [];
+    for (const r of ranges) {
+      const url = `https://iwi-web.onrender.com/api/initial?tm1=${r.tm1}&tm2=${r.tm2}`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: token,
+        },
+      });
 
-        const res = await fetch(WORKER_URL, {
-          method: "GET",
-          headers: {
-            Authorization: token,
-          },
-        });
-
-        return await res.json();
-      }),
-    );
+      responses.push(await res.json());
+    }
     console.log(windResponses);
     // try {
     //   const res = await fetch(WORKER_URL, {

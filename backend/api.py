@@ -27,7 +27,7 @@ def initial_api_calling():
     tm1=request.args.get("tm1")
     tm2=request.args.get("tm2")
     today=datetime.now().strftime("%Y%m%d")
-    results={"kmaWind":[],"kmaVis":[],"maeam":[]}
+    results={}
     url_kma_wind = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?'
     url_kma_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
     # url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
@@ -44,15 +44,15 @@ def initial_api_calling():
     #               "min":"1",
     #               "numOfRows":"65"}
     # 기상청 바람
+    dict_wind_info={"간절곶":[],"울기":[],"장생포":[]}
     try:
-        response_wind = request.get(url_kma_wind,params=params_kma,timeout=10,stream=True)
+        response_wind = requests.get(url_kma_wind,params=params_kma,timeout=10,stream=True)
         if response_wind.status_code == 200:
             for line in response_wind.iter_lines(decode_unicode=True):
                 if not line:
                     continue
                 parts = line.split()
                 if len(parts) > 1 and parts[1] in ["898", "901", "924"]:
-                    dict_wind_info={"간절곶":[],"울기":[],"장생포":[]}
                     info={"time":parts[0],"windSpeed":parts[5]}
                     if parts[1]=="898":
                         dict_wind_info["장생포"].append(info)
@@ -60,6 +60,7 @@ def initial_api_calling():
                         dict_wind_info["울기"].append(info)
                     elif parts[1]=="924":
                         dict_wind_info["간절곶"].append(info)
+        results["kmaWind"] = dict_wind_info
         # if response_wind.status_code == 200:
         #     list_info_text=response_wind.text.split("\n")[3:-2]
         #     list_wind_info_1=[]
