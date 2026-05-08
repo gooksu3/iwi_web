@@ -60,7 +60,7 @@ def initial_api_calling():
                 list_wind_info_1=[]
                 for t in list_info_text:
                     list_wind_info_1.append(t.split())
-                list_wind_info_2=[i for i in list_wind_info_2 if i[1] in ["898","901","924"]]
+                list_wind_info_2=[i for i in list_wind_info_1 if i[1] in ["898","901","924"]]
                 results["kmaWind"].extend([{"time":i[0],"windSpeed":i[5]} for i in list_wind_info_2])
         except Exception as e:
             results["kmaWind"].append(str(e))
@@ -72,7 +72,7 @@ def initial_api_calling():
                 list_vis_info_1=[]
                 for t in list_info_text:
                     list_vis_info_1.append(t.split())
-                list_vis_info_2=[i for i in list_wind_info_2 if i[1] in ["898","901","924"]]
+                list_vis_info_2=[i for i in list_wind_info_1 if i[1] in ["898","901","924"]]
                 results["kmaVis"].extend([{"time":i[0],"vis":i[5]} for i in list_vis_info_2 if i[1] in ["898","901","924"]])
         except Exception as e:
             results["kmaVis"].append(str(e))
