@@ -49,20 +49,18 @@ def initial_api_calling():
         response_wind = requests.get(url_kma_wind,params=params_kma,timeout=10)
         if response_wind.status_code == 200:
             lines = response_wind.text.split("\n")
-
             for line in lines[3:-2]:
                 parts = line.split()
-
                 if len(parts) > 5 and parts[1] in ["898", "901", "924"]:
                     info = {
                         "time": parts[0],
                         "windSpeed": parts[5]
                     }
-                    if "898" in parts[1]:
+                    if "898" in parts[1] and parts[5]!="-99.9":
                         dict_wind_info["장생포"].append(info)
-                    elif "901" in parts[1]:
+                    elif "901" in parts[1] and parts[5]!="-99.9":
                         dict_wind_info["울기"].append(info)
-                    elif "924" in parts[1]:
+                    elif "924" in parts[1] and parts[5]!="-99.9":
                         dict_wind_info["간절곶"].append(info)
     except Exception as e:
         results["kmaWind"]=str(e)

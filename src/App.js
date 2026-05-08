@@ -220,6 +220,7 @@ function App() {
   const arrayPoints = ["간절곶", "울기", "장생포"];
   const [kmaWindData, setKmaWindData] = useState(null);
   const [kmaVisData, setKmaVisData] = useState(null);
+  // 현재 풍향(그래프)
   const [windDirGanjulgot, setWindDirGanjulgot] = useState(null);
   const [windDirUlgi, setWindDirUlgi] = useState(null);
   const [windDirJangsaengpo, setWindDirJangsaengpo] = useState(null);
@@ -229,6 +230,7 @@ function App() {
     setWindDirUlgi,
     setWindDirJangsaengpo,
   ];
+  // 현재 풍속
   const [windSpdGanjulgot, setWindSpdGanjulgot] = useState(null);
   const [windSpdUlgi, setWindSpdUlgi] = useState(null);
   const [windSpdJangsaengpo, setWindSpdJangsaengpo] = useState(null);
@@ -238,11 +240,13 @@ function App() {
     setWindSpdUlgi,
     setWindSpdJangsaengpo,
   ];
+  // 현재 시정
   const [visGanjulgot, setVisGanjulgot] = useState(null);
   const [visUlgi, setVisUlgi] = useState(null);
   const [visJangsaengpo, setVisJangsaengpo] = useState(null);
   const arrayKmaVis = [visGanjulgot, visUlgi, visJangsaengpo];
   const arraySetKmaVis = [setVisGanjulgot, setVisUlgi, setVisJangsaengpo];
+  // 매암
   const [MaeamWindData, setMeamWindData] = useState([]);
   const [MaeamVisData, setMaeamVisData] = useState([]);
   const [windDirMaeam, setWindDirMaeam] = useState(null);
@@ -372,6 +376,13 @@ function App() {
   const mToKm = (m) => {
     return (Math.round((m / 1000) * 10) / 10).toFixed(1);
   };
+  const removeDuplicatesArray = (array) => {
+    const returnArray = array.filter(
+      (item, index, self) =>
+        index === self.findIndex((v) => v.time === item.time),
+    );
+    return returnArray;
+  };
   const fetchDataForecast = async () => {
     setArrayDateForecast([]);
     setShortForecastData([]);
@@ -459,16 +470,30 @@ function App() {
       new Date(now.getTime() - 60 * 60 * 1000),
     );
     const ranges = splitTimeRange(tm1, tm2, 10);
-    const windResponses = [];
+    const responses = [];
     for (const r of ranges) {
       const url = `https://iwi-web.onrender.com/api/10min?tm1=${r.tm1}&tm2=${r.tm2}`;
       const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
-      windResponses.push(await res.json());
+      responses.push(await res.json());
     }
-    console.log(windResponses);
+    const mergedWind = {
+      간절곶: [],
+      울기: [],
+      장생포: [],
+    };
+    responses.forEach((obj) => {
+      mergedWind["간절곶"].push(...obj.kmaWind["간절곶"]);
+      mergedWind["울기"].push(...obj.kmaWind["울기"]);
+      mergedWind["장생포"].push(...obj.kmaWind["장생포"]);
+    });
+    Object.keys(mergedWind).forEach((place) => {
+      removeDuplicatesArray(mergedWind[place]);
+    });
+    console.log(mergedWind);
+    // console.log(arrayKmaWind);
     // try {
     //   const res = await fetch(WORKER_URL, {
     //     method: "GET",
