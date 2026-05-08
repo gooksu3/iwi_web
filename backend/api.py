@@ -40,7 +40,7 @@ def initial_api_calling():
     current=tm1_datetime
     session = requests.Session()
     while current < tm2_datetime:
-        next_time = current + timedelta(minutes=20)
+        next_time = current + timedelta(minutes=30)
         if next_time > tm2_datetime:
             next_time = tm2_datetime
         params_kma = {
