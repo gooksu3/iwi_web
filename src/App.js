@@ -583,9 +583,12 @@ function App() {
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
-      console.log("-----");
-      console.log(await res.json());
+      const array = await res.json();
+      responseMaeam.push(array);
     }
+    responseMaeam.reverse();
+    console.log(responseMaeam);
+
     setOpenTableWindNVis(true);
   };
   const fetchWindData1min = async () => {

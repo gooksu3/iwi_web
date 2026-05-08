@@ -126,7 +126,7 @@ def maeam_wind_n_vis_today():
     url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     response_maeam=requests.get(url_maeam,params=params_maeam)
     if response_maeam.status_code==200:
-        response = make_response(jsonify(response_maeam.json()['body']['items']))
+        response = make_response(jsonify(response_maeam.json()['body']['items']['item']))
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
