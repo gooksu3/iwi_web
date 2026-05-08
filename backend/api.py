@@ -130,19 +130,11 @@ def maeam_wind_n_vis_today():
     url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     response_maeam=requests.get(url_maeam,params=params_maeam)
     if response_maeam.status_code==200:
-        results=[]
-        for i in response_maeam.json()['body']['items']:
-            time_datetime=datetime.strptime(i["obsrvnDt"],"%Y-%m-%d %H:%M")
-            if tm1_datetime<=time_datetime<=tm2_datetime:
-                results.append({"time":time_datetime.strftime("%Y%m%d%H%M"),"windDir":i["rmyWndrct"],"windSpeed":i["rmyWspd"],"vis":i["dtvsbM20kLen"]})
-                
-    response = make_response(jsonify(results))
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-
-    return jsonify(results)
+        response = make_response(jsonify(response_maeam.json()['body']['items']))
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        return jsonify(response)
     
-
 if __name__ == "__main__":
     app.run()
