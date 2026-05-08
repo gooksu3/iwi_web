@@ -27,7 +27,7 @@ def kma_api_calling_10min():
     tm1=request.args.get("tm1")
     tm2=request.args.get("tm2")
     today=datetime.now().strftime("%Y%m%d")
-    results=[]
+    results={}
     url_kma_wind = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?'
     url_kma_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
     # url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
@@ -64,7 +64,7 @@ def kma_api_calling_10min():
                         dict_wind_info["간절곶"].append(info)
     except Exception as e:
         results["kmaWind"]=str(e)
-    results.append(dict_wind_info)
+    results["kmaWind"]=dict_wind_info
     response = make_response(jsonify(results))
 
     response.headers["Access-Control-Allow-Origin"] = "*"

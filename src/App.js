@@ -479,15 +479,16 @@ function App() {
       }
       responses.push(await res.json());
     }
+    console.log(responses);
     const mergedWind = {
       간절곶: [],
       울기: [],
       장생포: [],
     };
-    responses.forEach((a) => {
-      mergedWind["간절곶"].push(...a["간절곶"]);
-      mergedWind["울기"].push(...a["울기"]);
-      mergedWind["장생포"].push(...a["장생포"]);
+    responses.forEach((obj) => {
+      mergedWind["간절곶"].push(...obj.kmaWind["간절곶"]);
+      mergedWind["울기"].push(...obj.kmaWind["울기"]);
+      mergedWind["장생포"].push(...obj.kmaWind["장생포"]);
     });
     Object.keys(mergedWind).forEach((place) => {
       removeDuplicatesArray(mergedWind[place]);
