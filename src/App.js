@@ -369,39 +369,6 @@ function App() {
     }
     return out;
   }
-  async function fetchSafe(url, options = {}, timeout = 12000, retries = 1) {
-    for (let i = 0; i <= retries; i++) {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
-
-      try {
-        console.log("fetch start");
-
-        const res = await fetch(url, {
-          ...options,
-          signal: controller.signal,
-        });
-
-        clearTimeout(id);
-
-        console.log("status", res.status);
-
-        if (!res.ok) {
-          throw new Error(`bad response ${res.status}`);
-        }
-
-        return res;
-      } catch (e) {
-        clearTimeout(id);
-
-        console.log("fetch error", e);
-
-        if (i === retries) return null;
-
-        await new Promise((r) => setTimeout(r, 800));
-      }
-    }
-  }
   const mToKm = (m) => {
     return (Math.round((m / 1000) * 10) / 10).toFixed(1);
   };
@@ -491,193 +458,178 @@ function App() {
     const tm1 = formatDateToYYYYMMDDHHMM(
       new Date(now.getTime() - 60 * 60 * 1000),
     );
-    // Workers 프록시 URL (배포한 주소로 교체하세요)
     const ranges = splitTimeRange(tm1, tm2, 10);
-
-    const windPromises = ranges.map((r) =>
-      fetchSafe(
-        `https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm1=${r.tm1}&tm2=${r.tm2}&authKey=${kmaKey}`,
-        {},
-        12000,
-        1,
-      ),
-    );
-    // const visPromises = ranges.map((r) =>
-    //   fetchSafe(
-    //     `https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?tm1=${r.tm1}&tm2=${r.tm2}&authKey=${kmaKey}`,
-    //     {},
-    //     12000,
-    //     1,
-    //   ),
-    // );
-    const [windResponses, visResponses] = await Promise.all([
-      Promise.all(windPromises),
-      // Promise.all(visPromises),
-    ]);
-
-    try {
-      const res = fetchSafe(
-        `https://iwi-web.onrender.com/api/initial?tm1=${tm1}&tm2=${tm2}`,
-        {},
-        12000,
-        1,
-      ),
-      if (!res.ok) {
-        throw new Error("네트워크 응답 실패");
-      }
-      const objInfoFromApi = await res.json();
-      console.log(objInfoFromApi);
-      // 간절곶:924,울기:901,장생포:898
-      // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
-      const arrayKmaWindInfoText = objInfoFromApi.kmaWind
-        ? objInfoFromApi.kmaWind.split("\n")
-        : [];
-      const arrayKW = arrayKmaWindInfoText.reduce(
-        (acc, cur) => {
-          const line = cur.split(/\s+/);
-          if (line[1] === "924" && line[5] !== "-99.9") {
-            // 간절곶
-            acc["간절곶"].push(line);
-          } else if (line[1] === "901" && line[5] !== "-99.9") {
-            // 울기
-            acc["울기"].push(line);
-          } else if (line[1] === "898" && line[5] !== "-99.9") {
-            // 장생포
-            acc["장생포"].push(line);
-          }
-          return acc;
-        },
-        { 간절곶: [], 울기: [], 장생포: [] },
-      );
-      console.log(arrayKW);
-      const arrayKmaWind = arrayPoints.map((point, index) => {
-        if (arrayKW[point].length > 0) {
-          const arrayInfo = arrayKW[point];
-          const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
-          if (arrayKmaWindDir[index] !== latestInfoWDir) {
-            arraySetKmaWindDir[index](latestInfoWDir);
-          }
-          const latestInfoWSpd = arrayInfo[arrayInfo.length - 1][5];
-          if (arrayKmaWindSpd[index] !== latestInfoWSpd) {
-            arraySetKmaWindSpd[index](latestInfoWSpd);
-          }
-          const uniqueArray = [
-            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
-          ].map((v) => JSON.parse(v));
-          const arrayWind = uniqueArray.map((info) => {
-            const time = formatToHHMM(info[0]);
-            return { time: time, windSpeed: info[5] };
-          });
-          if (arrayWind.length === 0) {
-            return kmaWindData[index];
-          } else {
-            return arrayWind;
-          }
-        }
+    const WORKER_URL = `https://iwi-web.onrender.com/api/initial?tm1=${tm1}&tm2=${tm2}`;
+    const windPromises = ranges.map((r) => {
+      const res = await fetch(WORKER_URL, {
+        method: "GET",
+        headers: { Authorization: token },
       });
-      if (arrayKmaWind) {
-        setKmaWindData(arrayKmaWind);
-      }
-      // 간절곶:924,울기:901,장생포:898
-      const arrayKmaVisInfoText = objInfoFromApi.kmaVis
-        ? objInfoFromApi.kmaVis.split("\n")
-        : [];
-      const arrayKV = arrayKmaVisInfoText.reduce(
-        (acc, cur) => {
-          const line = cur.split(/\s+/);
-          if (line[1] == "924" && line[5] !== "-99.9") {
-            // 간절곶
-            acc["간절곶"].push(line);
-          } else if (line[1] == "901" && line[5] !== "-99.9") {
-            // 울기
-            acc["울기"].push(line);
-          } else if (line[1] == "898" && line[5] !== "-99.9") {
-            // 장생포
-            acc["장생포"].push(line);
-          }
-          return acc;
-        },
-        { 간절곶: [], 울기: [], 장생포: [] },
-      );
-      console.log(arrayKV);
-      const arrayKmaVis = arrayPoints.map((point, index) => {
-        if (arrayKV[point].length > 0) {
-          const arrayInfo = arrayKV[point];
-          const latestInfoVis = mToKm(arrayInfo[arrayInfo.length - 1][5]);
-          arraySetKmaVis[index](latestInfoVis);
-          const uniqueArray = [
-            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
-          ].map((v) => JSON.parse(v));
-          const arrayVis = uniqueArray.map((info) => {
-            const time = formatToHHMM(info[0]);
-            return { time: time, vis: mToKm(info[5]) };
-          });
-          if (arrayVis.length === 0) {
-            return kmaVisData[index];
-          } else {
-            return arrayVis;
-          }
-        }
-      });
-      setKmaVisData(arrayKmaVis);
-      // 매암
-      if (objInfoFromApi.maeam.body.items.item.length > 0) {
-        const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
-        console.log(arrayInfoMaeam);
-        let latestInfoMaeam = null;
-        for (let i = 0; i >= 0; i++) {
-          if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
-            latestInfoMaeam = arrayInfoMaeam[i];
-            break;
-          }
-        }
-        setWindSpdMaeam(latestInfoMaeam.rmyWspd);
-        setWindDirMaeam(latestInfoMaeam.rmyWndrct);
-        setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
-        const baseDate = formatYYYYMMDDHHMMToDate(
-          latestInfoMaeam.obsrvnDt.replace(/[- :]/g, ""),
-        );
+      return res
+    });
+    const windResponses = await Promise.all(windPromises);
+    console.log(windResponses)
+    // try {
+    //   const res = await fetch(WORKER_URL, {
+    //     method: "GET",
+    //     headers: { Authorization: token },
+    //   });
+    //   if (!res.ok) {
+    //     throw new Error("네트워크 응답 실패");
+    //   }
+    //   const objInfoFromApi = await res.json();
+    //   console.log(objInfoFromApi);
+    //   // 간절곶:924,울기:901,장생포:898
+    //   // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
+    //   const arrayKmaWindInfoText = objInfoFromApi.kmaWind
+    //     ? objInfoFromApi.kmaWind.split("\n")
+    //     : [];
+    //   const arrayKW = arrayKmaWindInfoText.reduce(
+    //     (acc, cur) => {
+    //       const line = cur.split(/\s+/);
+    //       if (line[1] === "924" && line[5] !== "-99.9") {
+    //         // 간절곶
+    //         acc["간절곶"].push(line);
+    //       } else if (line[1] === "901" && line[5] !== "-99.9") {
+    //         // 울기
+    //         acc["울기"].push(line);
+    //       } else if (line[1] === "898" && line[5] !== "-99.9") {
+    //         // 장생포
+    //         acc["장생포"].push(line);
+    //       }
+    //       return acc;
+    //     },
+    //     { 간절곶: [], 울기: [], 장생포: [] },
+    //   );
+    //   console.log(arrayKW);
+    //   const arrayKmaWind = arrayPoints.map((point, index) => {
+    //     if (arrayKW[point].length > 0) {
+    //       const arrayInfo = arrayKW[point];
+    //       const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
+    //       if (arrayKmaWindDir[index] !== latestInfoWDir) {
+    //         arraySetKmaWindDir[index](latestInfoWDir);
+    //       }
+    //       const latestInfoWSpd = arrayInfo[arrayInfo.length - 1][5];
+    //       if (arrayKmaWindSpd[index] !== latestInfoWSpd) {
+    //         arraySetKmaWindSpd[index](latestInfoWSpd);
+    //       }
+    //       const uniqueArray = [
+    //         ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
+    //       ].map((v) => JSON.parse(v));
+    //       const arrayWind = uniqueArray.map((info) => {
+    //         const time = formatToHHMM(info[0]);
+    //         return { time: time, windSpeed: info[5] };
+    //       });
+    //       if (arrayWind.length === 0) {
+    //         return kmaWindData[index];
+    //       } else {
+    //         return arrayWind;
+    //       }
+    //     }
+    //   });
+    //   if (arrayKmaWind) {
+    //     setKmaWindData(arrayKmaWind);
+    //   }
+    //   // 간절곶:924,울기:901,장생포:898
+    //   const arrayKmaVisInfoText = objInfoFromApi.kmaVis
+    //     ? objInfoFromApi.kmaVis.split("\n")
+    //     : [];
+    //   const arrayKV = arrayKmaVisInfoText.reduce(
+    //     (acc, cur) => {
+    //       const line = cur.split(/\s+/);
+    //       if (line[1] == "924" && line[5] !== "-99.9") {
+    //         // 간절곶
+    //         acc["간절곶"].push(line);
+    //       } else if (line[1] == "901" && line[5] !== "-99.9") {
+    //         // 울기
+    //         acc["울기"].push(line);
+    //       } else if (line[1] == "898" && line[5] !== "-99.9") {
+    //         // 장생포
+    //         acc["장생포"].push(line);
+    //       }
+    //       return acc;
+    //     },
+    //     { 간절곶: [], 울기: [], 장생포: [] },
+    //   );
+    //   console.log(arrayKV);
+    //   const arrayKmaVis = arrayPoints.map((point, index) => {
+    //     if (arrayKV[point].length > 0) {
+    //       const arrayInfo = arrayKV[point];
+    //       const latestInfoVis = mToKm(arrayInfo[arrayInfo.length - 1][5]);
+    //       arraySetKmaVis[index](latestInfoVis);
+    //       const uniqueArray = [
+    //         ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
+    //       ].map((v) => JSON.parse(v));
+    //       const arrayVis = uniqueArray.map((info) => {
+    //         const time = formatToHHMM(info[0]);
+    //         return { time: time, vis: mToKm(info[5]) };
+    //       });
+    //       if (arrayVis.length === 0) {
+    //         return kmaVisData[index];
+    //       } else {
+    //         return arrayVis;
+    //       }
+    //     }
+    //   });
+    //   setKmaVisData(arrayKmaVis);
+    //   // 매암
+    //   if (objInfoFromApi.maeam.body.items.item.length > 0) {
+    //     const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
+    //     console.log(arrayInfoMaeam);
+    //     let latestInfoMaeam = null;
+    //     for (let i = 0; i >= 0; i++) {
+    //       if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
+    //         latestInfoMaeam = arrayInfoMaeam[i];
+    //         break;
+    //       }
+    //     }
+    //     setWindSpdMaeam(latestInfoMaeam.rmyWspd);
+    //     setWindDirMaeam(latestInfoMaeam.rmyWndrct);
+    //     setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
+    //     const baseDate = formatYYYYMMDDHHMMToDate(
+    //       latestInfoMaeam.obsrvnDt.replace(/[- :]/g, ""),
+    //     );
 
-        const arrayMaeam = arrayInfoMaeam.map((info) => {
-          const raw = info.obsrvnDt.replace(/[- :]/g, "");
+    //     const arrayMaeam = arrayInfoMaeam.map((info) => {
+    //       const raw = info.obsrvnDt.replace(/[- :]/g, "");
 
-          return {
-            time: formatToHHMM(raw),
-            wd: info.rmyWndrct,
-            ws: info.rmyWspd,
-            vis: mToKm(info.dtvsbM20kLen),
-          };
-        });
-        const arrayMW = arrayMaeam
-          .map((item) => ({ time: item.time, windSpeed: item.ws }))
-          .sort((a, b) => {
-            const toMinutes = (t) => {
-              const [h, m] = t.split(":").map(Number);
-              return h * 60 + m;
-            };
+    //       return {
+    //         time: formatToHHMM(raw),
+    //         wd: info.rmyWndrct,
+    //         ws: info.rmyWspd,
+    //         vis: mToKm(info.dtvsbM20kLen),
+    //       };
+    //     });
+    //     const arrayMW = arrayMaeam
+    //       .map((item) => ({ time: item.time, windSpeed: item.ws }))
+    //       .sort((a, b) => {
+    //         const toMinutes = (t) => {
+    //           const [h, m] = t.split(":").map(Number);
+    //           return h * 60 + m;
+    //         };
 
-            return toMinutes(a.time) - toMinutes(b.time);
-          });
-        if (arrayMW) {
-          setMeamWindData(arrayMW);
-        }
-        const arrayMV = arrayMaeam
-          .map((item) => ({ time: item.time, vis: item.vis }))
-          .sort((a, b) => {
-            const toMinutes = (t) => {
-              const [h, m] = t.split(":").map(Number);
-              return h * 60 + m;
-            };
+    //         return toMinutes(a.time) - toMinutes(b.time);
+    //       });
+    //     if (arrayMW) {
+    //       setMeamWindData(arrayMW);
+    //     }
+    //     const arrayMV = arrayMaeam
+    //       .map((item) => ({ time: item.time, vis: item.vis }))
+    //       .sort((a, b) => {
+    //         const toMinutes = (t) => {
+    //           const [h, m] = t.split(":").map(Number);
+    //           return h * 60 + m;
+    //         };
 
-            return toMinutes(a.time) - toMinutes(b.time);
-          });
-        if (arrayMV) {
-          setMaeamVisData(arrayMV);
-        }
-      }
-    } catch (err) {
-      console.error("데이터 불러오기 오류:", err);
-    }
+    //         return toMinutes(a.time) - toMinutes(b.time);
+    //       });
+    //     if (arrayMV) {
+    //       setMaeamVisData(arrayMV);
+    //     }
+    //   }
+    // } catch (err) {
+    //   console.error("데이터 불러오기 오류:", err);
+    // }
   };
   const fetchWindData1min = async () => {
     const now = new Date();
