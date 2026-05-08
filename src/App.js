@@ -470,7 +470,7 @@ function App() {
         },
       });
 
-      responses.push(await res.json());
+      windResponses.push(await res.json());
     }
     console.log(windResponses);
     // try {

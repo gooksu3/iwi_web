@@ -52,7 +52,7 @@ def initial_api_calling():
                 if not line:
                     continue
                 parts = line.split()
-                if len(parts) > 1 and parts[1] in ["898", "901", "924"]:
+                if len(parts) > 5 and parts[1] in ["898", "901", "924"]:
                     info={"time":parts[0],"windSpeed":parts[5]}
                     if parts[1]=="898":
                         dict_wind_info["장생포"].append(info)
@@ -78,7 +78,7 @@ def initial_api_calling():
         #             dict_wind_info["간절곶"].extend(info)
         #     results["kmaWind"].extend(dict_wind_info)
     except Exception as e:
-        results["kmaWind"].append(str(e))
+        results["kmaWind"]=str(e)
         # 기상청 시정
         # try:
         #     response_vis = session.get(url_kma_vis,params=params_kma,timeout=10,stream=True)
