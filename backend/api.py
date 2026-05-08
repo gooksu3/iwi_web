@@ -39,9 +39,9 @@ def initial_api_calling():
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
                   "min":"1",
                   "numOfRows":"65"}
-    response_wind = requests.get(url_kma_wind,params=params_kma,timeout=20)
-    response_vis=requests.get(url_kma_vis,params=params_kma,timeout=20)
-    response_maeam=requests.get(url_maeam,params=params_maeam,timeout=20)
+    response_wind = requests.get(url_kma_wind,params=params_kma,timeout=5)
+    response_vis=requests.get(url_kma_vis,params=params_kma,timeout=5)
+    response_maeam=requests.get(url_maeam,params=params_maeam,timeout=5)
     results["kmaWind"]=response_wind.text
     results["kmaVis"]=response_vis.text
     results["maeam"]=response_maeam.json()
