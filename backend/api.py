@@ -15,8 +15,8 @@ def test():
         "message": "success"
     }
 
-@app.route("/api/10min", methods=["GET", "OPTIONS"])
-def kma_api_calling_10min():
+@app.route("/api/kmaWind", methods=["GET", "OPTIONS"])
+def kma_wind_api_calling_10min():
     if request.method == "OPTIONS":
         response = make_response()
         response.headers["Access-Control-Allow-Origin"] = "*"
@@ -26,23 +26,13 @@ def kma_api_calling_10min():
 
     tm1=request.args.get("tm1")
     tm2=request.args.get("tm2")
-    today=datetime.now().strftime("%Y%m%d")
     results={}
     url_kma_wind = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?'
-    url_kma_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
-    # url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     params_kma = {
                 "authKey": "1oWYR_o-SnGFmEf6PlpxQQ",
                 "tm1":tm1,
                 "tm2":tm2,
                 }
-    # params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
-    #               "type":"json",
-    #               "obsCode":"SF_0010",
-    #               "reqDate":today,
-    #               "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
-    #               "min":"1",
-    #               "numOfRows":"65"}
     # 기상청 바람
     dict_wind_info={"간절곶":[],"울기":[],"장생포":[]}
     try:
@@ -65,6 +55,62 @@ def kma_api_calling_10min():
     except Exception as e:
         results["kmaWind"]=str(e)
     results["kmaWind"]=dict_wind_info
+    response = make_response(jsonify(results))
+
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+
+    return response
+@app.route("/api/kmaVis", methods=["GET", "OPTIONS"])
+def kma_vis_api_calling_10min():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        return response
+
+    tm1=request.args.get("tm1")
+    tm2=request.args.get("tm2")
+    today=datetime.now().strftime("%Y%m%d")
+    results={}
+    url_kma_vis = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min_vis?'
+    # url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
+    params_kma = {
+                "authKey": "1oWYR_o-SnGFmEf6PlpxQQ",
+                "tm1":tm1,
+                "tm2":tm2,
+                }
+    # params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
+    #               "type":"json",
+    #               "obsCode":"SF_0010",
+    #               "reqDate":today,
+    #               "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
+    #               "min":"1",
+    #               "numOfRows":"65"}
+    # 기상청 바람
+    dict_vis_info={"간절곶":[],"울기":[],"장생포":[]}
+    try:
+        response_vis = requests.get(url_kma_vis,params=params_kma,timeout=10)
+        if response_vis.status_code == 200:
+            lines = response_vis.text.split("\n")
+            for line in lines[3:-2]:
+                parts = line.split()
+                if len(parts) > 5 and parts[1] in ["898", "901", "924"]:
+                    info = {
+                        "time": parts[0],
+                        "vis": parts[5]
+                    }
+                    if "898" in parts[1] and parts[5]!="-99.9":
+                        dict_vis_info["장생포"].append(info)
+                    elif "901" in parts[1] and parts[5]!="-99.9":
+                        dict_vis_info["울기"].append(info)
+                    elif "924" in parts[1] and parts[5]!="-99.9":
+                        dict_vis_info["간절곶"].append(info)
+    except Exception as e:
+        results["kmaVis"]=str(e)
+    results["kmaVis"]=dict_vis_info
     response = make_response(jsonify(results))
 
     response.headers["Access-Control-Allow-Origin"] = "*"

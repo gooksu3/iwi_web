@@ -472,14 +472,13 @@ function App() {
     const ranges = splitTimeRange(tm1, tm2, 10);
     const responses = [];
     for (const r of ranges) {
-      const url = `https://iwi-web.onrender.com/api/10min?tm1=${r.tm1}&tm2=${r.tm2}`;
+      const url = `https://iwi-web.onrender.com/api/kmaWind?tm1=${r.tm1}&tm2=${r.tm2}`;
       const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
       responses.push(await res.json());
     }
-    console.log(responses);
     const mergedWind = {
       간절곶: [],
       울기: [],
@@ -494,6 +493,29 @@ function App() {
       removeDuplicatesArray(mergedWind[place]);
     });
     setKmaWindData(mergedWind);
+    for (const r of ranges) {
+      const url = `https://iwi-web.onrender.com/api/kmaVis?tm1=${r.tm1}&tm2=${r.tm2}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      responses.push(await res.json());
+    }
+    const mergedVis = {
+      간절곶: [],
+      울기: [],
+      장생포: [],
+    };
+    responses.forEach((obj) => {
+      mergedVis["간절곶"].push(...obj.kmaVis["간절곶"]);
+      mergedVis["울기"].push(...obj.kmaVis["울기"]);
+      mergedVis["장생포"].push(...obj.kmaVis["장생포"]);
+    });
+    Object.keys(mergedVis).forEach((place) => {
+      removeDuplicatesArray(mergedVis[place]);
+    });
+    console.log(mergedVis);
+    setKmaWindData(mergedVis);
     // console.log(arrayKmaWind);
     // try {
     //   const res = await fetch(WORKER_URL, {
