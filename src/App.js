@@ -443,25 +443,23 @@ function App() {
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
         ? objInfoFromApi.kmaWind.split("\n")
         : [];
-      const arrayKW = arrayKmaWindInfoText
-        .slice(3, arrayKmaWindInfoText.length - 2)
-        .reduce(
-          (acc, cur) => {
-            const line = cur.split(/\s+/);
-            if (line[1] === "924" && line[5] !== "-99.9") {
-              // 간절곶
-              acc["간절곶"].push(line);
-            } else if (line[1] === "901" && line[5] !== "-99.9") {
-              // 울기
-              acc["울기"].push(line);
-            } else if (line[1] === "898" && line[5] !== "-99.9") {
-              // 장생포
-              acc["장생포"].push(line);
-            }
-            return acc;
-          },
-          { 간절곶: [], 울기: [], 장생포: [] },
-        );
+      const arrayKW = arrayKmaWindInfoText.reduce(
+        (acc, cur) => {
+          const line = cur.split(/\s+/);
+          if (line[1] === "924" && line[5] !== "-99.9") {
+            // 간절곶
+            acc["간절곶"].push(line);
+          } else if (line[1] === "901" && line[5] !== "-99.9") {
+            // 울기
+            acc["울기"].push(line);
+          } else if (line[1] === "898" && line[5] !== "-99.9") {
+            // 장생포
+            acc["장생포"].push(line);
+          }
+          return acc;
+        },
+        { 간절곶: [], 울기: [], 장생포: [] },
+      );
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
@@ -494,25 +492,23 @@ function App() {
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
         : [];
-      const arrayKV = arrayKmaVisInfoText
-        .slice(3, arrayKmaVisInfoText.length - 2)
-        .reduce(
-          (acc, cur) => {
-            const line = cur.split(/\s+/);
-            if (line[1] == "924" && line[5] !== "-99.9") {
-              // 간절곶
-              acc["간절곶"].push(line);
-            } else if (line[1] == "901" && line[5] !== "-99.9") {
-              // 울기
-              acc["울기"].push(line);
-            } else if (line[1] == "898" && line[5] !== "-99.9") {
-              // 장생포
-              acc["장생포"].push(line);
-            }
-            return acc;
-          },
-          { 간절곶: [], 울기: [], 장생포: [] },
-        );
+      const arrayKV = arrayKmaVisInfoText.reduce(
+        (acc, cur) => {
+          const line = cur.split(/\s+/);
+          if (line[1] == "924" && line[5] !== "-99.9") {
+            // 간절곶
+            acc["간절곶"].push(line);
+          } else if (line[1] == "901" && line[5] !== "-99.9") {
+            // 울기
+            acc["울기"].push(line);
+          } else if (line[1] == "898" && line[5] !== "-99.9") {
+            // 장생포
+            acc["장생포"].push(line);
+          }
+          return acc;
+        },
+        { 간절곶: [], 울기: [], 장생포: [] },
+      );
       const arrayKmaVis = arrayPoints.map((point, index) => {
         if (arrayKV[point].length > 0) {
           const arrayInfo = arrayKV[point];
