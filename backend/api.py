@@ -66,7 +66,7 @@ def initial_api_calling():
                         dict_wind_info["간절곶"].append(info)
     except Exception as e:
         results["kmaWind"]=str(e)
-        
+    results["kmaWind"]=dict_wind_info
     response = make_response(jsonify(results))
 
     response.headers["Access-Control-Allow-Origin"] = "*"
