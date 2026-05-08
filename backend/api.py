@@ -58,18 +58,12 @@ def initial_api_calling():
                         "time": parts[0],
                         "windSpeed": parts[5]
                     }
-                    if parts[1] == "898":
+                    if "898" in parts[1]:
                         dict_wind_info["장생포"].append(info)
-
-                    elif parts[1] == "901":
+                    elif "901" in parts[1]:
                         dict_wind_info["울기"].append(info)
-
-                    elif parts[1] == "924":
+                    elif "924" in parts[1]:
                         dict_wind_info["간절곶"].append(info)
-                    else:
-                        dict_wind_info["간절곶"].append(parts[0],"-",len(parts[0]),parts[5])
-                        dict_wind_info["울기"].append(parts[0],"-",len(parts[0]),parts[5])
-                        dict_wind_info["장생포"].append(parts[0],"-",len(parts[0]),parts[5])
     except Exception as e:
         results["kmaWind"]=str(e)
         
