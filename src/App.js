@@ -460,6 +460,7 @@ function App() {
         },
         { 간절곶: [], 울기: [], 장생포: [] },
       );
+      console.log(arrayKW);
       const arrayKmaWind = arrayPoints.map((point, index) => {
         if (arrayKW[point].length > 0) {
           const arrayInfo = arrayKW[point];
@@ -509,6 +510,7 @@ function App() {
         },
         { 간절곶: [], 울기: [], 장생포: [] },
       );
+      console.log(arrayKV);
       const arrayKmaVis = arrayPoints.map((point, index) => {
         if (arrayKV[point].length > 0) {
           const arrayInfo = arrayKV[point];
