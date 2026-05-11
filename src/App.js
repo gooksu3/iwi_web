@@ -693,8 +693,9 @@ function App() {
       setKmaVisData(objKmaVis);
     }
     // 매암
-    const urlMaeam = "https://iwi-web.onrender.com/api/maeam?pageNo=1";
+    const urlMaeam = `https://iwi-web.onrender.com/api/maeam?pageNo=1&today=${tm2}`;
     const data = await fetchApi(urlMaeam);
+    console.log("---", data);
     if (data.length > 0) {
       const latestInfoMaeam = data[data.length - 1];
       setWindSpdMaeam(latestInfoMaeam.rmyWspd);
@@ -716,6 +717,7 @@ function App() {
         console.log(array);
         return array;
       });
+      console.log(arrayMV);
       setMaeamVisData((prev) => {
         const array = removeDuplicatesArray([...prev, ...arrayMV]);
         if (array.length > 61) {

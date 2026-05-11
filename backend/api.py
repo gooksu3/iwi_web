@@ -114,8 +114,9 @@ def kma_vis_api_calling_10min():
 
 @app.route("/api/maeam", methods=["GET", "OPTIONS"])
 def maeam_wind_n_vis_today():
-    today=datetime.now().strftime("%Y%m%d")
+    today=request.args.get("today")
     pageNo=request.args.get("pageNo")
+    url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
                   "type":"json",
                   "obsCode":"SF_0010",
@@ -123,7 +124,6 @@ def maeam_wind_n_vis_today():
                   "include":"obsrvnDt,rmyWspd,rmyWndrct,dtvsbM20kLen",
                   "min":"1",
                   "pageNo":pageNo}
-    url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     response_maeam=requests.get(url_maeam,params=params_maeam)
     if response_maeam.status_code==200:
         response = make_response(jsonify(response_maeam.json()['body']['items']['item']))
