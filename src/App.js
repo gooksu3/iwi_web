@@ -586,7 +586,7 @@ function App() {
       const array = await res.json();
       responseMaeam.push(array);
     }
-    responseMaeam.reverse();
+    // responseMaeam.reverse();
     console.log(responseMaeam);
 
     setOpenTableWindNVis(true);
