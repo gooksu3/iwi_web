@@ -112,7 +112,7 @@ def kma_vis_api_calling_10min():
 
     return response
 
-@app.route("/api/maeamToday", methods=["GET", "OPTIONS"])
+@app.route("/api/maeam", methods=["GET", "OPTIONS"])
 def maeam_wind_n_vis_today():
     today=datetime.now().strftime("%Y%m%d")
     pageNo=request.args.get("pageNo")

@@ -578,17 +578,34 @@ function App() {
     // 매암
     const responseMaeam = [];
     for (let page = 1; page < 7; page++) {
-      const url_maeam = `https://iwi-web.onrender.com/api/maeamToday?pageNo=${page}`;
+      const url_maeam = `https://iwi-web.onrender.com/api/maeam?pageNo=${page}`;
       const res = await fetch(url_maeam);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
       const array = await res.json();
-      responseMaeam.push(array);
+      responseMaeam.push(...array);
     }
     // responseMaeam.reverse();
     console.log(responseMaeam);
-
+    const latestInfoMaeam = responseMaeam[0];
+    setWindSpdMaeam(latestInfoMaeam.rmyWspd);
+    setWindDirMaeam(latestInfoMaeam.rmyWndrct);
+    setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
+    responseMaeam.reverse();
+    const arrayMW = [];
+    const arrayMV = [];
+    responseMaeam.forEach((item) => {
+      const time = formatToHHMM(item.obsrvnDt.replace(/[- :]/g, ""));
+      arrayMW.push({ time: time, windSpeed: item.rmyWspd });
+      arrayMV.push({ time: time, vis: item.dtvsbM20kLen });
+    });
+    if (arrayMW) {
+      setMeamWindData(arrayMW);
+    }
+    if (arrayMV) {
+      setMaeamVisData(arrayMV);
+    }
     setOpenTableWindNVis(true);
   };
   const fetchWindData1min = async () => {
@@ -1385,7 +1402,7 @@ function App() {
               />
             );
           })}
-          {/* <RowInWetherTable
+          <RowInWetherTable
             point={"매암부두"}
             source={"해양조사원"}
             backgroundColor={arrayRowColor[3 % 2]}
@@ -1395,7 +1412,7 @@ function App() {
             vis={visMaeam}
             visData={MaeamVisData}
             varKma={false}
-          /> */}
+          />
         </tbody>
       </table>
     );
