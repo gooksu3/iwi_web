@@ -114,7 +114,7 @@ def kma_vis_api_calling_10min():
 
 @app.route("/api/maeam", methods=["GET", "OPTIONS"])
 def maeam_wind_n_vis_today():
-    today=request.args.get("today")
+    today=request.args.get("today")[:-4]
     pageNo=request.args.get("pageNo")
     url_maeam="https://apis.data.go.kr/1192136/surveySeafog/GetSurveySeafogApiService?"
     params_maeam={"serviceKey":"A/d2seUujJ6QE6I/syxLeO60f+KemMGQxK2/VhmbhG6EcG0y/c8JroKQn8j8e7QujsZIStjwl9IE6vGQy0EJ9g==",
