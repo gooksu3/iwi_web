@@ -464,6 +464,22 @@ function App() {
     }
     setLoadForecastTable(false);
   };
+  const fetchKmaWind = async (tm1, tm2) => {
+    const url = `https://iwi-web.onrender.com/api/kmaWind?tm1=${tm1}&tm2=${tm2}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    return await res.json();
+  };
+  const fetchKmaVis = async (tm1, tm2) => {
+    const url = `https://iwi-web.onrender.com/api/kmaVis?tm1=${tm1}&tm2=${tm2}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    return await res.json();
+  };
   const fetchInitialWindData = async () => {
     const now = new Date();
     const tm2 = formatDateToYYYYMMDDHHMM(now);
@@ -474,12 +490,8 @@ function App() {
     // 기상청 바람
     const responsesWind = [];
     for (const r of ranges) {
-      const url = `https://iwi-web.onrender.com/api/kmaWind?tm1=${r.tm1}&tm2=${r.tm2}`;
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      responsesWind.push(await res.json());
+      const data = await fetchKmaWind(r.tm1, r.tm2);
+      responsesWind.push(data);
     }
     const mergedWind = {
       간절곶: [],
@@ -532,12 +544,8 @@ function App() {
     // 기상청 시정
     const responsesVis = [];
     for (const r of ranges) {
-      const url = `https://iwi-web.onrender.com/api/kmaVis?tm1=${r.tm1}&tm2=${r.tm2}`;
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      responsesVis.push(await res.json());
+      const data = await fetchKmaVis(r.tm1, r.tm2);
+      responsesVis.push(data);
     }
     const mergedVis = {
       간절곶: [],
