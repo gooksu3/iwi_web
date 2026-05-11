@@ -90,16 +90,16 @@ def kma_vis_api_calling_10min():
             lines = response_vis.text.split("\n")
             for line in lines[3:-2]:
                 parts = line.split()
-                if len(parts) > 5 and parts[1] in ["898", "901", "924"]:
+                if len(parts) > 5 and parts[1].strip() in ["898", "901", "924"]:
                     info = {
                         "time": parts[0],
                         "vis": parts[5]
                     }
-                    if "898" in parts[1] and parts[5]!="-99.9":
+                    if "898" in parts[1].strip() and parts[5].strip()!="-99.9":
                         dict_vis_info["장생포"].append(info)
-                    elif "901" in parts[1] and parts[5]!="-99.9":
+                    elif "901" in parts[1].strip() and parts[5].strip()!="-99.9":
                         dict_vis_info["울기"].append(info)
-                    elif "924" in parts[1] and parts[5]!="-99.9":
+                    elif "924" in parts[1].strip() and parts[5].strip()!="-99.9":
                         dict_vis_info["간절곶"].append(info)
     except Exception as e:
         results["kmaVis"]=str(e)
