@@ -581,8 +581,10 @@ function App() {
     console.log(mergedVis);
     // 매암
     const responseMaeam = [];
+    const todayForMaeam = tm2.slice(0, -4);
+    console.log(todayForMaeam);
     for (let page = 1; page < 7; page++) {
-      const url = `https://iwi-web.onrender.com/api/maeam?pageNo=${page}`;
+      const url = `https://iwi-web.onrender.com/api/maeam?pageNo=${page}&today=${todayForMaeam}`;
       const data = await fetchApi(url);
       responseMaeam.push(...data);
     }
