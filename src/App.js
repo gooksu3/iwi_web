@@ -392,8 +392,6 @@ function App() {
           });
         }
       }
-      console.log(array4DaysDate);
-      console.log(array4DaysForecast);
       const now = new Date();
       const hourNow = now.getHours();
       let startIndex = 0;
@@ -596,7 +594,7 @@ function App() {
     const now = new Date();
     const tm2 = formatDateToYYYYMMDDHHMM(now);
     const tm1 = formatDateToYYYYMMDDHHMM(
-      new Date(now.getTime() - 3 * 60 * 1000),
+      new Date(now.getTime() - 10 * 60 * 1000),
     );
     // Workers 프록시 URL (배포한 주소로 교체하세요)
     const WORKER_URL = `https://newuiwi.gooksu3.workers.dev/api/1min?tm1=${tm1}&tm2=${tm2}`;
@@ -658,26 +656,41 @@ function App() {
           }
         }
       });
-      setKmaWindData((prev) => {
-        const updated = { ...prev };
-
-        Object.keys(arrayKmaWind).forEach((key) => {
-          const prevArr = prev[key] || [];
-          const newArr = arrayKmaWind[key] || [];
-
-          // 기존 time 목록
-          const existingTimes = new Set(prevArr.map((item) => item.time));
-
-          // 중복 아닌 것만 필터
-          const filtered = newArr.filter(
-            (item) => !existingTimes.has(item.time),
+      if (arrayKmaWind.length > 0) {
+        setKmaWindData((prev, index) => {
+          const updated = [...prev];
+          const array = updated.map((a, index) =>
+            [
+              ...new Set(
+                [...a, ...arrayKmaWind[index]].map((v) => JSON.stringify(v)),
+              ),
+            ].map((v) => JSON.parse(v)),
           );
-          if (filtered.length > 61) {
-            updated[key] = [...prevArr, ...filtered].slice(-filtered.length);
-          }
+
+          return array;
         });
-        return updated;
-      });
+      }
+      // setKmaWindData((prev) => {
+      //   const updated = { ...prev };
+      //   console.log(updated);
+      //   Object.keys(arrayPoints).forEach((point, index) => {
+      //     const prevArr = prev[index] || [];
+      //     const newArr = arrayKmaWind[index] || [];
+
+      //     // 기존 time 목록
+      //     const existingTimes = new Set(prevArr.map((item) => item.time));
+
+      //     // 중복 아닌 것만 필터
+      //     const filtered = newArr.filter(
+      //       (item) => !existingTimes.has(item.time),
+      //     );
+      //     if (filtered.length > 61) {
+      //       updated[index] = [...prevArr, ...filtered].slice(-filtered.length);
+      //     }
+      //   });
+      //   console.log(updated);
+      //   return updated;
+      // });
       // // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -720,28 +733,43 @@ function App() {
           }
         }
       });
-      setKmaVisData((prev) => {
-        const updated = { ...prev };
-
-        Object.keys(arrayKmaVis).forEach((key) => {
-          const prevArr = prev[key] || [];
-          const newArr = arrayKmaVis[key] || [];
-
-          // 기존 time 목록
-          const existingTimes = new Set(prevArr.map((item) => item.time));
-
-          // 중복 아닌 것만 필터
-          const filtered = newArr.filter(
-            (item) => !existingTimes.has(item.time),
+      if (arrayKmaVis.length > 0) {
+        setKmaVisData((prev, index) => {
+          const updated = [...prev];
+          const array = updated.map((a, index) =>
+            [
+              ...new Set(
+                [...a, ...arrayKmaVis[index]].map((v) => JSON.stringify(v)),
+              ),
+            ].map((v) => JSON.parse(v)),
           );
-          if (filtered.length > 61) {
-            updated[key] = [...prevArr, ...filtered].slice(-filtered.length);
-          }
+
+          return array;
         });
-        return updated;
-      });
+      }
+      // setKmaVisData((prev) => {
+      //   const updated = { ...prev };
+
+      //   Object.keys(arrayPoints).forEach((point, index) => {
+      //     const prevArr = prev[point] || [];
+      //     const newArr = arrayKmaVis[index] || [];
+
+      //     // 기존 time 목록
+      //     const existingTimes = new Set(prevArr.map((item) => item.time));
+
+      //     // 중복 아닌 것만 필터
+      //     const filtered = newArr.filter(
+      //       (item) => !existingTimes.has(item.time),
+      //     );
+      //     if (filtered.length > 61) {
+      //       updated[point] = [...prevArr, ...filtered].slice(-filtered.length);
+      //     }
+      //   });
+      //   return updated;
+      // });
       // 매암
-      if (objInfoFromApi.maeam.body.items.item.length > 0) {
+      console.log(objInfoFromApi.maeam);
+      if (objInfoFromApi.maeam?.body?.items?.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item.filter(
           (obj) => "dtvsbM20kLen" in obj && obj.dtvsbM20kLen !== null,
         );
