@@ -1780,7 +1780,7 @@ function App() {
     textAlign: "center", // 가로 중앙
     verticalAlign: "middle", // 세로 중앙
     alignItems: "center",
-    fontSize: "1.6vw",
+    fontSize: "2vw",
     fontWeight: "bold",
     color: "#EAF3FD",
     padding: "3px",
@@ -1789,7 +1789,7 @@ function App() {
     textAlign: "center", // 가로 중앙
     verticalAlign: "middle", // 세로 중앙
     alignItems: "center",
-    fontSize: "3vw",
+    fontSize: "2.7vw",
     fontWeight: "bold",
     border: "2px solid #272727",
     color: "#EAF3FD",
