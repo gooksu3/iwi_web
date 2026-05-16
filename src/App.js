@@ -392,6 +392,8 @@ function App() {
           });
         }
       }
+      console.log(array4DaysDate);
+      console.log(array4DaysForecast);
       const now = new Date();
       const hourNow = now.getHours();
       let startIndex = 0;
@@ -437,7 +439,6 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      // console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -488,7 +489,6 @@ function App() {
         }
       });
       if (arrayKmaWind) {
-        console.log(arrayKmaWind);
         setKmaWindData(arrayKmaWind);
       }
       // 간절곶:924,울기:901,장생포:898
@@ -533,7 +533,6 @@ function App() {
           }
         }
       });
-      console.log(arrayKmaVis);
       setKmaVisData(arrayKmaVis);
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
@@ -573,7 +572,6 @@ function App() {
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMW) {
-          console.log(arrayMW);
           setMeamWindData(arrayMW);
         }
         const arrayMV = arrayMaeam
@@ -587,7 +585,6 @@ function App() {
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMV) {
-          console.log(arrayMV);
           setMaeamVisData(arrayMV);
         }
       }
@@ -612,7 +609,6 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      // console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -662,7 +658,6 @@ function App() {
           }
         }
       });
-      // console.log(arrayKmaWind);
       setKmaWindData((prev) => {
         const updated = { ...prev };
 
@@ -681,7 +676,6 @@ function App() {
             updated[key] = [...prevArr, ...filtered].slice(-filtered.length);
           }
         });
-        console.log("kmaWind", updated);
         return updated;
       });
       // // 간절곶:924,울기:901,장생포:898
@@ -726,7 +720,6 @@ function App() {
           }
         }
       });
-      // console.log(arrayKmaVis);
       setKmaVisData((prev) => {
         const updated = { ...prev };
 
@@ -745,20 +738,14 @@ function App() {
             updated[key] = [...prevArr, ...filtered].slice(-filtered.length);
           }
         });
-        console.log("kmaVis", updated);
         return updated;
       });
-
-      // // 매암
+      // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
-        const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
-        let latestInfoMaeam = null;
-        for (let i = 0; i >= 0; i++) {
-          if (arrayInfoMaeam[i].dtvsbM20kLen != null) {
-            latestInfoMaeam = arrayInfoMaeam[i];
-            break;
-          }
-        }
+        const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item.filter(
+          (obj) => "dtvsbM20kLen" in obj && obj.dtvsbM20kLen !== null,
+        );
+        const latestInfoMaeam = arrayInfoMaeam[0];
         setWindSpdMaeam(latestInfoMaeam.rmyWspd);
         setWindDirMaeam(latestInfoMaeam.rmyWndrct);
         setVisMaeam(mToKm(latestInfoMaeam.dtvsbM20kLen));
@@ -779,25 +766,10 @@ function App() {
               const [h, m] = t.split(":").map(Number);
               return h * 60 + m;
             };
-
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMW) {
-          setMeamWindData((prev) => {
-            const existingTimes = new Set(prev.map((item) => item.time));
-            const filtered = arrayMW.filter(
-              (item) => !existingTimes.has(item.time),
-            );
-            const updated = [...prev, ...filtered];
-
-            if (updated.length > 61) {
-              console.log("maeamWind 1", updated.slice(filtered.length));
-              return updated.slice(filtered.length);
-            } else {
-              console.log("maeamWind 2", updated);
-              return updated;
-            }
-          });
+          setMeamWindData(arrayMW);
         }
         const arrayMV = arrayMaeam
           .map((item) => ({ time: item.time, vis: item.vis }))
@@ -809,22 +781,8 @@ function App() {
 
             return toMinutes(a.time) - toMinutes(b.time);
           });
-
         if (arrayMV) {
-          setMaeamVisData((prev) => {
-            const existingTimes = new Set(prev.map((item) => item.time));
-            const filtered = arrayMV.filter(
-              (item) => !existingTimes.has(item.time),
-            );
-            const updated = [...prev, ...filtered];
-            if (updated.length > 61) {
-              console.log("maeamVis 3", updated.slice(filtered.length));
-              return updated.slice(filtered.length);
-            } else {
-              console.log("maeamVis 4", updated);
-              return updated;
-            }
-          });
+          setMaeamVisData(arrayMV);
         }
       }
     } catch (err) {
@@ -1694,7 +1652,9 @@ function App() {
         fetchInitialWindData();
         fetchDataForecast();
         fetchDataWeatherWarning();
-        setInterval(fetchWindData1min, 60 * 1000); // 1분마다 갱신
+        setInterval(()=>{ 
+          fetchWindData1min() 
+          fetchDataForecast() }, 60 * 1000); // 1분마다 갱신
         let lastForecastKey = "";
         let lastWarningKey = "";
 
