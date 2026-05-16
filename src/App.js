@@ -1652,9 +1652,7 @@ function App() {
         fetchInitialWindData();
         fetchDataForecast();
         fetchDataWeatherWarning();
-        setInterval(()=>{ 
-          fetchWindData1min() 
-          fetchDataForecast() }, 60 * 1000); // 1분마다 갱신
+        setInterval(fetchWindData1min, 60 * 1000); // 1분마다 갱신
         let lastForecastKey = "";
         let lastWarningKey = "";
 
