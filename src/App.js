@@ -437,7 +437,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      console.log(objInfoFromApi);
+      // console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -488,6 +488,7 @@ function App() {
         }
       });
       if (arrayKmaWind) {
+        console.log(arrayKmaWind);
         setKmaWindData(arrayKmaWind);
       }
       // 간절곶:924,울기:901,장생포:898
@@ -532,6 +533,7 @@ function App() {
           }
         }
       });
+      console.log(arrayKmaVis);
       setKmaVisData(arrayKmaVis);
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
@@ -571,6 +573,7 @@ function App() {
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMW) {
+          console.log(arrayMW);
           setMeamWindData(arrayMW);
         }
         const arrayMV = arrayMaeam
@@ -584,10 +587,10 @@ function App() {
             return toMinutes(a.time) - toMinutes(b.time);
           });
         if (arrayMV) {
+          console.log(arrayMV);
           setMaeamVisData(arrayMV);
         }
       }
-      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -609,7 +612,7 @@ function App() {
         throw new Error("네트워크 응답 실패");
       }
       const objInfoFromApi = await res.json();
-      console.log(objInfoFromApi);
+      // console.log(objInfoFromApi);
       // 간절곶:924,울기:901,장생포:898
       // index 1:1분 평균 풍향, index 2:1분 평균 풍속, index 3:최대 순간 풍향, index 4:최대 순간 풍속
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
@@ -674,10 +677,11 @@ function App() {
           const filtered = newArr.filter(
             (item) => !existingTimes.has(item.time),
           );
-
-          updated[key] = [...prevArr, ...filtered].slice(filtered.length);
+          if (filtered.length > 61) {
+            updated[key] = [...prevArr, ...filtered].slice(-filtered.length);
+          }
         });
-
+        console.log("kmaWind", updated);
         return updated;
       });
       // // 간절곶:924,울기:901,장생포:898
@@ -737,10 +741,11 @@ function App() {
           const filtered = newArr.filter(
             (item) => !existingTimes.has(item.time),
           );
-
-          updated[key] = [...prevArr, ...filtered].slice(filtered.length);
+          if (filtered.length > 61) {
+            updated[key] = [...prevArr, ...filtered].slice(-filtered.length);
+          }
         });
-
+        console.log("kmaVis", updated);
         return updated;
       });
 
@@ -783,7 +788,15 @@ function App() {
             const filtered = arrayMW.filter(
               (item) => !existingTimes.has(item.time),
             );
-            return [...prev, ...filtered].slice(filtered.length);
+            const updated = [...prev, ...filtered];
+
+            if (updated.length > 61) {
+              console.log("maeamWind 1", updated.slice(filtered.length));
+              return updated.slice(filtered.length);
+            } else {
+              console.log("maeamWind 2", updated);
+              return updated;
+            }
           });
         }
         const arrayMV = arrayMaeam
@@ -803,11 +816,17 @@ function App() {
             const filtered = arrayMV.filter(
               (item) => !existingTimes.has(item.time),
             );
-            return [...prev, ...filtered].slice(filtered.length);
+            const updated = [...prev, ...filtered];
+            if (updated.length > 61) {
+              console.log("maeamVis 3", updated.slice(filtered.length));
+              return updated.slice(filtered.length);
+            } else {
+              console.log("maeamVis 4", updated);
+              return updated;
+            }
           });
         }
       }
-      console.log(objInfoFromApi.eastBreak);
     } catch (err) {
       console.error("데이터 불러오기 오류:", err);
     }
@@ -1675,7 +1694,7 @@ function App() {
         fetchInitialWindData();
         fetchDataForecast();
         fetchDataWeatherWarning();
-        setInterval(fetchWindData1min, 10 * 60 * 1000); // 1분마다 갱신
+        setInterval(fetchWindData1min, 60 * 1000); // 1분마다 갱신
         let lastForecastKey = "";
         let lastWarningKey = "";
 
@@ -1803,7 +1822,7 @@ function App() {
     textAlign: "center", // 가로 중앙
     verticalAlign: "middle", // 세로 중앙
     alignItems: "center",
-    fontSize: "2vw",
+    fontSize: "1.8vw",
     fontWeight: "bold",
     color: "#EAF3FD",
     padding: "3px",
