@@ -496,13 +496,13 @@ function App() {
         .reduce(
           (acc, cur) => {
             const line = cur.split(/\s+/);
-            if (line[1] == "924" && line[5] !== "-99.9") {
+            if (line[1] === "924" && line[5] !== "-99.9") {
               // 간절곶
               acc["간절곶"].push(line);
-            } else if (line[1] == "901" && line[5] !== "-99.9") {
+            } else if (line[1] === "901" && line[5] !== "-99.9") {
               // 울기
               acc["울기"].push(line);
-            } else if (line[1] == "898" && line[5] !== "-99.9") {
+            } else if (line[1] === "898" && line[5] !== "-99.9") {
               // 장생포
               acc["장생포"].push(line);
             }
@@ -522,6 +522,8 @@ function App() {
             return { time: time, vis: mToKm(info[5]) };
           });
           objKmaVis[point] = arrayVis;
+        } else {
+          objKmaVis[point] = [];
         }
       });
       setKmaVisData(objKmaVis);
@@ -644,6 +646,8 @@ function App() {
             return { time: time, windSpeed: info[5] };
           });
           objKmaWind[point] = arrayWind;
+        } else {
+          objKmaWind[point] = [];
         }
       });
       setKmaWindData((prev) => {
