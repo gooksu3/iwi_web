@@ -657,15 +657,18 @@ function App() {
         }
       });
       if (arrayKmaWind.length > 0) {
-        setKmaWindData((prev, index) => {
-          const updated = [...prev];
-          const array = updated.map((a, index) =>
-            [
-              ...new Set(
-                [...a, ...arrayKmaWind[index]].map((v) => JSON.stringify(v)),
-              ),
-            ].map((v) => JSON.parse(v)),
-          );
+        setKmaWindData((prev) => {
+          const updated = Array.isArray(prev) ? prev : [];
+          const array = updated.map((a, index) => {
+            const left = Array.isArray(a) ? a : [];
+            const right = Array.isArray(arrayKmaWind[index])
+              ? arrayKmaWind[index]
+              : [];
+
+            return [
+              ...new Set([...left, ...right].map((v) => JSON.stringify(v))),
+            ].map((v) => JSON.parse(v));
+          });
 
           return array;
         });
@@ -734,15 +737,30 @@ function App() {
         }
       });
       if (arrayKmaVis.length > 0) {
-        setKmaVisData((prev, index) => {
-          const updated = [...prev];
-          const array = updated.map((a, index) =>
-            [
-              ...new Set(
-                [...a, ...arrayKmaVis[index]].map((v) => JSON.stringify(v)),
-              ),
-            ].map((v) => JSON.parse(v)),
-          );
+        // setKmaVisData((prev, index) => {
+        //   const updated = [...prev];
+        //   const array = updated.map((a, index) =>
+        //     [
+        //       ...new Set(
+        //         [...a, ...arrayKmaVis[index]].map((v) => JSON.stringify(v)),
+        //       ),
+        //     ].map((v) => JSON.parse(v)),
+        //   );
+
+        //   return array;
+        // });
+        setKmaVisData((prev) => {
+          const updated = Array.isArray(prev) ? prev : [];
+          const array = updated.map((a, index) => {
+            const left = Array.isArray(a) ? a : [];
+            const right = Array.isArray(arrayKmaVis[index])
+              ? arrayKmaVis[index]
+              : [];
+
+            return [
+              ...new Set([...left, ...right].map((v) => JSON.stringify(v))),
+            ].map((v) => JSON.parse(v));
+          });
 
           return array;
         });
