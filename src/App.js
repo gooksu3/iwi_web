@@ -420,6 +420,11 @@ function App() {
     }
     setLoadForecastTable(false);
   };
+  const removeDuplicates = (array) => {
+    return [...new Set(array.map((v) => JSON.stringify(v)))].map((v) =>
+      JSON.parse(v),
+    );
+  };
   const fetchInitialWindData = async () => {
     const now = new Date();
     const tm2 = formatDateToYYYYMMDDHHMM(now);
@@ -442,7 +447,7 @@ function App() {
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
         ? objInfoFromApi.kmaWind.split("\n")
         : [];
-      const arrayKW = arrayKmaWindInfoText
+      const objKW = arrayKmaWindInfoText
         .slice(3, arrayKmaWindInfoText.length - 2)
         .reduce(
           (acc, cur) => {
@@ -461,9 +466,10 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      const arrayKmaWind = arrayPoints.map((point, index) => {
-        if (arrayKW[point].length > 0) {
-          const arrayInfo = arrayKW[point];
+      const objKmaWind = {};
+      arrayPoints.forEach((point, index) => {
+        const arrayInfo = objKW[point];
+        if (arrayInfo.length > 0) {
           const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
           if (arrayKmaWindDir[index] !== latestInfoWDir) {
             arraySetKmaWindDir[index](latestInfoWDir);
@@ -472,23 +478,15 @@ function App() {
           if (arrayKmaWindSpd[index] !== latestInfoWSpd) {
             arraySetKmaWindSpd[index](latestInfoWSpd);
           }
-          const uniqueArray = [
-            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
-          ].map((v) => JSON.parse(v));
+          const uniqueArray = removeDuplicates(arrayInfo);
           const arrayWind = uniqueArray.map((info) => {
             const time = formatToHHMM(info[0]);
             return { time: time, windSpeed: info[5] };
           });
-          if (arrayWind.length === 0) {
-            return kmaWindData[index];
-          } else {
-            return arrayWind;
-          }
+          objKmaWind[point] = arrayWind;
         }
       });
-      if (arrayKmaWind) {
-        setKmaWindData(arrayKmaWind);
-      }
+      setKmaWindData(objKmaWind);
       // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -512,26 +510,21 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      const arrayKmaVis = arrayPoints.map((point, index) => {
-        if (arrayKV[point].length > 0) {
-          const arrayInfo = arrayKV[point];
+      const objKmaVis = {};
+      arrayPoints.forEach((point, index) => {
+        const arrayInfo = arrayKV[point];
+        if (arrayInfo.length > 0) {
           const latestInfoVis = mToKm(arrayInfo[arrayInfo.length - 1][5]);
           arraySetKmaVis[index](latestInfoVis);
-          const uniqueArray = [
-            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
-          ].map((v) => JSON.parse(v));
+          const uniqueArray = removeDuplicates(arrayInfo);
           const arrayVis = uniqueArray.map((info) => {
             const time = formatToHHMM(info[0]);
             return { time: time, vis: mToKm(info[5]) };
           });
-          if (arrayVis.length === 0) {
-            return kmaVisData[index];
-          } else {
-            return arrayVis;
-          }
+          objKmaVis[point] = arrayVis;
         }
       });
-      setKmaVisData(arrayKmaVis);
+      setKmaVisData(objKmaVis);
       // 매암
       if (objInfoFromApi.maeam.body.items.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item;
@@ -612,7 +605,7 @@ function App() {
       const arrayKmaWindInfoText = objInfoFromApi.kmaWind
         ? objInfoFromApi.kmaWind.split("\n")
         : [];
-      const arrayKW = arrayKmaWindInfoText
+      const objKW = arrayKmaWindInfoText
         .slice(3, arrayKmaWindInfoText.length - 2)
         .reduce(
           (acc, cur) => {
@@ -631,8 +624,9 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      const arrayKmaWind = arrayPoints.map((point, index) => {
-        const arrayInfo = arrayKW[point];
+      const objKmaWind = {};
+      arrayPoints.forEach((point, index) => {
+        const arrayInfo = objKW[point];
         if (arrayInfo.length > 0) {
           const latestInfoWDir = arrayInfo[arrayInfo.length - 1][4];
           if (arrayKmaWindDir[index] !== latestInfoWDir) {
@@ -649,51 +643,26 @@ function App() {
             const time = formatToHHMM(info[0]);
             return { time: time, windSpeed: info[5] };
           });
-          if (arrayWind.length === 0) {
-            return kmaWindData[index];
-          } else {
-            return arrayWind;
-          }
+          objKmaWind[point] = arrayWind;
         }
       });
-      if (arrayKmaWind.length > 0) {
-        setKmaWindData((prev) => {
-          const updated = Array.isArray(prev) ? prev : [];
-          const array = updated.map((a, index) => {
-            const left = Array.isArray(a) ? a : [];
-            const right = Array.isArray(arrayKmaWind[index])
-              ? arrayKmaWind[index]
-              : [];
+      setKmaWindData((prev) => {
+        const updated = { ...prev };
+        arrayPoints.forEach((point) => {
+          const prevArr = prev[point] || [];
+          const newArr = objKmaWind[point] || [];
 
-            return [
-              ...new Set([...left, ...right].map((v) => JSON.stringify(v))),
-            ].map((v) => JSON.parse(v));
-          });
+          // 기존 time 목록
+          const existingTimes = new Set(prevArr.map((item) => item.time));
 
-          return array;
+          // 중복 아닌 것만 필터
+          const filtered = newArr.filter(
+            (item) => !existingTimes.has(item.time),
+          );
+          updated[point] = [...prevArr, ...filtered].slice(-61);
         });
-      }
-      // setKmaWindData((prev) => {
-      //   const updated = { ...prev };
-      //   console.log(updated);
-      //   Object.keys(arrayPoints).forEach((point, index) => {
-      //     const prevArr = prev[index] || [];
-      //     const newArr = arrayKmaWind[index] || [];
-
-      //     // 기존 time 목록
-      //     const existingTimes = new Set(prevArr.map((item) => item.time));
-
-      //     // 중복 아닌 것만 필터
-      //     const filtered = newArr.filter(
-      //       (item) => !existingTimes.has(item.time),
-      //     );
-      //     if (filtered.length > 61) {
-      //       updated[index] = [...prevArr, ...filtered].slice(-filtered.length);
-      //     }
-      //   });
-      //   console.log(updated);
-      //   return updated;
-      // });
+        return updated;
+      });
       // // 간절곶:924,울기:901,장생포:898
       const arrayKmaVisInfoText = objInfoFromApi.kmaVis
         ? objInfoFromApi.kmaVis.split("\n")
@@ -736,57 +705,25 @@ function App() {
           }
         }
       });
-      if (arrayKmaVis.length > 0) {
-        // setKmaVisData((prev, index) => {
-        //   const updated = [...prev];
-        //   const array = updated.map((a, index) =>
-        //     [
-        //       ...new Set(
-        //         [...a, ...arrayKmaVis[index]].map((v) => JSON.stringify(v)),
-        //       ),
-        //     ].map((v) => JSON.parse(v)),
-        //   );
 
-        //   return array;
-        // });
-        setKmaVisData((prev) => {
-          const updated = Array.isArray(prev) ? prev : [];
-          const array = updated.map((a, index) => {
-            const left = Array.isArray(a) ? a : [];
-            const right = Array.isArray(arrayKmaVis[index])
-              ? arrayKmaVis[index]
-              : [];
+      setKmaVisData((prev) => {
+        const updated = { ...prev };
+        arrayPoints.forEach((point) => {
+          const prevArr = prev[point] || [];
+          const newArr = arrayKmaVis[point] || [];
 
-            return [
-              ...new Set([...left, ...right].map((v) => JSON.stringify(v))),
-            ].map((v) => JSON.parse(v));
-          });
+          // 기존 time 목록
+          const existingTimes = new Set(prevArr.map((item) => item.time));
 
-          return array;
+          // 중복 아닌 것만 필터
+          const filtered = newArr.filter(
+            (item) => !existingTimes.has(item.time),
+          );
+          updated[point] = [...prevArr, ...filtered].slice(-61);
         });
-      }
-      // setKmaVisData((prev) => {
-      //   const updated = { ...prev };
-
-      //   Object.keys(arrayPoints).forEach((point, index) => {
-      //     const prevArr = prev[point] || [];
-      //     const newArr = arrayKmaVis[index] || [];
-
-      //     // 기존 time 목록
-      //     const existingTimes = new Set(prevArr.map((item) => item.time));
-
-      //     // 중복 아닌 것만 필터
-      //     const filtered = newArr.filter(
-      //       (item) => !existingTimes.has(item.time),
-      //     );
-      //     if (filtered.length > 61) {
-      //       updated[point] = [...prevArr, ...filtered].slice(-filtered.length);
-      //     }
-      //   });
-      //   return updated;
-      // });
+        return updated;
+      });
       // 매암
-      console.log(objInfoFromApi.maeam);
       if (objInfoFromApi.maeam?.body?.items?.item.length > 0) {
         const arrayInfoMaeam = objInfoFromApi.maeam.body.items.item.filter(
           (obj) => "dtvsbM20kLen" in obj && obj.dtvsbM20kLen !== null,
@@ -1407,9 +1344,9 @@ function App() {
                 backgroundColor={arrayRowColor[index % 2]}
                 windDir={degreesToCompass(arrayKmaWindDir[index])}
                 windSpd={arrayKmaWindSpd[index]}
-                windData={kmaWindData[index]}
+                windData={kmaWindData[point]}
                 vis={arrayKmaVis[index]}
-                visData={kmaVisData[index]}
+                visData={kmaVisData[point]}
                 varKma={true}
               />
             );
