@@ -638,9 +638,7 @@ function App() {
           if (arrayKmaWindSpd[index] !== latestInfoWSpd) {
             arraySetKmaWindSpd[index](latestInfoWSpd);
           }
-          const uniqueArray = [
-            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
-          ].map((v) => JSON.parse(v));
+          const uniqueArray = removeDuplicates(arrayInfo);
           const arrayWind = uniqueArray.map((info) => {
             const time = formatToHHMM(info[0]);
             return { time: time, windSpeed: info[5] };
@@ -690,31 +688,29 @@ function App() {
           },
           { 간절곶: [], 울기: [], 장생포: [] },
         );
-      const arrayKmaVis = arrayPoints.map((point, index) => {
+      const objKmaVis = {};
+      arrayPoints.forEach((point, index) => {
         const arrayInfo = arrayKV[point];
         if (arrayInfo.length > 0) {
           const latestInfoVis = mToKm(arrayInfo[arrayInfo.length - 1][5]);
           arraySetKmaVis[index](latestInfoVis);
-          const uniqueArray = [
-            ...new Set(arrayInfo.map((v) => JSON.stringify(v))),
-          ].map((v) => JSON.parse(v));
+          const uniqueArray = removeDuplicates(arrayInfo);
           const arrayVis = uniqueArray.map((info) => {
             const time = formatToHHMM(info[0]);
             return { time: time, vis: mToKm(info[5]) };
           });
-          if (arrayVis.length === 0) {
-            return kmaVisData[index];
-          } else {
-            return arrayVis;
-          }
+          objKmaVis[point] = arrayVis;
+        } else {
+          objKmaVis[point] = [];
         }
       });
-
+      console.log(objKmaVis);
       setKmaVisData((prev) => {
         const updated = { ...prev };
         arrayPoints.forEach((point) => {
           const prevArr = prev[point] || [];
-          const newArr = arrayKmaVis[point] || [];
+          console.log(prevArr);
+          const newArr = objKmaVis[point] || [];
 
           // 기존 time 목록
           const existingTimes = new Set(prevArr.map((item) => item.time));
@@ -723,6 +719,7 @@ function App() {
           const filtered = newArr.filter(
             (item) => !existingTimes.has(item.time),
           );
+          console.log(filtered);
           updated[point] = [...prevArr, ...filtered].slice(-61);
         });
         return updated;
